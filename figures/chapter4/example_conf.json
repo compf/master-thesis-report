@@ -1,0 +1,15 @@
+{
+    "include":["*.java"],
+    "exclude":[],
+    "metrics":[
+        {
+			"metric_name":"simple_comment",
+			"weight":1,
+			"unique_name":"m1",
+			"params":{"ignore_getters_setters":false}
+        },
+    ],
+    "absolute_threshold":50,
+    "builder":"weighted_mean_builder",
+    "relative_threshold":30
+}

@@ -1,0 +1,78 @@
+ \begin{figure}[ht!]
+ \centering
+ \scalebox{0.8}{
+ \begin{tikzpicture}
+ \pgfmathsetlengthmacro\breite{6cm}
+\pgfmathsetlengthmacro\hoehe{2.567cm}
+\pgfmathsetlengthmacro\InnerSep{0.4cm}
+\node[draw,
+anchor=center, 
+inner sep=0pt, 
+minimum width=5cm, text width=6cm-\InnerSep,
+align=justify,
+minimum height=\hoehe
+] (java) {
+  \hspace*{0.1cm}\textbf{public} \textbf{class} Main\{\newline 
+     \hspace*{0.5cm}\textbf{private} \textbf{int} test(\textbf{int} a)\{\newline
+    \hspace*{0.5cm}\}\newline
+\hspace*{0.1cm}\}
+
+};
+\node[draw,text width=5.5cm, left = of java](python){
+\textbf{class} Main:\newline
+     \hspace*{0.5cm}\textbf{def} \_\_test(a:\textbf{int}): -> \textbf{int}\newline
+         \hspace*{1cm}pass
+
+};
+\draw[line width=0.05cm] (python) -- (-4,-2.5) ;
+\draw [line width=0.05cm](java) -- (-4,-2.5);
+\draw[->,thick,line width=0.05cm] (-4,-2.5) -- (-4,-3.5);
+\draw [] (-9,-3.5) rectangle(4,-16);
+\begin{scope} {0,-10}
+       \begin{object}[text width=8cm]{fileObj}{-4,-4}
+        \instanceOf{FileComponent}
+        \attribute{name = \enquote{path}}
+        \attribute{parent = null}
+        \attribute{children={[}classObj{]}}
+      \end{object}
+      \begin{object}[text width=8cm]{classObj}{-4,-8 }
+        \instanceOf{ClassComponent}
+        \attribute{name=\enquote{Main}}
+        \attribute{parent=fileObj}
+        \attribute{children={[}methodObj{]}}
+          \attribute{metaInformation=meta}
+      \end{object}
+    \begin{object}[text width=8cm]{methodObj}{-4,-12}
+        \instanceOf{MethodComponent}
+        \attribute{name=\enquote{test}}
+        \attribute{parent=classObj}
+        \attribute{params={[}paramsObj{]}}
+        \attribute{metaInformation=meta2}
+        \attribute{returnType=int}
+      \end{object}
+      \begin{object}[text width=2.5cm]{paramObj}{2,-10}
+        \attribute{name=\enquote{a}}
+        \attribute{type=\enquote{int}}
+      \end{object}
+    \begin{object}[text width=2.5cm]{meta}{2,-6}
+        \attribute{isPublic=true}
+      \end{object}
+    \begin{object}[text width=2.5cm]{meta2}{2.5,-14.5}
+        \attribute{isPublic=false}
+      \end{object}
+\end{scope}
+\begin{scope}[line width=0.05cm]
+    \aggregation{fileObj}{}{}{classObj}{}{}
+     \aggregation {classObj}{}{}{methodObj}{}{}
+      \aggregation {methodObj}{}{}{paramObj}{}{}
+    \aggregation {classObj}{}{}{meta}{}{}
+        \aggregation {methodObj}{}{}{meta2}{}{}
+\end{scope}
+
+    
+\end{tikzpicture}
+}
+     
+     \caption{Objektdiagramm aus Java- und Python-Code}
+     \label{fig:python_java_comp}
+ \end{figure}

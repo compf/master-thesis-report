@@ -1,0 +1,211 @@
+
+\renewcommand\appendixpagename{Anhänge}
+\begin{appendices}
+
+
+\chapter{Änderungen an der Parserdatei}\label{chapter:appendix_parser_changes}
+
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{m{0.75cm}|m{4cm}|m{10cm}}
+        \textbf{Zeile} & \textbf{Änderung} & \textbf{Begründung} \\
+         \hline
+        116 & Deklaration Kommentar & Hier wird ein mehrzeiliger Kommentar definiert, dies ist hier ein Alias für den Token \textit{JCOMMENT}\\
+        \hline
+        127--128 & \textit{comment} als mögliches Präfix in Klassenmember & Hier wird dem Parser mitgeteilt, dass ein Bestandteil einer Klasse wie z. B. eine Methode einen Javadoc-Kommentar besitzen kann\\
+        \hline
+        47 & \textit{comment} als mögliches Präfix vor Datentyp & Hier wird dem Parser mitgeteilt, dass ein Datentyp (Klasse, Schnittstelle etc. ) einen Javadoc-Kommentar haben kann \\
+        \hline
+        404 & Zulassung von Javadoc in Methoden & Da Javadoc-Kommentare an beliebigen Stellen auftauchen können, auch wenn es nicht empfohlen wird und keinen Mehrwert bietet, wird hier sichergestellt, dass solche Kommentare nicht zu Warnungen oder Fehler von ANTLR4 führen. Diese Javadoc-Kommentare werden nichtsdestotrotz später ignoriert\\
+        \hline
+        34, 38& Zulassung von Kommentaren vor Paketdeklarationen und Imports & Hier werden Kommentare auch vor Paketdeklarationen und Import-Statements erlaubt, was vor allem bei Klassen mit Urheberrechtsangabe sinnvoll ist\\
+        \hline
+        105 & Zulassung von Kommentaren bei Enumerationen & Zwar werden Javadoc-Kommentare in Enumerationen mit diesem Tool nicht betrachtet, sie führen aber dennoch zu Warnungen und Fehlermeldungen. Daher werden sie hier zugelassen, aber später ignoriert \\
+        \hline
+        82, 83 & Erzeugung eines separaten Knotens für \textit{Extends}- und \textit{Implements}-Deklarationen & In der originalen Version der Parserdatei wurde die Definition der Basisklasse bzw. der implementierten Schnittstellen direkt über die Tokens \textit{EXTENDS} bzw. \textit{IMPLEMENTS} gelöst. Dies wurde in einem neuen Knoten \textit{extendClass} bzw. \textit{implementInterfaces} ausgegliedert, um so das Parsing etwas zu vereinfachen  \\
+         
+    \end{tabular}
+    \caption{Änderungen an der Parserdatei}
+    \label{tab:parser_changes}
+\end{table}
+
+\chapter{UML-Diagramm: Parser}\label{appendix_parsing_uml}
+\begin{figure}[ht!]
+\fontsize{5}{10}\selectfont
+    \centering
+    \includegraphics[height=9cm,keepaspectratio,angle=90]{figures/uml/parsing.png}
+    \caption{UML-Diagramme aller Klassen, die relevant für das Parsen sind}
+    \label{fig:uml_parsing}
+\end{figure}
+\chapter{UML-Diagramm: Metriken}\label{appendix_metrics_uml}
+\begin{figure}[ht!]
+\fontsize{5}{10}\selectfont
+    \centering
+    \includegraphics[height=10cm,keepaspectratio,angle=90]{figures/uml/metriken.png}
+    \caption{UML-Diagramme aller Klassen, die relevant für die Metriken sind}
+    \label{fig:uml_metrics}
+\end{figure}
+\chapter{Konfiguration des Tools}
+\begin{description}
+        \item[include]  Alle Dateien, die bei der Bewertung der Dokumentationsqualität berücksichtigt werden müssen
+        \item[exclude]  Teilmenge von include, enthält Dateien, die nicht weiter betrachtet werden müssen
+        \item[metrics]  Alle Metriken, die das Tool verwenden soll. Dies ist ein Array von Objekten mit der Struktur \enquote{(name,weight, unique\_name, params)}, wobei \textit{weight} das Gewicht der jeweiligen Metrik ist (Bei Algorithmen ohne Relevanz des Gewichts wird es ignoriert), \textit{name} der Name der Metrik und \textit{params} ein Objekt mit den Parametern der Metrik
+        \item[absolute\_threshold] Mindestwert der Bewertung, die erreicht werden muss, sonst wird die Dokumentationsqualität nicht akzeptiert
+       
+          \item[builder] Der Algorithmus/\textit{ResultBuilder}, der die einzelnen Ergebnisse verarbeitet.
+        
+        \item[parser]  Kann verwendet, um die zu parsende Programmiersprache zu wählen. Dazu muss \textit{ParserFactory} angepasst werden
+        
+        \item[path\_weights] Ein Array von Objekten der Struktur \enquote{(path,weight)}. Wird verwendet, um einzelne Pfade höher oder niedriger zu gewichtet
+        
+         \item[component\_weights] Ein Array von Objekten der Struktur \enquote{(name,weight)}. Wird verwendet, um einzelne Komponenten höher oder niedriger zu gewichtet
+         
+         \item[default\_path\_weight] Das Standardgewicht für eine Datei, wenn keine passende Gewichtung gefunden wurde
+         
+         \item[default\_component\_weight] Das Standardgewicht einer Komponente, wenn keine passende Gewichtung gefunden wurde
+         
+         \item[state\_manager] Kann verwendet werden, um festzulegen, wie das letzte Ergebnis der Dokumentationsqualität gespeichert werden soll. Weitere Möglichkeiten können durch Erweiterung der \textit{StateManagerFactory} hinzugefügt werden.
+         
+         \item[relative\_threshold] Der maximale  relative Abstand zur letzten Dokumentationsqualität bevor eine Fehlermeldung geworfen wird.
+         \item[builder\_params] Parameter für die \textit{MetricResultBuilder}. Diese wird aktuell nur von dem Squale-Builder (Kapitel \ref{chapter:squale}) genutzt
+        
+        
+        
+    \label{enum:tool_javadoc_conf}
+\end{description}
+\chapter{Implementierte Metriken}\label{appendix_metrics}
+
+\begin{description}
+
+\item[Anteil dokumentierter Komponenten an allen Komponenten]
+\begin{description}
+\item[]
+    \item [Metrikname]  simple\_comment
+    \item [Klassenname] SimpleCommentPresentMetric
+    \item[Beschreibung] Berechnet den Anteil der dokumentierten Komponenten an allen Komponenten, kann Getter und Setter ignorieren
+    \item[Quellen] \cite[S. 5]{HowDocumentationEvolvesoverTime}
+\end{description}
+
+\item[Anteil öffentlicher dokumentierter Komponenten]
+\begin{description}
+\item[]
+    \item [Metrikname]  public\_members\_only
+    \item [Klassenname] SimplePublicMembersOnlyMetric
+    \item[Beschreibung] Berechnet den Anteil der öffentlichen dokumentierten Komponenten an allen öffentlichen Komponenten, kann Getter und Setter ignorieren
+     \item[Quellen] \cite[S. 253]{JavadocViolationsandTheirEvolutioninOpen-SourceSoftware}
+\end{description}
+
+\item[Bestrafung langer undokumentierter Methoden]
+\begin{description}
+\item[]
+    \item [Metrikname]  large\_method\_commented
+    \item [Klassenname] SimpleLargeMethodCommentedMetric
+    \item[Beschreibung] Bestraft undokumentierte Methoden je nach ihrer Länge
+    \item[Quellen] Eigene Idee
+\end{description}
+
+\item[Vollständigkeit der Dokumentation von Methoden]
+\begin{description}
+\item[]
+    \item [Metrikname]  method\_fully\_documented
+    \item [Klassenname] SimpleMethodDocumentationMetric
+    \item[Beschreibung] Prüft, ob alle Methodenparameter und Rückgabewert dokumentiert sind
+    \item[Quellen] \cite[S. 5]{HowDocumentationEvolvesoverTime}
+\end{description}
+\clearpage
+\item[Anteil dokumentierter Methoden unter
+Berücksichtigung der LOC]
+\begin{description}
+\item[]
+    \item [Metrikname]  commented\_lines
+    \item [Klassenname] CommentedLinesRatioMetric
+    \item[Beschreibung]  Berechnet den Anteil der \ac{LOC} der dokumentierten Methoden an allen \ac{LOC} aller Methoden
+    \item[Quellen] Eigene Idee
+\end{description}
+
+\item[Flesch-Score]
+\begin{description}
+\item[]
+    \item [Metrikname]  flesch
+    \item [Klassenname] FleschMetric
+    \item[Beschreibung]   Berechnet den Flesch-Score des Kommentars und bewertet so, ob der Kommentar verständlich ist
+    \item[Quellen] \cite[S. 72]{AutomaticQualityAssessmentofSourceCodeComments:TheJavadocMiner}
+\end{description}
+
+\item[Kohärenz zwischen Kommentar und
+Komponentenname]
+\begin{description}
+\item[]
+    \item [Metrikname]  comment\_name\_coherence
+    \item [Klassenname] CommentNameCoherenceMetric
+    \item[Beschreibung]  Prüft, ob der Kommentar und der Name der dokumentierten Komponente sehr ähnlich sind oder keine Ähnlichkeit haben, arbeitet nur mit Methoden
+    \item[Quellen] \cite[S. 86ff ]{Qualityanalysisofsourcecodecomments}
+\end{description}
+
+\item[Verwendung bestimmter Wörter bestrafen]
+\begin{description}
+\item[]
+    \item [Metrikname]  certain\_terms
+    \item [Klassenname] CertainTermCountMetric
+    \item[Beschreibung]  Bestraft das Vorkommen bestimmter Wörter (wie z.~B. Abkürzungen)
+     \item[Quellen] Inspiriert von Verbot lateinischer Ausdrücke nach \cite{HowtoWriteDocCommentsfortheJavadocTool}
+\end{description}
+
+\item[Bewertung der Formatierung]
+\begin{description}
+\item[]
+    \item [Metrikname]  formatting\_good
+    \item [Klassenname] FormattingGoodMetric
+    \item[Beschreibung] Überprüft, ob korrekte Tags verwendet wurde, HTML-Tags geschlossen wurden und bei langen Methoden überhaupt eine Formatierung verwendet wurden
+     \item[Quellen] Inspiriert von Regel in Checkstyle \cite{checkstyle_doc_metrics}
+\end{description}
+
+\clearpage
+\item[Rechtschreibfehler bestrafen] 
+
+\begin{description}
+\item[]
+    \item [Metrikname]  spellling
+    \item [Klassenname] SpellingMetric
+    \item[Beschreibung]Sucht nach Rechtschreibfehlern und bestraft sie
+    \item[Quellen] Eigene Idee
+\end{description}
+
+\item[Erwähnung von Randfällen bei Methodenparameter
+und -rückgabewerte]
+\begin{description}
+\item[]
+    \item [Metrikname]  edge\_case
+    \item [Klassenname] EdgeCaseMetric
+    \item[Beschreibung] Prüft, ob bei der Dokumentation von Parametern die Behandlung des Wertes \textit{null} erwähnt wird
+       \item[Quellen] Inspiriert von Idee in  \cite{javadoc_coding_standards}. In \cite[S.~1ff.]{@tComment:TestingJavadocCommentstoDetectComment-CodeInconsistencies} wird ebenfalls auf einer ähnlichen Art und Weise die Erwähnung von Randfällen geprüft, dort aber auch, ob diese Angaben korrekt sind
+\end{description}
+
+
+\item[Gunning-Fog-Index]
+\begin{description}
+\item[]
+    \item [Metrikname]  gunning\_fog
+    \item [Klassenname] GunningFogMetric
+    \item[Beschreibung] Berechnet den Gunning-Fog-Index des Kommentars und bewertet so, ob der Kommentar verständlich ist
+     \item[Quellen] \cite[S. 71]{AutomaticQualityAssessmentofSourceCodeComments:TheJavadocMiner}
+\end{description}
+ \end{description}
+
+\chapter{Bilder des Tools}\label{chapter:pictures_tool}
+In diesem Kapitel sind zwei Bilder des \textit{DoxEvaluators} abgedruckt, welche die zwei möglichen Ausgaben des Programms zeigen (Dokumentationsqualität ausreichend und nicht ausreichend):
+\begin{figure}[htbp!]
+    \centering
+    \includegraphics[width=\columnwidth]{figures/appendix/passed.png}
+    \caption{Foto vom Tool: Dokumentationsqualität ausreichend}
+    \label{fig:passed}
+\end{figure}
+\begin{figure}[htbp!]
+    \centering
+    \includegraphics[width=\columnwidth]{figures/appendix/absolute_threshold.png}
+    \caption{Foto vom Tool: Dokumentationsqualität zu schlecht}
+    \label{fig:absolute}
+\end{figure}
+
+\end{appendices}
+	

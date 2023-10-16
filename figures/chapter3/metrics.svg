@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink= "http://www.w3.org/1999/xlink" width="900" height="600" >
+    <style>
+   
+    </style>
+    <defs >
+    <g id="file"  style="fill:white;stroke:inherit">
+        <rect  x="0" width="40" y="0" height="80"></rect> 
+        <rect x="10" y="10" width="20" height="20"></rect> 
+        <polygon  points="5,50 30,50 17.5,70"></polygon> 
+    </g>
+    <g id="rhombus" style="fill:white;stroke:black">
+        <rect transform="rotate(45)" width="40" height="40"/>
+    </g>
+       
+    <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5"
+    markerWidth="6" markerHeight="6"
+    orient="auto-start-reverse">
+  <path d="M 0 0 L 10 5 L 0 10 z" />
+    </marker>
+    <g id="file_result">
+        <use xlink:href="#file" x="60" y="200" />
+        <use xlink:href="#rhombus" x="80" y="55" />
+         <ellipse  cx="80" cy="160" rx="30" ry="15" fill="none" stroke="black" />
+        <line x1="80" y1= "150" x2="80" y2="115" marker-end="url(#arrow)" stroke="black" fill="none"/>
+         <path d="M80,250 q 60,-40 20,-80" marker-end="url(#arrow)" stroke="black" fill="none"/>
+           <path d="M70,210 q -50,-30 -20,-40" marker-end="url(#arrow)" stroke="black" fill="none"/>
+    </g>
+    <g id="same_files_one_metric">
+        <use xlink:href="#file_result" y="250"/>
+        <use xlink:href="#file_result" x="90" y="250"/>
+        <ellipse  cx="125" cy="250" rx="30" ry="15" fill="none" stroke="black" />
+        <line x1="110" x2="80" y1="270" y2="300" marker-start="url(#arrow)" fill="none" stroke="black"/>
+        <line x1="130" x2="160" y1="270" y2="300" marker-start="url(#arrow)" fill="none" stroke="black"/>
+        <use xlink:href="#rhombus" x="125" y="130"/>
+        <line x1="125" x2="125" y1="185" y2="230" marker-start="url(#arrow)" fill="none" stroke="black"/>
+    </g>
+    </defs>
+    <g class="pict" id="picture" transform="translate(0,50)" >
+        <rect stroke-dasharray="4" x="10" y="-20" width="600" height="550" stroke="black" fill="none"/>
+        <ellipse cx="300" cy="90" rx="70" ry="30" fill="none" stroke="black" />
+        <use xlink:href="#same_files_one_metric" style="stroke:red"/>
+        <line x1="250" x2="155" y1="115" y2="155" fill="none"  marker-start="url(#arrow)" stroke="black"/>
+        <line x1="350" x2="450" y1="115" y2="155" fill="none"  marker-start="url(#arrow)" stroke="black"/>
+        
+        <use x="350" xlink:href="#same_files_one_metric"  style="stroke:green"/>
+
+        <use xlink:href="#rhombus" x="300" y="-20"/>
+        <line x1="300" x2="300" marker-start="url(#arrow)" y1="40" y2="55" stroke="black"/>
+        
+
+        <text x="15" y="280">Metrik 1</text>
+        <text x="155" y="280">Metrik 2</text>
+        <text x="365" y="280">Metrik 1</text>
+        <text x="505" y="280">Metrik 2</text>
+
+        <text x="150" y="120">Datei 1</text>
+        <text x="400" y="120">Datei 2</text>
+    </g>
+    <g transform="translate(650,30)">
+        <text y="0" x="10">Legende:</text>
+        <g >
+            <ellipse  cy="30"  rx="30" ry="15" fill="none" stroke="black" />
+
+            <text y="30" x="40">MetricResultBuilder</text>
+            <use y="60" xlink:href="#rhombus" />
+            <text y="90" x="40">MetricResult</text>
+            <use style="stroke:black" xlink:href="#file" y="140" x="-20"/>
+            <text y="180" x="50">Datei</text>
+            <path   stroke="black" fill="none"  d="M-25,240 h50 l-25,35 l-25,-35"></path> 
+            <text y="260" x="50">MethodComponent</text>
+            <rect x="-20" y="300" style="stroke:black;fill:white" width="40" height="40"/>
+              <text y="320" x="50">ClassComponent</text>
+        </g>
+        
+    </g>
+    
+   
+</svg>

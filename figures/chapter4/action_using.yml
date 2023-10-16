@@ -1,0 +1,3 @@
+ uses: compf/DocEvaluator@action
+        with:
+          absolute_threshold: 20

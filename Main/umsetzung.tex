@@ -1,0 +1,146 @@
+
+\begingroup
+\renewcommand{\cleardoublepage}{} % TODO maybe removing this and next
+\renewcommand{\clearpage}{}
+\chapter{Umsetzung}\label{chapter:program}
+\endgroup
+In diesem Kapitel wird auf die Umsetzung der in Kapitel \ref{chapter_conception} beschriebenen Architektur eingegangen. In Kapitel \ref{chapter:tool_running} wird zunächst erläutert, wie das Programm konkret ausgeführt wird, um die Dokumentationsqualität zu ermitteln. Danach wird in Kapitel \ref{chapter:traversing} beschrieben, wie das Programm die einzelnen Java-Dateien findet, damit diese weiterverarbeitet werden können.  Außerdem wird in Kapitel \ref{chapter:antlr4_impl} erläutert, wie ANTLR4 verwendet wird, um Java-Dateien zu parsen. Daraufhin wird erklärt, wie die strukturierten Kommentare geparst werden (Kapitel \ref{chapter:comment_parsing}).  In Kapitel \ref{chapter:conf} wird die Konfiguration des Tools erläutert. Um auch einen Vergleich zwischen den aktuellen und den vorherigen Zustand der Dokumentationsqualität zu ermöglichen, wird in Kapitel \ref{chapter:saving} beschrieben, wie das letzte Ergebnis der Bewertung gespeichert werden kann. In Kapitel \ref{chapter:github_actions_impl} wird erklärt, wie das Programm in GitHub Actions eingebunden wird und wie es so genutzt werden kann. Zum Abschluss werden in Kapitel \ref{chapter:metrics} und \ref{chapter:algos_aggregation} die implementierten Metriken und die implementierten Aggregationsalgorithmen erläutert. 
+
+
+\hfill
+\section{Ausführung des Programms}\label{chapter:tool_running}
+In diesem Unterabschnitt wird beschrieben, wie das Programm die in Kapitel \ref{chapter_conception}
+beschriebenen Arbeitspakete nutzt, um die Qualität der Softwaredokumentation zu bewerten. 
+
+Die Koordination des Programms wird in der Datei \enquote{index.ts} durchgeführt, die als Einstiegspunkt des Programms verstanden werden kann. In dieser Datei werden die einzelnen Module des Programms in der richtigen Reihenfolge aufgerufen und die Ergebnisse eines Moduls werden durch die \enquote{index.ts}-Datei an das folgende Modul/Arbeitspaket übergeben, soweit sie dort benötigt werden. Dadurch sind die Module voneinander entkoppelt und greifen nicht direkt aufeinander zu. 
+
+Im ersten Schritt  muss die Konfiguration des Programms geladen werden. Dazu wird das Arbeitsverzeichnis von der Kommandozeile gelesen. Basierend auf das Arbeitsverzeichnis kann dann die Konfiguration des Tools geladen werden, wie es in Kapitel \ref{chapter:conf} beschrieben ist.  
+
+Anschließend müssen einige Objekte  initialisiert werden. Hierzu werden die Werte aus der Konfiguration (z.~B. der Konfigurationsdatei) verwendet. Beispielsweise kann durch \textit{builder} der Algorithmus festgelegt werden, der die Einzelergebnisse der einzelnen Metriken zu einem Gesamtresultat kombiniert. Dazu wird eine Fabrikmethode verwendet, da damit die Konstruktion eines Objektes aus einer Zeichenkette möglich ist und somit der Anwender in der Konfiguration nur eine bestimmte Zeichenkette oder ID zur Konstruktion eines komplexeren Objektes angeben muss \cite[S.~149--161]{gamma2015design}. Zudem werden die Metriken, die zur Analyse verwendet werden sollen, durch den Metrikmanager registriert.
+
+Außerdem wird eine assoziative Liste für die Dateien und die Metriken erstellt, die einem eindeutigen Metriknamen bzw. einem Wildcard-Pattern einer Datei ein Gewicht zuordnet. Diese Liste kann einem \textit{WeightResolver} übergeben werden, der wiederum dem  \textit{MetricResultBuilder} übergeben wird. Falls dieser keine Gewichtung benötigt, werden diese Informationen ignoriert. 
+
+Danach müssen die relevanten Dateien gefunden werden. Dazu werden dem Traversierer (siehe Kapitel \ref{chapter:traversing}) die Wildcard-Patterns der zu inkludierenden Dateien und der auszuschließenden Dateien übergeben. Mit der Methode \textit{getRelevantFiles} werden dann alle relevanten Dateien zurückgegeben.
+
+In nächsten Schritt muss jede Datei mit jeder Metrik geprüft werden und die Ergebnisse gesammelt werden. Hierzu wird eine verschachtelte For-Schleife verwendet. Dabei gibt es zwei Möglichkeiten zur Verschachtelung. Im ersten Fall könnte in der äußeren Schleife jede Datei und in der inneren jede Metrik durchlaufen werden. Alternativ könnte auch die innere und äußere Schleife vertauscht werden. Der erste Ansatz hat den Vorteil, dass jede Datei nur einmal geladen werden muss, was einen Geschwindigkeitsvorteil bringen kann, deshalb wird dieses Verfahren auch gewählt. Pro Iteration der inneren Schleife wird die aktuelle Datei von der jeweiligen Metrik analysiert und alle gefundenen Metrikresultate, die von den einzelnen Komponenten der Datei stammen, zu einem \textit{MetricResultBuilder} hinzugefügt.
+
+Nach Abschluss der beiden Schleifen steht das Ergebnis durch Aggregation der Resultate in dem \textit{MetricResultBuilder} zur Verfügung und kann genutzt werden, um die Qualität der Dokumentation mit dem Grenzwert bzw. dem letzten Wert zu vergleichen. Wird bei diesem Vergleich festgestellt, dass die Dokumentationsqualität nicht ausreichend ist, wird eine Ausnahme geworfen und das Programm bricht ab. Wird das Programm mittels GitHub Actions ausgeführt, so kann durch diese Ausnahme ein Merge verhindert werden.
+
+Die Abbildungen \ref{fig:passed} und \ref{fig:absolute} im Anhang \ref{chapter:pictures_tool} visualisieren die Ausgabe des Programmes bei einer ausreichenden bzw. mangelhaften Dokumentationsqualität.
+
+\section{Traversierung aller relevanten Dateien und der Komponenten}\label{chapter:traversing}
+Softwareprojekte bestehen aus Hunderten von Dateien, die nicht alle Quellcode enthalten. Beispielsweise gehören Konfigurationsdateien, Ressourcendateien wie Bilder oder binäre Dateien zu den Dateien, bei denen eine Analyse der Softwaredokumentation im Hinblick auf die begrenzte Zeit für die Bachelorarbeit nicht implementierbar ist. Daher ist es sinnvoll, bestimmte Dateien bei der Analyse auszuschließen beziehungsweise nur bestimmte Dateien zu betrachten. Bei einer Weiterentwicklung des Tools nach Abschluss der Bachelorarbeit kann das Tool auf andere Dateitypen ausgeweitet werden, um so ein besseres Gesamtbild über die Softwaredokumentation zu erhalten.
+
+Um die relevanten Dateien zu finden, wird zunächst ein übergeordnetes Verzeichnis benötigt, was bei Softwareprojekten aber der Standard sein sollte. Dieses Verzeichnis kann dann rekursiv durchlaufen werden und somit die Liste aller darin gespeicherten Dateien abgerufen werden. Die relevanten Dateien können dann durch Überprüfung ihres Dateinamens mittels bestimmter Regeln ermittelt werden, die der Benutzer des Tools festlegen kann.
+
+Beim DocEvaluator wird hierzu die NPM-Bibliothek \textit{Minimatch} \cite{Minimatch} verwendet, die es ermöglicht, Dateinamen mit Wildcard-Patterns zu vergleichen. Zum Beispiel könnte der Dateiname \enquote{test.txt} mit der Wildcard \enquote{test.*} verglichen werden und die Bibliothek würde eine Übereinstimmung melden.
+
+Auch die Komponenten einer Datei müssen traversiert werden, damit bei jeder Komponente die Dokumentation überprüft werden kann. Da die Komponenten wie in Kapitel \ref{chapter:parsing} beschrieben rekursiv aufgebaut sind, kann dies mittels einer Tiefensuche durchgeführt werden.
+
+\subsubsection{Ignorieren bestimmter Kommentare}
+
+Unter Umständen kann es sinnvoll sein, bestimmte Komponenten bei der Bewertung auszulassen, weil sie beispielsweise noch nicht vollständig implementiert sind, in einer nicht-englischen Sprache dokumentiert sind oder ein anderer gewichtiger Grund existiert. Für diesen Fall kann die allgemeine Beschreibung der Dokumentation einer Komponente  den Begriff \enquote{\%ignore\_this\%} oder \enquote{\%ignore\_node\%} enthalten. Bei Ersterem wird nur diese Komponente ignoriert und als nicht existent betrachtet. Bei Zweiterem werden sowohl diese Komponente als auch alle Kinder dieser Komponente ignoriert, sofern sie existieren.
+
+
+
+
+\section{Implementierung von ANTLR4 für Java}\label{chapter:antlr4_impl}
+
+Für die Programmiersprache Java steht eine ANTLR4-Grammatik, die auf GitHub unter der BSD-Lizenz angeboten wird, zur Verfügung \cite{ANTLRgrammarforjava}, allerdings ignoriert diese Grammatik alle Kommentare. Daher müssen einige Änderungen sowohl am Lexer als auch am Parser vorgenommen werden. Im Lexer werden standardmäßig alle Tokens aus einem Kommentar in einem versteckten Kanal gespeichert, was dazu führt, dass diese Tokens vom Parser ignoriert werden. Um dieses Problem zu lösen, wird das Verhalten durch Definition eines neuen Tokens so geändert, dass Javadoc-Kommentare auch vom Parser verarbeitet werden können, aber mehrzeilige und einzeilige Kommentare weiterhin ignoriert werden. Einzeilige Kommentare sind hier nicht relevant, da sie kein Javadoc enthalten.
+
+Mehrzeilige Kommentare könnten theoretisch auch berücksichtigt werden, da einige Entwickler diese anstelle von Javadoc benutzen. Allerdings werden solche mehrzeiligen Kommentare vor Komponenten nicht von Tools erkannt und haben daher einen geringeren, aber durchaus vorhandenen Nutzen \cite[S.~4]{HowDocumentationEvolvesoverTime}. Deshalb werden Komponenten, die zwar mit mehrzeiligen Kommentaren, aber nicht mit Javadoc dokumentiert sind, wie undokumentierte Komponenten betrachtet. Für einen Entwickler sollte es so schnell möglich sein, solche nicht korrekt dokumentierten Komponenten zu identifizieren und deren mehrzeilige Kommentare in gültige Javadoc-Kommentare umzuwandeln und so die Qualität der Dokumentation zu erhöhen. Für andere Programmiersprachen können jedoch normale mehrzeilige wie strukturierte Kommentare betrachtet werden, wenn dies für sinnvollerer erachtet wird.
+
+Mehr Änderungen müssen an der entsprechenden Parser-Datei \enquote{JavaParser.g4} durchgeführt werden.  Da diese Änderungen für die eigentliche Thematik dieser Bachelorarbeit nur eine untergeordnete Rolle spielen, wird hier nicht jede Änderung genauer erklärt. Tabelle \ref{tab:parser_changes} im Anhang \ref{chapter:appendix_parser_changes} listet alle Änderungen an der Parserdatei auf. Die geänderte Parserdatei und das Original befinden sich auch im digitalen Anhang im Verzeichnis \enquote{parser\_changes}. 
+
+Um die Informationen aus einer Java-Datei mittels ANTLR4 zu verarbeiten, kann das Visitor-Pattern verwendet werden \cite[S.~400ff.]{gamma2015design}. Mit einem Visitor kann die Baumstruktur, die ANTLR4 erstellt hat, traversiert werden, damit so nur die notwendigen Informationen herausgefiltert werden. Andere Informationen (wie z.~B. Conditional-Branches) können so ignoriert werden.  
+		\begin{figure} [htbp!]
+			\lstinputlisting
+			[caption={Codeauschnitt aus  Methoden-Visitor},
+			label={lst:visit_method_example},
+			captionpos=b,language=javascript, basicstyle=\footnotesize, tabsize=2, showstringspaces=false,  numbers=left]
+			{figures/chapter4/visit_method_example.js}
+		\end{figure}
+Listing \ref{lst:visit_method_example} zeigt einen Ausschnitt vom Visitor für Methodendeklarationen aus dem Quellcode des Tools. Hier ist die Baumstruktur leicht sichtbar. Alle Einzelbestandteile einer Methode wie z. B. Bezeichner, Rückgabetyp etc. sind Kindknoten des \textit{RuleContext} und können über die Methode \textit{getChild} abgerufen werden. So werden sowohl der Bezeichner als auch der Rückgabetyp direkt als Text abgerufen. Diese  beiden Bestandteile bestehen wiederum auch aus weiteren Kindknoten, doch eine weitergehende Betrachtung ist nicht nötig, da nur die Bezeichnung als Zeichenkette benötigt wird. Andere Bestandteile wie die Methodenparameter sind jedoch komplexer, deswegen werden sie von separaten Visitors betrachtet.
+
+\section{Parsen der strukturierten Kommentare}\label{chapter:comment_parsing}
+Um die strukturierten Kommentare in das Format nach Kapitel \ref{chapter:structured_comments} zu bringen, wird eine simple Heuristik verwendet. Es werden so viele Zeilen als allgemeine Beschreibung betrachtet, bis eine Zeile auftaucht, die mit einem Tag wie z.~B. \enquote{@param} beginnt, der den allgemeinen Teil beendet.
+
+Anschließend werden diese Tags verarbeitet. Benötigt ein Tag einen Parameter, so wird die Zeile in drei Teilen an den Leerzeichen aufgetrennt. Dabei ist der erste Teil der Typ des Tags, der zweite Teil der Parameter und der Rest (mit allen übrigen Leerzeichen) die Beschreibung des Tags.
+Bei einem Tag ohne Parameter wird die Zeile in zwei Teile getrennt, wobei hier der erste Teil der Typ des Tags und der letzte Teil die Beschreibung ist.
+
+Diese Heuristik sollte die gängigsten Javadoc-Blöcke verarbeiten können. Alternativ könnte auch ANTLR4 Javadoc parsen. Allerdings ist dies aufgrund der Mischung von natürlicher Sprache und der relativen Flexibilität von Javadoc nicht trivial und wird daher nicht implementiert. 
+
+
+
+\section{Konfiguration des Tools}\label{chapter:conf}
+Zur Nutzung des Tools werden bestimmte Informationen benötigt, die aus verschiedenen Quellen bezogen werden. Zunächst benötigt das Tool den Pfad, der die Quelldateien enthält, die nach Kapitel \ref{chapter:traversing} traversiert werden sollen. Dieser wird als namenloser Parameter über die Kommandozeile übergeben. Er ist optional, da bei dessen Fehlen das aktuelle Arbeitsverzeichnis genommen wird. Die weiteren Informationen werden aus zwei Quellen bezogen. Wenn beide Quellen fehlen, werden Standardwerte genommen. Die erste Quelle ist eine \ac{JSON}-Datei namens \mbox{\enquote{comment\_conf.json}}, welche die notwendigen Daten für die Arbeit des Programms enthält. Listing \ref{lst:example_conf} zeigt eine beispielhafte Konfigurationsdatei im \ac{JSON}-Format.
+
+\begin{figure}[htbp]
+\lstinputlisting
+[caption={Beispielhafte Konfigurationsdatei für das Tool},
+label={lst:example_conf},
+captionpos=b, basicstyle=\footnotesize, tabsize=2, showstringspaces=false,  numbers=left,language=JSON]
+{figures/chapter4/example_conf.json}
+\end{figure}
+
+In dieser Beispieldatei  werden alle Dateien mit der Dateiendung \enquote{.java} bei der Traversierung betrachtet (Z. 1). Außerdem werden dabei keine Dateien bei der Traversierung ausgeschlossen (Z. 2). Diese beiden Werte entsprechend dabei ihre Standardwerte. Sie könnten also bei dieser Konfigurationsdatei weggelassen werden und das Programmverhalten würde sich nicht ändern.
+
+Anschließend (Z. 4--11) werden die zu verwendenden Metriken definiert. Jede Metrik besitzt einen \textit{metric\_name}, der den Typ der Metrik spezifiziert. In Zeile 6 wäre dies beispielhaft die Metrik \enquote{Anteil der dokumentierten Komponenten an allen Komponenten} (vgl. Kapitel \ref{chapter:metrics_coverage}). Anhang  \ref{appendix_metrics} beschreibt alle implementierten Metriken mit ihren Namen. Diese Namen werden vom Metrikmanager dazu genutzt, um die passende Klasse zu finden und so ein Metrikobjekt zu erzeugen. Außerdem erhält jede Metrik durch \textit{unique\_name} einen eindeutigen Namen (hier z.~B. \enquote{m1}). Dieser kann auch weggelassen werden. Dann wird der eindeutige Name aus dem Namen der Metrik und einer fortlaufenden Nummerierung erzeugt. Zudem besitzt jede Metrik das Attribut \textit{weight}, welches zur Bestimmung der Relevanz bzw. des Gewichts der Metrik dient und von einem \textit{MetricResultBuilder} zur Bestimmung eines Gesamtergebnisses benutzt werden kann. Ein \textit{MetricResultBuilder}, der keine Gewichtung der Metriken benötigt, wird diese Information ignorieren. Das Gewicht ist ebenfalls optional. Bei dessen Fehlen wird das Gewicht \enquote{1} eingesetzt.  Durch \textit{params}  werden der Metrik die Parameter übergeben, die sie benötigt. Die genaue Anzahl und Struktur der Parameter hängen von der jeweiligen Metrik ab. Fehlen diese Parameter, so werden standardmäßige Parameter verwendet.
+
+Fehlt der Eintrag \enquote{metrics}, so werden alle implementierten Metriken mit ihren Standardwerten genommen.
+
+Als Nächstes (Z. 12) wird der Schwellwert festgelegt. Dieser Wert legt fest, ob das Programm beim Unterschreiten dieses Wertes mit einer Fehlermeldung abbrechen soll. In Zeile 13 wird der \textit{MetricResultBuilder} festgelegt, der bestimmt, wie die Einzelergebnisse aggregiert werden. In dem Beispiel werden alle Teilresultate mittels eines gewichteten Mittelwertes zu einem Gesamtergebnis aggregiert.  In Zeile 14 wird durch \mbox{\textit{ relative\_threshold }} festgelegt, um wie viel sich die Dokumentationsqualität verschlechtern muss, damit ebenfalls eine Fehlermeldung erscheint. Dies wird in Kapitel \ref{chapter:saving} genauer erläutert.
+
+
+
+\bigskip
+Die zweite Quelle für die Informationen sind die Eingabeparameter aus GitHub Actions. Dazu wird, wie in Kapitel \ref{chapter:github_actions_impl} beschrieben, jeder Parameter aus der \ac{JSON}-Datei auch in der \enquote{action.yml}-Datei übernommen. Bei der Ausführung des Programms stehen diese Eingabedaten über Umgebungsvariablen bereit. Jede Umgebungsvariable beginnt mit der Zeichenkette \enquote{INPUT\_}, anschließend folgt der Name des entsprechenden Parameters (wie in der \ac{JSON}-Datei), wobei der Name allerdings komplett in Großbuchstaben geschrieben ist. So steht  \enquote{absolute\_threshold} als \enquote{INPUT\_ABSOLUTE\_THRESHOLD} zur Verfügung.
+
+Da es durchaus sein kann, dass sowohl eine Konfigurationsdatei existiert als auch die Umgebungsvariablen gesetzt sind, muss klar festgelegt werden, welcher Wert eines Parameters am Ende genommen wird. Bei dem Tool haben die von GitHub Actions erzeugten Umgebungsvariablen  Vorrang, da das Tool für die Verwendung in GitHub Actions konzipiert wurde.  Die Auflistung im Anhang \ref{enum:tool_javadoc_conf} listet alle Parameter des Tools nochmals auf und erläutert sie zusätzlich. 
+
+\begin{comment}
+Das Tool \textit{create\_conf}, das im Hauptverzeichnis im GitHub-Repository liegt kann eine beispielhafte Konfigurationsdatei erstellen, indem \textit{node create\_conf.js --out PATH --type json} aufgerufen wird. Dabei ist \textit{PATH} ein Pfad ohne Dateiname. Dieses Hilfstool legt dann eine Konfigurationsdatei namens \enquote{comment\_conf.json} in dem angegebenen Verzeichnis an. 
+\end{comment}
+\section{Speicherung des letzten Ergebnisses}\label{chapter:saving}
+Neben der bereits erwähnten Möglichkeit, einen absoluten Grenzwert für die Dokumentationsqualität zu definieren, ist auch ein inkrementeller Vergleich interessant. Dabei wird das Ergebnis der Dokumentationsqualität zwischengespeichert. Bei einem neuen Start des Tools kann das alte Ergebnis mit dem neuen Ergebnis verglichen werden. Verschlechtert sich das Ergebnis über einen gewissen Schwellwert hinaus, so sollte der Entwickler ebenfalls gewarnt werden, selbst wenn die Dokumentationsqualität noch über der absoluten Grenze liegt. Schließlich kann dies ein Trend sein, der zum baldigen Unterschreiten des absoluten Grenzwertes führen kann. 
+
+Der Ort zur Speicherung des letzten Wertes ist dabei flexibel. Standardmäßig wird der Wert in einer Datei namens \enquote{.evaluator\_last\_state.txt} gespeichert. Falls das Programm im Kontext von GitHub Actions ausgeführt wird, sollte allerdings beachtet werden, dass diese Datei nach der Beendigung des Workflows gelöscht wird. Dieses Problem kann dadurch gelöst werden, dass die geänderte Datei im Repository des zu analysierenden Projektes hochgeladen wird. Dies kann beispielsweise mit dem Tool \textit{Add \& Commit} \cite{add_commit} erledigt werden. Nachteilhaft ist an diesem Vorgehen allerdings, dass hierdurch in dem Commit-Verlauf automatisierte Commits erscheinen, sodass der Überblick verloren gehen kann.  Eine weitere Möglichkeit zur Speicherung des Wertes wäre es, den Wert an einen externen Server zu senden und bei einem erneuten Start diesen Wert abzurufen. 
+
+  
+\section{Einbindung in GitHub Actions}\label{chapter:github_actions_impl}
+Um das Tool in GitHub Actions einzubinden, müssen einige Schritte erfolgen. Zunächst muss eine \enquote{action.yaml} geschrieben werden, die das GitHub-Repository als Aktion markiert und die notwendigen Befehle für die Ausführung enthält. Listing  \ref{lst:action} zeigt einen beispielhaften Code der Action. Zur Übersichtlichkeit wird in diesem Listing nur ein Eingabeparameter definiert. Die restlichen Eingabeparameter werden im Programm analog definiert.
+\begin{figure} [htbp]
+\lstinputlisting
+[caption={Beispielhafte Action-Datei für das Tool},
+label={lst:action},
+captionpos=b, basicstyle=\footnotesize, tabsize=2, showstringspaces=false,  numbers=left,language=YAML]
+{figures/chapter4/action.yml}
+\end{figure}
+
+In den ersten beiden Zeilen werden Attribute wie der Name und eine Beschreibung gesetzt. Danach (Z. 4--7) wird der Eingabeparameter für die minimal erlaubte Bewertung für die Dokumentationsqualität definiert, damit dieser von den Nutzern der Aktion verändert werden kann. In den Zeilen 8 bis 10 ist der wichtige Programmcode enthalten, in denen die Aktion als JavaScript-Aktion mit der Node-Version 16 festgelegt wird. Zudem enthält die letzte Zeile auch den Pfad zur Quellcodedatei, mit dem das Programm gestartet werden soll. 
+
+\bigskip
+Eine JavaScript-Aktion in GitHub Actions benötigt JavaScript, sodass der TypeScript-Code des Tools erst in JavaScript umgewandelt werden muss. Damit das Programm bei der Veröffentlichung einer neuen Version in einen auslieferbaren Zustand gebracht werden kann, wird ein weiterer Workflow benötigt, der bei jedem Push in dem Main-Zweig folgende Schritte ausführt:
+\begin{enumerate}
+    \item Klonen des Main-Branch des Repositorys (wie bei den meisten anderen Workflows)
+    \item Aufruf von TSC, Konvertierung des TypeScript-Codes in JavaScript
+    \item Aufruf und Benutzung von \textit{NCC} \cite{ncc}. Packen aller JavaScript-Dateien in einer einzigen Datei
+    \item Kopieren der generierten Datei, die den gesamten Quellcode enthält, und der \enquote{action.yml}, in eine (neue) Branch \textit{action}. Dies wird mittels der Aktion \textit{Branch-Push} \cite{Branch-Push} durchgeführt
+\end{enumerate}
+Durch diese Schritte wird eine neue Branch erstellt, die nur die notwendige JavaScript-Datei und die \textit{action.yml} enthält. Dadurch können Nutzer der Aktion diese schneller herunterladen und nutzen. Es wäre auch möglich, kein \textit{NCC} zu verwenden, also alle Javascript-Dateien in die neue Branch zu kopieren, allerdings ist die hier gewählte Methode praktikabler, da dann nur ein Lesezugriff beim Starten des Programms erforderlich ist und so ein Geschwindigkeitsvorteil existiert. 
+
+\subsubsection{Nutzung der Aktion}
+
+Die oben erstellte Aktion kann nun von jedem GitHub-Repository verwendet werden. Dazu kann das folgende Listing \ref{lst:action_using} als zusätzlicher Schritt in einem Workflow eingebunden werden. 
+\begin{figure} [htbp]
+\lstinputlisting
+[caption={Verwendung der Aktion in einem Workflow},
+label={lst:action_using},
+captionpos=b, basicstyle=\footnotesize, tabsize=2, showstringspaces=false,  numbers=left,language=YAML]
+{figures/chapter4/action_using.yml}
+\end{figure}
+
+Hier wird die aktuelle Version des DocEvaluators aus der Branch \textit{action} heruntergeladen und automatisch ausgeführt. Als Parameter wird beispielsweise ein Grenzwert von 20 übergeben, der jedoch nach Belieben angepasst werden kann. Wenn das entsprechende Ereignis des Workflows eintritt (z. B. ein Push-Ereignis), wird der DocEvaluator mit diesem Parameter aufgerufen und zeigt unter der Registerkarte \textit{Actions} eine Fehlermeldung an, wenn die Dokumentationsqualität den Grenzwert unterschreitet und somit nicht ausreichend ist.
+\begin{comment}
+Das Tool \textit{create\_conf}, das im Hauptverzeichnis im GitHub-Repository liegt, kann ein Workflow erstellen, indem \textit{node create\_conf.js --out PATH --type yaml} aufgerufen wird. Dieses kleine Hilfstool erzeugt dann ein beispielhafter Workflow mit allen Eingaben in dem angegebenen Pfad, um es leicht in GitHub einzubinden.
+\end{comment}

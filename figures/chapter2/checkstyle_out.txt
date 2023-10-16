@@ -1,0 +1,5 @@
+[ERROR]
+FigCompartment.java:
+466:5: 
+Missing a Javadoc comment.
+[MissingJavadocMethod]

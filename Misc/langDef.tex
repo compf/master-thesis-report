@@ -1,0 +1,64 @@
+\lstdefinelanguage{YAML}{
+  morekeywords=
+  {
+    name:,on:,jobs:,steps:,uses:,run:,echo,workflow_dispatch:,description:,inputs:,required:,default:,runs-on:,using:,main:,with:,author:, absolute_threshold:
+  },
+  keywordstyle=\color{black}\bfseries,
+  ndkeywords={false,compf/JavaDocEvaluator@action},
+  ndkeywordstyle=\color{black}\bfseries,
+  identifierstyle=\color{black},
+  sensitive=false,
+  comment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  commentstyle=\color{purple}\ttfamily,
+  %stringstyle=\color{red}\ttfamily,
+  morestring=[b]',
+  morestring=[b]",
+  alsodigit={:},
+  alsoletter={/,@,-}
+}
+
+
+
+
+\lstdefinelanguage{ANTLR}{
+  keywords=
+  {
+   formalParameter:,variableModifier:,typeType:,variableDeclaratorId:,JCOMMENT:
+  },
+  keywordstyle=\color{black}\itshape,
+  identifierstyle=\color{black},
+  sensitive=false,
+  comment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  commentstyle=\color{purple}\ttfamily,
+  morestring=[b]',
+  morestring=[b]",
+  alsodigit={:},
+}
+
+\lstdefinelanguage{JSON}{
+    tabsize             = 4,
+    showstringspaces    = false,
+    keywords            = {false,true,include,exclude,metrics,metric_name,weight,unique_name,params,absolute_threshold,builder,relative_threshold},
+    alsoletter          = 0123456789.*,
+    ndkeywordstyle         = \color{red},
+  keywordstyle=\color{black}\bfseries,
+}
+
+
+
+
+
+\lstdefinelanguage{javascript}{
+  keywords={typeof, new, true, false, catch, function, return, null, catch, switch, var, if, in, while, do, else, case, break,let,this,private},
+  keywordstyle=\color{black}\bfseries,
+  identifierstyle=\color{black},
+  sensitive=true,
+  comment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  commentstyle=\color{purple}\ttfamily,
+  stringstyle=\color{red}\ttfamily,
+  morestring=[b]',
+  morestring=[b]",
+}

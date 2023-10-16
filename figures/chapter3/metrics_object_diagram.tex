@@ -1,0 +1,73 @@
+  \begin{figure}[h!]
+  \centering
+ \begin{tikzpicture}[scale=0.75, every node/.style={scale=0.75}]
+ \pgfmathsetlengthmacro\breite{6cm}
+\pgfmathsetlengthmacro\hoehe{2.567cm}
+\pgfmathsetlengthmacro\InnerSep{0.4cm}
+\node[draw,
+anchor=center, 
+inner sep=0pt, 
+minimum width=5cm, text width=8cm-\InnerSep,
+align=justify,minimum height=1.5cm] (java) {\textbf{class} Main\{\newline 
+\hspace*{0.1cm}\}};
+
+\node[draw,text width=5.5cm, left = of java](java2){
+/** \textbf{Commented} */ \newline
+     \hspace*{0.1cm}\textbf{public} \textbf{void} method()\{\newline
+    \hspace*{0.1cm}\}\newline
+};
+\draw[line width=0.05cm]    (java2) -- (-4,-3.5) ;
+\draw [line width=0.05cm](java) -- (-4,-3.5);
+\draw[thick,line width=0.05cm] (-4,-3.5) -- (-4,-3.5);
+
+\node[above=-0.0 of java2,line width=0cm]{Program.java};
+
+\node[above=-0.0 of java,line width=0cm]{Main.java};
+
+
+\draw [] (-11,-3.5) rectangle(5,-19);
+\begin{scope} {0,-10}
+       \begin{object}[text width=10cm]{builder}{-4,-10}
+        \instanceOf{WeightedMetricResultBuilder}
+        \attribute{resultList={[r1,r2,r3]}}
+      \end{object}
+      \begin{object}[text width=6cm]{r1}{-4,-5 }
+        \instanceOf{MetricResult}
+        \attribute{result=100}
+        \attribute{creators=(Program.java,\newline
+        \hspace*{1.6cm}MethodComponent, \newline
+        \hspace*{1.6cm}simple\_comment)}
+      \end{object}
+      
+        \begin{object}[text width=6cm]{r2}{0,-14 }
+        \instanceOf{MetricResult}
+        \attribute{result=0}
+        \attribute{creators=(Main.java,\newline
+        \hspace*{1.6cm}ClassComponent,\newline
+        \hspace*{1.6cm}simple\_comment)}
+      \end{object}
+      
+           \begin{object}[text width=6cm]{r3}{-7,-14 }
+        \instanceOf{MetricResult}
+        \attribute{result=100}
+        \attribute{creators=(Program.java,\newline
+       \hspace*{1.6cm}MethodComponent,\newline
+       \hspace*{1.6cm}public\_members)}
+      \end{object}
+      
+
+   
+\end{scope}
+\begin{scope}[line width=0.05cm]
+    \aggregation{builder}{}{}{r1}{}{}
+    \aggregation{builder}{}{}{r2}{}{}
+    \aggregation{builder}{}{}{r3}{}{}
+
+\end{scope}
+
+    
+\end{tikzpicture}
+     
+     \caption{ Veranschaulichung der Bildung eines Gesamtergebnisses}
+     \label{fig:metric_weighting}
+ \end{figure}

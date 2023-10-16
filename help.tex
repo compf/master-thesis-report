@@ -1,0 +1,78 @@
+%Contains examples for common latex features
+	
+	\section{Bullet Point List}
+		\begin{itemize}
+			\item 
+			Hello
+			
+			\item 
+			World
+		\end{itemize}
+	
+	\section{Enumerated List}
+		\begin{enumerate}
+			\item 
+			Hello
+			
+			\item 
+			World
+		\end{enumerate}
+
+	\section{Figures}
+		\begin{figure}
+			\centering
+			\includegraphics[scale=0.5]{figures/unilogo.pdf} %Scale scales the whole figure based on its original size
+			\caption{Bildunterschrift Bild 1.}
+			\label{fig:referenceToFigure1}
+		\end{figure}
+	
+		\begin{figure}
+			\centering
+			\includegraphics[width=1\linewidth]{figures/unilogo.pdf} %width = 1\linewidth scales the figure to width of a line of text
+			\caption{Bildunterschrift Bild 2.}
+			\label{fig:referenceToFigure2}
+		\end{figure}
+	
+		%multiple figures 
+		\begin{figure}[b!]
+			\centering
+			
+			\subfloat[Bildunterschrift erstes Teilbild.]{
+				\includegraphics[width=0.45\linewidth]{figures/unilogo.pdf} %if width >0.5 linewidth, then the figures are printed below each other instead of next to each other
+			} \qquad
+		%	\vspace{0.2pt} Optional vertical space
+			\subfloat[Bildunterschrift zweites Teilbild.]{
+				\includegraphics[width=0.45\linewidth]{figures/unilogo.pdf}
+			}
+			\caption{Bildunterschrift unter beide Bilder}
+			\label{fig:multipleFigures}
+		\end{figure}
+	
+	\section{Tables}
+		\begin{tabular}{lcr} %l = left-aligned, c = center-aligned, r = right-aligned. For each column (Spalte) write a letter
+			5 & 4 & 6 \\ % & trennt Spalten, \\ trennt Zeilen
+			\midrule %horizontal line
+			2 & 5 & 7
+		\end{tabular}
+		
+	\section{Schriftart}
+		\textbf{Fett}, \emph{kursiv}, \code{int a}.
+	
+	\section{Code}
+		\begin{figure}
+			\lstinputlisting
+			[caption={Begleittext},
+			label={lst:referenceToListing},
+			captionpos=b,language=java, basicstyle=\footnotesize, tabsize=2, showstringspaces=false,  numbers=left]
+			{figures/CodeListing.java}
+		\end{figure}
+	
+	\section{Referencing sections or images}
+		See figure~\ref{fig:referenceToFigure1} or figure~\ref{fig:multipleFigures}(a) or section~\ref{sec:evaluation}.
+		
+	\section{Citations}
+		\cite{mda}
+		
+	\section{Acronmys}
+	%See also Misc/Acronyms file
+	\ac{ATL}

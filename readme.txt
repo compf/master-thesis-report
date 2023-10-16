@@ -1,0 +1,1 @@
+Das Programm TeXstudio ist zum Umgang mit Latex geeignet

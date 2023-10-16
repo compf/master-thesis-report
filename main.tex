@@ -1,0 +1,165 @@
+\documentclass[a4paper,12pt,oneside, bibliography=totoc]
+{scrbook}
+\usepackage[utf8]{inputenc}
+\usepackage{pgf-umlcd}
+% Schrift und -kodierung
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{tcolorbox}
+% Sprache/Silbentrennung
+\usepackage[english]{babel} %TODO change to german if desired
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{floatflt}
+\usepackage{float} 
+\usepackage{verbatim}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{pbox}
+\usepackage{algorithmic}
+\usepackage{algorithm}
+\usepackage{subcaption}
+\usepackage{siunitx}
+\usepackage[autostyle]{csquotes}
+\usepackage{todonotes}
+\usepackage{svg}
+\usepackage[page, title, titletoc, header]{appendix} %prettier appendix
+
+\svgpath{{../figures/}}
+
+\usepackage[printonlyused]{acronym}
+\usepackage{listings} 
+%\usepackage{subfig}
+\lstset{xleftmargin=2em} %Proper indention of listings
+
+\widowpenalty10000
+\clubpenalty10000
+\usepackage{tabularx} %For tables
+\usepackage{csquotes} %For Quotes
+
+
+
+
+
+%Footnote Numbering not reset in new chapters
+\usepackage{chngcntr}
+\counterwithout{footnote}{chapter}
+
+
+%Remove last point after section/subsections
+\renewcommand{\autodot}{}
+
+\usepackage[htt]{hyphenat} %damit texttt noch Linebreaks mit Silbentrennung erzeugt
+\newcommand{\code}[1]{\texttt{#1}} %Programmcode im Textfluss in passendem Font ausgeben
+
+
+%Literatur
+%Ordering in references checken, vermutlich was mit style=numeric zu tun
+\usepackage[
+   backend=biber,
+   sorting= none,
+   firstinits=true,
+   date=long,
+   urldate=long
+]{biblatex}
+\addbibresource{database.bib}
+%\addbibresource{literatur2.bib}
+
+
+\usepackage[]{hyperref}
+
+\begin{document}
+\frontmatter %roman page numbers
+
+
+
+
+
+	\titlehead{
+	\begin{center}
+	   \includegraphics[width=10cm]{figures/unilogo.pdf}\\
+	   	Institute of Computer Science, Software Engineering Group
+	\end{center}
+	}
+	\subject{Master Thesis: }
+	\title{ Refactoring data clumps with the help of ChatGPT
+ }
+	\author{Timo Schoemaker\\ Immatriculation number: 978621} %engl. Matriculation Number
+
+	\date{\today\\
+	Advisor: Prof. Dr.-Ing. Elke Pulvermüller \\ %Deutsch: Erstebetreuer
+	Co-Advisor: Nils Baumgartner, M. Sc.} %Deutsch: Zweitbetreuer
+	
+	\maketitle
+	
+	\clearpage
+	
+	\input{Misc/Abstract}
+
+
+	\clearpage
+	
+	\tableofcontents
+	\clearpage
+
+	
+
+
+
+
+\input{Misc/langDef}
+\input{Misc/Acronyms} %See inside for usage of acronmys
+\mainmatter %switch roman auf arabic page numbers
+
+
+
+\chapter{Einführung}
+\setcounter{page}{1} %Seitenzahlen hier mit 1 anfangen
+
+	%Include text from other files into the document --> great for structuring
+	\input{Introduction/introduction}
+\begingroup
+\renewcommand{\cleardoublepage}{} % TODO maybe removing this and next
+\renewcommand{\clearpage}{}
+\chapter{Grundlagen}\label{sec:background}
+\endgroup
+
+	%Multiple input files for larger chapters are also possible
+\input{Background/grundlagen}
+
+
+
+\input{Main/konzeption}
+\input{Main/umsetzung}
+%\input{Main/main}
+
+
+\input{Main/Metriken}
+\begingroup
+\renewcommand{\cleardoublepage}{} % TODO maybe removing this and next
+\renewcommand{\clearpage}{}
+\chapter{Evaluation}\label{sec:evaluation}
+\endgroup
+	\input{Evaluation/eval.tex}
+\begingroup
+\renewcommand{\cleardoublepage}{} % TODO maybe removing this and next
+\renewcommand{\clearpage}{}
+\chapter{Fazit}\label{chapter:conclusion}
+\endgroup
+\label{sec:conclusion}
+\input{Conclusion/conclusion}
+
+
+%Prints references
+\printbibliography[title=Literaturverzeichnis]
+
+
+\clearpage 
+
+%Appendix (comes after bibliography)
+\input{Misc/Appendix}
+
+
+\input{Misc/Testimony}
+\end{document}
+
