@@ -1,4 +1,4 @@
-
+\begin{comment}
 \begingroup
 \renewcommand{\cleardoublepage}{} % TODO maybe removing this and next
 \renewcommand{\clearpage}{}
@@ -98,9 +98,7 @@ Die zweite Quelle für die Informationen sind die Eingabeparameter aus GitHub Ac
 
 Da es durchaus sein kann, dass sowohl eine Konfigurationsdatei existiert als auch die Umgebungsvariablen gesetzt sind, muss klar festgelegt werden, welcher Wert eines Parameters am Ende genommen wird. Bei dem Tool haben die von GitHub Actions erzeugten Umgebungsvariablen  Vorrang, da das Tool für die Verwendung in GitHub Actions konzipiert wurde.  Die Auflistung im Anhang \ref{enum:tool_javadoc_conf} listet alle Parameter des Tools nochmals auf und erläutert sie zusätzlich. 
 
-\begin{comment}
-Das Tool \textit{create\_conf}, das im Hauptverzeichnis im GitHub-Repository liegt kann eine beispielhafte Konfigurationsdatei erstellen, indem \textit{node create\_conf.js --out PATH --type json} aufgerufen wird. Dabei ist \textit{PATH} ein Pfad ohne Dateiname. Dieses Hilfstool legt dann eine Konfigurationsdatei namens \enquote{comment\_conf.json} in dem angegebenen Verzeichnis an. 
-\end{comment}
+
 \section{Speicherung des letzten Ergebnisses}\label{chapter:saving}
 Neben der bereits erwähnten Möglichkeit, einen absoluten Grenzwert für die Dokumentationsqualität zu definieren, ist auch ein inkrementeller Vergleich interessant. Dabei wird das Ergebnis der Dokumentationsqualität zwischengespeichert. Bei einem neuen Start des Tools kann das alte Ergebnis mit dem neuen Ergebnis verglichen werden. Verschlechtert sich das Ergebnis über einen gewissen Schwellwert hinaus, so sollte der Entwickler ebenfalls gewarnt werden, selbst wenn die Dokumentationsqualität noch über der absoluten Grenze liegt. Schließlich kann dies ein Trend sein, der zum baldigen Unterschreiten des absoluten Grenzwertes führen kann. 
 
@@ -141,6 +139,5 @@ captionpos=b, basicstyle=\footnotesize, tabsize=2, showstringspaces=false,  numb
 \end{figure}
 
 Hier wird die aktuelle Version des DocEvaluators aus der Branch \textit{action} heruntergeladen und automatisch ausgeführt. Als Parameter wird beispielsweise ein Grenzwert von 20 übergeben, der jedoch nach Belieben angepasst werden kann. Wenn das entsprechende Ereignis des Workflows eintritt (z. B. ein Push-Ereignis), wird der DocEvaluator mit diesem Parameter aufgerufen und zeigt unter der Registerkarte \textit{Actions} eine Fehlermeldung an, wenn die Dokumentationsqualität den Grenzwert unterschreitet und somit nicht ausreichend ist.
-\begin{comment}
-Das Tool \textit{create\_conf}, das im Hauptverzeichnis im GitHub-Repository liegt, kann ein Workflow erstellen, indem \textit{node create\_conf.js --out PATH --type yaml} aufgerufen wird. Dieses kleine Hilfstool erzeugt dann ein beispielhafter Workflow mit allen Eingaben in dem angegebenen Pfad, um es leicht in GitHub einzubinden.
+
 \end{comment}

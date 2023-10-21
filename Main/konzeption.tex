@@ -14,7 +14,7 @@ In order to find and refactor data clumps automatically, a certain sequence of s
 It is easily agreeable that data clumps cannot be fixed unless they have been found previously. Therefore, one of the first step of the pipeline must be the detection of data clumps. 
 
 The data clump detection process itself can be further divided into sub steps.
-\subsubsection{Filtering}
+\subsubsection{Filtering}\label{subsub:filtering_files}
 First of all, all files of the programming language needs do detected. Usually, there are specific file extensions (e.g. \textit{.java}) for a source code file which simplifies the finding of files. It also for software project to have a root folder that contains all source code files. Therefore, one can recursively iterate through all files and directories of a given root folder that have a matching extension. 
 
 However, not every source code file might be analyzed for data clumps. For instance, parts of the projects must not be refactored or a refactorization would be too time-consuming. As outlined in chapter \ref{sec:introduction}, the cost for detection of data clumps might be too high. Therefore, filtering rules might be necessary to reduce the size of the relevant files for the subsequent steps.  
@@ -30,8 +30,19 @@ From this, a graph can be constructed that visualizes the relationship of the se
 \subsubsection{Data clump detection}
 After similar variables have been been detected, it must be determined whether a cluster of variables that are deemed similar, are in fact a data clump. Here, the rules from section \ref{chapter:antlr4_impl} can be used. However, defining own rules can lead to better results so that  here flexibility is important too. 
 
+\subsection{Data clump filtering or prioritization}
+In section \ref{subsub:filtering_files}, a filtering by files is performed. However, even if many data clumps were detected, they do not need always to be refactored. One can decide to ignore certain data clumps and refatcor them later or even never. 
 
+There can be many reasons for this approach. For instance, parts of the source code that are infrequently updated might be too risky for refactoring since any automatic tool might cause bugs or invalid code that is hard to fix because the developers are not familiar with this part of the source code. On the contrary, a part of the source code that is updated more frequently might be in an intermittent state so that refactoring is currently not recommendable. Also as noted in section  \ref{subsub:filtering_files}, if a service like ChatGPT is used, the cost of transferring many source code files with data clumps might be too high. 
+
+Therefore, it can be suggested to filter out certain data clumps that are considered not worthy of refactoring.
+
+\subsection{Name finding}
+The next step ofthe pipeline is to find a suitable identifier of the extracted class.
+
+There are some criteria for this identifier. It should be a valid name in the respective programming language so that in general only alphanumerical characters may be chosen. It should not in conflict with other identifiers as it may lead to bugs or compiler errors, and it should be readable and as best as feasible represent the fields of the class
 \hfill
+\begin{comment}
 Eine Quellcodedatei besteht zunächst aus reinem Text und bietet daher nur indirekt Einblick in die innere Struktur. Damit eine Bewertung der Dokumentationsqualität möglich ist, müssen bestimmte Strukturen aus einer Datei gelesen werden, die für die Dokumentation wichtig sind. Andere Strukturen können dabei ignoriert werden. Für die Bewertung der Dokumentation sind nur wenige Bestandteile relevant. Beispielsweise sind alle Conditional-Branches (wie z.~B.  For-Schleifen und If-Verzweigungen) und viele andere Komponenten in Methodenrümpfen nicht relevant, da diese nur mit normalen Kommentaren und nicht mit Javadoc kommentiert werden (sie werden dennoch unstrukturiert als Zeichenkette gespeichert, damit Metriken diese Information eventuell nutzen können). Aus diesem Grund müssen die notwendigen Informationen extrahiert werden. Zudem ist es ein Ziel der Arbeit, eine Erweiterbarkeit auf andere objektorientierte Programmiersprachen zu ermöglichen. Daher müssen die Informationen in ein abstraktes Format gebracht werden, welches eine gute Annäherung für die meisten objektorientierten Programmiersprachen ist. Beispielsweise unterscheiden sich die Zugriffsmodifizierer vieler Programmiersprachen, sodass eine einheitliche Schnittstelle schwer umsetzbar ist. Daher enthält die abstrakte Repräsentation nur Informationen darüber, ob eine Komponente als öffentlich markiert ist. Dies ist sinnvoll, da öffentliche Komponenten als Teil der öffentlichen Schnittstelle eher dokumentiert werden sollten als nicht öffentliche und eine weiter gehende Differenzierung kaum Vorteile bietet. In einigen Programmiersprachen wie z. B. Python gibt es keine expliziten öffentlichen Komponenten, jedoch existieren de facto Standards für Bezeichner, sodass beispielsweise private Komponenten zwei Unterstriche als Präfix haben.
 
 Außerdem werden in der abstrakten Repräsentation die Vererbung etwas vereinfacht dargestellt, indem nicht zwischen Basisklassen und Schnittstellen unterschieden wird, da es auch hier Unterschiede zwischen Programmiersprachen gibt. Zudem werden Konstruktoren als Methoden mit den Namen \enquote{constructor} und Schnittstellen als Klassen repräsentiert, da auch hier eine zu feine Spezifikation nicht notwendig sein wird.  
@@ -153,3 +164,4 @@ Dieses Ergebnis ist dann Maß für die Bewertung der Dokumentationsqualität die
 
 
 
+\end{comment}
