@@ -1,5 +1,6 @@
 #!/bin/bash
-unzip -o ../masterthesis.zip 
+rm -r masterthesis
+unzip -o -d ./masterthesis ../masterthesis.zip 
 echo "Please input commit message"
 read commitMessage
 echo "$commitMessage"
