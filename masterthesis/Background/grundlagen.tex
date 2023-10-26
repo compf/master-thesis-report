@@ -1,20 +1,78 @@
 In this chapter, the background of data clumps will be discussed. A formal definition of data clumps will be presented (\ref{sec:data_clumps_def}. ChatGPT will be discussed in section \ref{sec:chatgpt}. Also, there will be a discussion of the data clump type context format. 
 
 \section{Data clumps}\label{sec:sec:data_clump_def}
+The term \enquote{Data Clump} was coined by Martin Fowler in as one possible code smell that can occur in source code. He describes data clumps as follows:
+
+\begin{displayquote}
+Data items tend to be like children: They enjoy hanging around together.  around in groups. Often you will see
+the same three or four data items together in lots of
+places: fields in a couple of classes, parameters in many
+method signatures. \cite{fowler2019refactoring} 
+\end{displayquote}
+
+This definition is somewhat imprecise. It is not specified whether three or four data items are necessary. Also \enquote{a couple of classes} and \enquote{in many method signatures} do not define concrete numbers.  
 
 A more precise and algorithmic  definition of \enquote{data clumps} is provided by \cite{zhangImprovingPrecisionFowler2008}. According to them, a data clump  can be defined on the field or method-parameter levels. 
 To be a method parameter data clump, a group of at least three variables must appear in multiple methods. Those variables must be duplicated, meaning they share the same name and data type. However, the inner order of the group does not need to be the same. 
 
-These conditions often need to be more relaxed. For instance, methods can be inherited and overridden so that a group of parameters may appear in each derived class thereby fulfilling the definition of a method parameter data clump. Since (except for the identifiers of the parameters) an overriding method must be the same as the overridden method, they are not considered data clumps. \cite{zhangImprovingPrecisionFowler2008}
+These conditions often need to be more relaxed. For instance, methods can be inherited and overridden so that a group of parameters may appear in each derived class thereby fulfilling the definition of a method parameter data clump. Since (except for the identifiers of the parameters) an overriding method must be the same as the overridden method, they are not considered data clumps.
 
-To be a field data clump, similar conditions apply. There must be at least three fields that appear in more than one class and the names and data types of the variables must the same while the inner order may be different. Since in most programming language, a field can have an additional access modifier (e.g. \textit{private}, \textit{static} etc. ), the access modifier should also be included to determine whether two groups of variables are identical and hence a data clump.  \cite{zhangImprovingPrecisionFowler2008}
+To be a field data clump, similar conditions apply. There must be at least three fields that appear in more than one class and the names and data types of the variables must the same while the inner order may be different. Since in most programming language, a field can have an additional access modifier (e.g. \textit{private}, \textit{static} etc. ), the access modifier should also be included to determine whether two groups of variables are identical and hence a data clump.  
 
 The definition might also need to be more relaxed for both method and field data clumps. Two variables, that have the same name but a compatible type in at least one direction  (e.g. \textit{int} and  \textit{double}), would be disregarded as a data clump according to the formalized definition, although some would regard them a data clump.
 
 Also, modification of a variable's identifier might not change its meaning. For instance, typos can happen, or synonyms can be used so that an automatic algorithm might not discover the connection of two variables but requires  knowledge of the semantics of the source code. \cite{zhangImprovingPrecisionFowler2008}
 
 
-To conclude, the core definition of a data clump is clear. However, this definition still leaves out some edge cases that require a semantic understanding of the source code.  
+To conclude, the core definition of a data clump is clear. However, this definition still leaves out some edge cases that require a semantic understanding of the source code. 
+
+An example of a data clump is shown in listing \ref{lst:math_stuff_java}
+\begin{figure} [htbp!]
+			\lstinputlisting
+			[caption={Some operations on vectors},
+			label={lst:math_stuff_java},
+			captionpos=b,language=java, basicstyle=\footnotesize, tabsize=2, showstringspaces=false,  numbers=left]
+			{figures/chapter3/MathStuff.java}
+		\end{figure}
+
+
+
+Listing \ref{lst:math_stuff_java} contains three method that execute some vector operations (calculation of length, sum of coordinates, and the maximum coordinate). T
+
+
+It can be seen that  the snippet contains a method parameter data clump since the variables \textit{x}, \textit{y}, and  \textit{z} occur thrice.  These variables might be called \textbf{data clump items}
+  
+\subsection{Refactoring data clumps}
+Fowler suggests three steps to refactor a data clump
+\begin{enumerate}
+    \item \textbf{Extract Class} Create a class with fields for each data clump item
+    \item \textbf{Introduce Parameter Object} Change signature of the methods so that instead of the individual data clump items, the newly created class is used. 
+    \item \textbf{Preserve Whole Object} Refactor the source code so that whereever the refactored method in step 2 is used, a new object of the class in step 1 is created and provided instead of the individual data clump items.
+\end{enumerate}
+
+
+To illustrate the suggested data clump refactoring process, listing \ref{lst:math_usaer_java} shows how the methods in \ref{lst:math_stuff_java} can be used. 
+
+
+  \begin{figure} [htbp!]
+			\lstinputlisting
+			[caption={Some operations on vectors},
+			label={lst:math_user_java},
+			captionpos=b,language=java, basicstyle=\footnotesize, tabsize=2, showstringspaces=false,  numbers=left]
+			{figures/chapter3/MathUser.java}
+	\end{figure}
+
+In the first step, a new class can be extracted which contains all data clump items as field. It should also contain setters and getters to access the fields in an encapsulated manner. The class should be named so that its purpose is clear. Listing \ref{lst:coordinate_java} shows how such a class may look like. 
+
+  \begin{figure} [htbp!]
+			\lstinputlisting
+			[caption={ Resulting Coordinate class},
+			label={lst:coordinate_java},
+			captionpos=b,language=java, basicstyle=\footnotesize, tabsize=2, showstringspaces=false,  numbers=left]
+			{figures/chapter3/Coordinate.java}
+		\end{figure}
+
+
 
 
 \section{ChatGPT}

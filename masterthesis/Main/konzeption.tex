@@ -60,14 +60,7 @@ In contrast to the previous step of the pipeline, this process can be automated 
 Additionally, methods for converting a object to a string or creating a hash code may be useful, but these methods are usually not required for the refactoring of data clumps. 
 
 \subsection{Example}
-A small example will illustrate the execution of the pipeline. Listings \ref{lst:math_stuff_java} and \ref{lst:math_user_java} outline how a refactoring process can be facilitated.  
-
-Listing \ref{lst:math_stuff_java} contains three method that execute some vector operations (calculation of length, sum of coordinates, and the maximum coordinate). These methods are called in listing \ref{lst:math_user_java}. 
-
-For simplicity, not all steps of the pipeline will be shown because some are irrelevant.
-\subsubsection{Identification} (see section \ref{subsec:chap3_data_clump_detection})
-It can be seen that  listing \ref{lst:math_stuff_java} contains a data clump since the variables \textit{x}, \textit{y}, and  \textit{z} occur thrice. This data clump will now be fixed.
-\subsubsection{Name finding (see section \ref{subsec:chap3_data_clump_name_finding}})
+Listing \ref{lst:math_stuff_java} will be used a the foundation to describe a detailed approach for fixing data clumps.
 
 Looking at the parameters \textit{x}, \textit{y}, and \textit{z}, there are multiple suggestions for a class name. The most trivial one is a simple concatenation  (e.g. \textit{XYZ} or \textit{X\_Y\_Z}). However, this name is often not suitable as it can be hard to read and to understand its meaning.
 
@@ -79,30 +72,7 @@ Since a suitable class name has been found, the following class can be created w
 
 Listing \ref{lst:coordinate_java} shows an example implemtation of a coordinate class. This class contains fields, getters, and setters, for all method parameters. There is also a constructor for initialization.  
 
-\begin{figure} [htbp!]
-			\lstinputlisting
-			[caption={Some operations on vectors},
-			label={lst:math_stuff_java},
-			captionpos=b,language=java, basicstyle=\footnotesize, tabsize=2, showstringspaces=false,  numbers=left]
-			{figures/chapter3/MathStuff.java}
-		\end{figure}
-
-
-  \begin{figure} [htbp!]
-			\lstinputlisting
-			[caption={Some operations on vectors},
-			label={lst:math_user_java},
-			captionpos=b,language=java, basicstyle=\footnotesize, tabsize=2, showstringspaces=false,  numbers=left]
-			{figures/chapter3/MathUser.java}
-		\end{figure}
 
 
 
-  \begin{figure} [htbp!]
-			\lstinputlisting
-			[caption={ Resulting Coordinate class},
-			label={lst:coordinate_java},
-			captionpos=b,language=java, basicstyle=\footnotesize, tabsize=2, showstringspaces=false,  numbers=left]
-			{figures/chapter3/Coordinate.java}
-		\end{figure}
 \hfill
