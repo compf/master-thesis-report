@@ -1,0 +1,23 @@
+Metriken, welche die Semantik überprüfen
+
+Da nicht nur das Vorhandensein, sondern auch die Aussagekraft und Verständlichkeit der Dokumentation wichtig sind, bietet das Tool weitere Metriken an. Diese Metriken überprüfen die Semantik, also den Inhalt, der Dokumentation und können so Aufschluss darüber geben, ob die Dokumentation tatsächlich hilfreich ist.
+
+Zur Bewertung der Verständlichkeit eines englischsprachigen Textes ist der  Flesch-Score sehr bekannt  Dies ist eine Formel zur heuristischen Bewertung der Lesbarkeit eines Textes, welches die Anzahl der Sätze, Silben und Wörter berücksichtigt. Die Formel lautet:
+206,835-1,015*84,6*W}
+
+Dabei ist $S$ die Anzahl der Sätze, $W$ die Anzahl der Wörter und $H$ die Anzahl der Silben. Die Formel liefert einen Wert von 0 bis 100 zurück, wobei 0 auf einen sehr komplizierten und 100 auf einen leichten Text hindeutet. Diese Formel und verwandte Formeln werden auch von verschiedenen US-Behörden verwendet, um die Lesbarkeit ihrer Dokumente zu verbessern  Für kleinere Flesch-Score werden weniger Punkte vergeben. Für größere Flesch-Scores werden ebenfalls Punkte abgezogen, aber nicht mehr als 15, da sehr leichte Texte besser sind als schwierige Texte.
+Bei der Verwendung des Flesch-Scores sollte beachtet werden, dass die Bestimmung der Silbenzahl eines Wortes nicht immer trivial ist. Bei der Entwicklung des Tools musste bei einem Austausch einer Bibliothek die Testmethode angepasst werden, da das Wort  themselves plötzlich drei statt zwei Silben hatte. Dies hängt natürlich auch von der Aussprache und somit von kulturellen Gegebenheiten ab. Dies gilt natürlich auch für die Bestimmung von Wörtern und Sätze.
+
+Der  Gunning-Fog-Index ist eine ähnliche Formel. Sie berücksichtigt nicht die Anzahl der Silben, sondern die Zahl der komplizierten Wörter. Ein Wort gilt dabei als kompliziert, wenn es mehr als zwei Silben hat  Dabei gibt der Gunning-Fog-Index die Anzahl an Schuljahren zurück, die ein Leser absolviert haben muss, um den Text gut verstehen zu können. Die Definition des komplizierten Wortes ist aber umstritten. So ist beispielsweise das Wort  {vacation} drei Silben lang, aber nicht unbedingt kompliziert 
+
+Eine weitere Möglichkeit zu Bewertung der Semantik der Dokumentation ist ein Vergleich der Dokumentation mit dem Namen der dokumentierten Komponente. Ein Kommentar, der einen Großteil des Namens der Komponente wiederholt, bietet keinen Mehrwert. Auch ein Kommentar, der keinen Zusammenhang mit der dokumentierten Komponente erkennen lässt, verliert an Nutzen 
+Um diese  Kohärenz zu messen, kann die Anzahl der gemeinsamen Wörter zwischen Dokumentation und des Namens der dokumentierten Komponente ermittelt werden und dies durch die Zahl der Wörter der Dokumentation geteilt werden. Die Autoren in vertreten die Ansicht, dass dieser von mehr als 0,5 oder gleich 0 auf eine schlechte Dokumentation hindeutet, da es im ersteren Fall eine starke Ähnlichkeit zwischen dem Namen und der Dokumentation gibt und im zweiten Fall überhaupt keine Gemeinsamkeiten existiert. Die Implementation der Metrik bewertet in beiden Fällen die Dokumentation mit 0 Punkten, in allen anderen Fällen vergibt sie 100 Punkte.
+
+undefinedZwei Methoden mit mangelhafter Kohärenzundefined,
+label=lst:coherence_example,
+captionpos=b,language=java, basicstyle=
+figures/metrics/coherence.java
+
+Listing im Komponentennamen auftreten. Zur Verbesserung der Kohärenz könnte beispielsweise erwähnt werden, wie sich die Methode bei negativen Werten verhält. Bei der zweiten Methode gibt es überhaupt keine Gemeinsamkeiten zwischen den Namen der Komponente und der Dokumentation (Z. 11), sodass der Kohärenzkoeffizient gleich 0 ist. Hier könnte z.~B. zur Verbesserung  das Wort in der Dokumentation erwähnt werden.
+
+Die Kohärenzmetrik hilft dem Entwickler dabei, dass die Dokumentation zu dem Namen der dokumentierten Komponente passt und gleichzeitig einen Mehrwert bietet, sodass die Dokumentation nützlich ist. Allerdings können Synonyme den Wert verfälschen, da dann keine gemeinsamen Wörter gefunden werden. Auch durch Füllwörter (wie z.~B.  the, etc.) kann die Bewertung unterschätzt werden.

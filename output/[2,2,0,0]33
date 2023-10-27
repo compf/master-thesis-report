@@ -1,0 +1,20 @@
+Metriken, welche  nach Fehlern suchen
+
+Die letzte Kategorie an Metriken analysiert die Dokumentation und sucht nach dem Vorkommen von bestimmten Fehlern, welche die Qualität der Dokumentation negativ beeinflussen können. Solche Fehler können beispielsweise Rechtschreibfehler oder fehlerhafte Formatierung (wie z.~B. nicht konformes  oder  zu vermeiden 
+
+undefinedMethode mit unvollständiger Erklärung der Behandlung von Nullwertenundefined,
+label=lst:null_handling_example,
+captionpos=b,language=java, basicstyle=
+figures/metrics/null_handling.java
+
+Bei Methoden sollte zudem darauf eingegangen werden, ob die Methode  null als Parameterwert akzeptiert oder zurückgeben kann, damit der Benutzer die Methode korrekt verwenden kann  Listing zeigt eine Methode, bei denen die Behandlung von nur teilweise erwähnt wird. Beim ersten Parameter (Z. 3) wird erwähnt, dass der Parameter niemals null sein kann und daher ein Nullwert zu einer Ausnahme führen kann.  Beim zweiten Parameter (Z. 4) ist dies nicht klar und der Benutzer der Dokumentation wird im Unklaren gelassen, was zu einer fehlerhaften Verwendung der Methode führen kann.
+
+In allen Fällen sollte ein Verstoß gegen diese Konventionen zu Punkteabzug führen.
+Dazu können pro Verstoß Fehlerpunkte vergeben werden. Diese Fehlerpunkte können dann der Funktion
+B(l)=S-(S-B_0)*e^-k*l
+
+übergeben werden, die eine beschränkt fallende Exponentialfunktion ist. Dabei ist $S$ die untere Schranke für die Bewertung, $B_0$ die bestmögliche Bewertung,  $k$ eine Konstante für die Wachstumsrate und $l$ die Zahl der Fehlerpunkte. Durch diese Funktion erhalten Kommentare mit vielen Fehlerpunkten eine geringere Bewertung als Kommentare mit keinen oder wenigen Fehlerpunkten. Die Wachstumsrate $k$ kann dabei parametrisiert sein und sollte auch von der jeweiligen Fehlerkategorie abhängen. So kann beispielsweise argumentiert werden, dass Rechtschreibfehler weniger gravierend sind als fehlerhaftes 
+
+Bei allen Metriken sollte allerdings beachtet werden, dass diese nur nach relativ einfachen Fehlern suchen. Bei einer Prüfung des 
+
+Als weitere Möglichkeit, die in der Literatur nicht erwähnt wird, könnten lange Methoden, die bestimmte Fehler aufweisen, härter bestraft werden. So kann beispielsweise argumentiert werden, dass lange Methoden, die sowieso vermieden werden sollten sind, bestraft werden.

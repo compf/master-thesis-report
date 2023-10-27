@@ -1,0 +1,3 @@
+Arithmetischer Mittelwert
+Der arithmetische Mittelwert wird durch die Klasse  MetricResultBuilder implementiert. Dieser Algorithmus berücksichtigt jedes Ergebnis gleichermaßen. Dies ist insbesondere dann sinnvoll, wenn keine guten Kriterien für die Gewichtung von Metriken, Dateien oder Komponenten gefunden werden können. Es sollte allerdings auch beachtet werden, dass der Mittelwert extreme Ausreißer berücksichtigt. Dies kann hier sinnvoll sein, da eine in Teilen sehr schlechte Dokumentation besser berücksichtigt wird und so ein verlässliches Gesamtergebnis geliefert wird.
+

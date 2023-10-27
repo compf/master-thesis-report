@@ -1,0 +1,22 @@
+Konfiguration des Tools
+Zur Nutzung des Tools werden bestimmte Informationen benötigt, die aus verschiedenen Quellen bezogen werden. Zunächst benötigt das Tool den Pfad, der die Quelldateien enthält, die nach Kapitel Datei namens , welche die notwendigen Daten für die Arbeit des Programms enthält. Listing zeigt eine beispielhafte Konfigurationsdatei im Format.
+
+undefinedBeispielhafte Konfigurationsdatei für das Toolundefined,
+label=lst:example_conf,
+captionpos=b, basicstyle=
+figures/chapter4/example_conf.json
+
+In dieser Beispieldatei  werden alle Dateien mit der Dateiendung  .java bei der Traversierung betrachtet (Z. 1). Außerdem werden dabei keine Dateien bei der Traversierung ausgeschlossen (Z. 2). Diese beiden Werte entsprechend dabei ihre Standardwerte. Sie könnten also bei dieser Konfigurationsdatei weggelassen werden und das Programmverhalten würde sich nicht ändern.
+
+Anschließend (Z. 4--11) werden die zu verwendenden Metriken definiert. Jede Metrik besitzt einen  metric(vgl. Kapitel . Anhang  beschreibt alle implementierten Metriken mit ihren Namen. Diese Namen werden vom Metrikmanager dazu genutzt, um die passende Klasse zu finden und so ein Metrikobjekt zu erzeugen. Außerdem erhält jede Metrik durch einen eindeutigen Namen (hier z.~B. . Dieser kann auch weggelassen werden. Dann wird der eindeutige Name aus dem Namen der Metrik und einer fortlaufenden Nummerierung erzeugt. Zudem besitzt jede Metrik das Attribut  welches zur Bestimmung der Relevanz bzw. des Gewichts der Metrik dient und von einem zur Bestimmung eines Gesamtergebnisses benutzt werden kann. Ein  der keine Gewichtung der Metriken benötigt, wird diese Information ignorieren. Das Gewicht ist ebenfalls optional. Bei dessen Fehlen wird das Gewicht eingesetzt.  Durch  werden der Metrik die Parameter übergeben, die sie benötigt. Die genaue Anzahl und Struktur der Parameter hängen von der jeweiligen Metrik ab. Fehlen diese Parameter, so werden standardmäßige Parameter verwendet.
+
+Fehlt der Eintrag  metrics, so werden alle implementierten Metriken mit ihren Standardwerten genommen.
+
+Als Nächstes (Z. 12) wird der Schwellwert festgelegt. Dieser Wert legt fest, ob das Programm beim Unterschreiten dieses Wertes mit einer Fehlermeldung abbrechen soll. In Zeile 13 wird der  MetricResultBuilder festgelegt, der bestimmt, wie die Einzelergebnisse aggregiert werden. In dem Beispiel werden alle Teilresultate mittels eines gewichteten Mittelwertes zu einem Gesamtergebnis aggregiert.  In Zeile 14 wird durch  festgelegt, um wie viel sich die Dokumentationsqualität verschlechtern muss, damit ebenfalls eine Fehlermeldung erscheint. Dies wird in Kapitel genauer erläutert.
+
+
+
+Die zweite Quelle für die Informationen sind die Eingabeparameter aus GitHub Actions. Dazu wird, wie in Kapitel Datei auch in der  {action.yml}-Datei übernommen. Bei der Ausführung des Programms stehen diese Eingabedaten über Umgebungsvariablen bereit. Jede Umgebungsvariable beginnt mit der Zeichenkette  anschließend folgt der Name des entsprechenden Parameters (wie in der Datei), wobei der Name allerdings komplett in Großbuchstaben geschrieben ist. So steht  als zur Verfügung.
+
+Da es durchaus sein kann, dass sowohl eine Konfigurationsdatei existiert als auch die Umgebungsvariablen gesetzt sind, muss klar festgelegt werden, welcher Wert eines Parameters am Ende genommen wird. Bei dem Tool haben die von GitHub Actions erzeugten Umgebungsvariablen  Vorrang, da das Tool für die Verwendung in GitHub Actions konzipiert wurde.  Die Auflistung im Anhang 
+

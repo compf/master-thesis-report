@@ -1,0 +1,9 @@
+Parsen der strukturierten Kommentare
+Um die strukturierten Kommentare in das Format nach Kapitel beginnt, der den allgemeinen Teil beendet.
+
+Anschließend werden diese Tags verarbeitet. Benötigt ein Tag einen Parameter, so wird die Zeile in drei Teilen an den Leerzeichen aufgetrennt. Dabei ist der erste Teil der Typ des Tags, der zweite Teil der Parameter und der Rest (mit allen übrigen Leerzeichen) die Beschreibung des Tags.
+Bei einem Tag ohne Parameter wird die Zeile in zwei Teile getrennt, wobei hier der erste Teil der Typ des Tags und der letzte Teil die Beschreibung ist.
+
+Diese Heuristik sollte die gängigsten Javadoc-Blöcke verarbeiten können. Alternativ könnte auch ANTLR4 Javadoc parsen. Allerdings ist dies aufgrund der Mischung von natürlicher Sprache und der relativen Flexibilität von Javadoc nicht trivial und wird daher nicht implementiert.
+
+

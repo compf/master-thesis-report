@@ -1,0 +1,2 @@
+Klassische Algorithmen
+Die klassischen Algorithmen zur Berechnung eines Ergebnisses aus mehreren Ergebnissen sind hinlänglich bekannt. Sie alle basieren auf der Annahme, dass die dahinter liegende Verteilung symmetrisch ist. Im Kontext der besprochenen Metriken bedeutet dies, dass die Wahrscheinlichkeit für eine gute Bewertung genauso sein sollte wie eine schlechte Bewertung. Bei vielen Metriken zur Bewertung der Softwarequalität kann diese Annahme nicht getroffen werden 

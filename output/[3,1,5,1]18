@@ -1,0 +1,6 @@
+Example
+Listing 
+
+Looking at the parameters  x,  and  there are multiple suggestions for a class name. The most trivial one is a simple concatenation  (e.g. or . However, this name is often not suitable as it can be hard to read and to understand its meaning.
+
+A more suitable approach requires domain knowledgwe. It is common knowledge, that the terms  x,  and are terms used in math to describe coordinates. using this information, a s fitting name could be  Simple methods would not have discovered this name as artificial or human intelligence is required.

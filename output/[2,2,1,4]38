@@ -1,0 +1,5 @@
+Gewichteter Mittelwert
+Der gewichtete Mittelwert ist in der Klasse  WeightedMetricResultBuilder implementiert. Die Zuweisung der Gewichte erfolgt, wie in Kapitel beschrieben, durch einen  Die Gewichte müssen nicht normiert werden, da dies während der Berechnung implizit erledigt wird. Die Resultate jeder Metrik werden multipliziert mit dessen Gewicht, dann aufsummiert und zuletzt durch die Summe aller Gewichte geteilt.
+
+
+Dieser Algorithmus ermöglicht es zum Beispiel, bestimmte Metriken zu bevorzugen bzw. zu benachteiligen. Dies ist sinnvoll, da nicht jede Metrik immer ein aussagekräftiges Ergebnis liefert und bestimmte Metriken je nach Situation ein besseres Bild über die Dokumentationsqualität liefern. Allerdings ist auch zu beachten, dass die Wahl der Gewichte nicht trivial ist und ein Vergleich von Ergebnissen, die verschiedene Gewichte verwenden, nicht sinnvoll ist.

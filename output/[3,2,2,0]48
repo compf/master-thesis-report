@@ -1,0 +1,30 @@
+Ergebnisse
+
+Tabelle  auf. In den Spalten werden die Fehler nach dem Projekt gruppiert. Die ersten drei Zeilen beschreiben, wie viele Fehler die einzelnen Tools pro Projekt gefunden haben. So hat  der  {DocEvaluator} 1710 Fehler in gefunden.  In den übrigen Zeilen wird aufgeführt, welche Kombinationen der Tools wie viele Fehler gefunden haben. Die Zeile mit der ersten Spalte  { beschreibt beispielsweise, dass und der  (aber nicht  41 Fehler bei  264 Fehler bei und 253 Fehler bei  gefunden haben.
+& Log4J & {ArgoUML} & {Eclipse  
+|DE|            & 1710 & 10054  & 17380      
+|CS|            & 1590 & 9961   & 17638      
+|PMD|           & 1008 & 9051   & 12702      
+
+Aus der Tabelle ist ersichtlich, dass stets über 50~und werden mehr als ein Viertel der Fehler von der Kombination  und gefunden. Beim Projekt  {ArgoUML} liegt diese Quote bei weniger als 15~
+
+Die Überschneidungen der Fehler lassen sich auch mit Venn-Diagrammen darstellen.  Die Abbildungen und  zeigen für jedes Projekt die Überschneidungen der gefundenen Fehler. Die Abbildung ist die Legende dieser drei Abbildungen:
+
+
+
+Auch hier zeigt der graue Bereich visuell, dass die drei verglichenen Tools viele Fehler gemeinsam finden.  Dies ist vor allem bei  ArgoUML deutlich, da der graue Kreis fast alle anderen Kreise großflächig überdeckt. Bei den anderen beiden Projekten ist zudem eine große Überschneidung von und zeigt das Diagramm einen im Vergleich zu den anderen Projekten größeren Bereich (dunkelblau) an Fehlern, die nur von gefunden werden. Auch der Bereich der exklusiv vom gefundenen Fehler (rot) ist bei größer. Die nur vom und gefundenen Fehler (lila) sind bei   nicht zu erkennen, bei den anderen Venn-Diagrammen allerdings schon. Dafür scheint es bei   relativ viele Fehler zu geben, die nur von  mehr Fehler, die nur von gefunden werden, da der grüne Bereich größer ist.
+
+Um die Trefferrate mathematisch auszudrücken, kann die Formel
+1-{|}
+
+1-+}{|+|}
+
+Tabelle und  die Treffergenauigkeit des  {DocEvaluators} für jedes analysierte Projekt:
+Formel & Log4J & ArgoUML & Eclipse 
+
+Es ist klar erkennbar, dass die Trefferrate unabhängig von der Formel und dem analysierten Projekt größer als 90~gefunden werden, auch vom 
+
+
+
+
+

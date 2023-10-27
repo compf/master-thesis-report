@@ -1,0 +1,21 @@
+Ergebnisse
+Die Tabellen zeigen den Median und die Standardabweichung der benötigten Durchlaufzeit pro Tool und Projekt in Sekunden. Die Abbildungen  und visualisieren den Inhalt der Tabellen als Boxplot.
+
+Im Verzeichnis  speed
+& DE & {CS} & {PMD}  
+Log4J & 2.538 & 2.30 & 1.907
+ArgoUML & 16.965 & 9.301 & 7.917 
+Eclipse 
+
+& DE & {CS} & {PMD}  
+Log4J & 0,077 &  0,174 &  0,068
+ArgoUML & 0,197 &  0,083 & 0,157 
+Eclipse 
+
+
+
+
+
+Aus den Tabellen und Boxplot-Diagrammen wird ersichtlich, dass der mehr Zeit benötigt hat.   Ansonsten war stets schneller als der  analysiert am schnellsten ein Projekt. Der Unterschied in der Laufzeit zwischen dem benötigt der  Bei dem größten Projekt  benötigt der  Beim steigt die Standardabweichung mit der Größe des Projektes, während dieser Trend bei nicht so eindeutig ist.
+
+Bei dem Boxplot-Diagramm ist auch erkennbar, dass Ausreißer der Laufzeit nach oben häufiger sind als nach unten, da der Median sich stets im unteren Bereich des Boxplot-Quartils befindet. Bei den anderen Projekten ist dies aufgrund des größeren Zeitabstandes  zwischen dem durch den  scheinen Abweichungen nach unten häufiger zu sein.

@@ -1,0 +1,8 @@
+Analyse der Qualität
+Durch die Evaluation der Qualität soll geprüft werden, ob der 
+beschriebenen abstrakten Formates eine Java-Datei richtig parsen kann und alle für die Dokumentation relevanten Informationen korrekt extrahieren kann. Zur Durchführung der Evaluation muss zunächst definiert werden, welche Funktionen der einzelnen Programme miteinander verglichen werden können, da die Programme unterschiedliche Aspekte der Dokumentation überprüfen und die Darstellung der Ergebnisse im Vergleich zum  DocEvaluator abweicht.
+
+
+Im Gegensatz dazu verwendet der 
+
+Aus diesen Gründen wird die Evaluation nicht mit den Metriken an sich, sondern mit den Warnmeldungen der jeweiligen Tools durchgeführt. Jedes Programm wird mit einem Verweis auf das zu analysierende Projekt aufgerufen und die Ausgaben der Programme werden in separaten Dateien umgeleitet.  Diese Dateien dienen dann als Grundlage für die spätere Evaluation.

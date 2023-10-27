@@ -1,0 +1,2051 @@
+Start
+[0,0,0,0]
+\documentclass[a4paper,12pt,oneside, bibliography=totoc]
+{scrbook}
+\usepackage[utf8]{inputenc}
+\usepackage{pgf-umlcd}
+% Schrift und -kodierung
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{tcolorbox}
+% Sprache/Silbentrennung
+\usepackage[english]{babel} %TODO change to german if desired
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{floatflt}
+\usepackage{float}
+\usepackage{verbatim}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{pbox}
+\usepackage{algorithmic}
+\usepackage{algorithm}
+\usepackage{subcaption}
+\usepackage{siunitx}
+\usepackage[autostyle]{csquotes}
+\usepackage{todonotes}
+\usepackage{svg}
+\usepackage[page, title, titletoc, header]{appendix} %prettier appendix
+
+\svgpath{{../figures/}}
+
+\usepackage[printonlyused]{acronym}
+\usepackage{listings}
+%\usepackage{subfig}
+\lstset{xleftmargin=2em} %Proper indention of listings
+
+\widowpenalty10000
+\clubpenalty10000
+\usepackage{tabularx} %For tables
+\usepackage{csquotes} %For Quotes
+
+
+
+
+
+%Footnote Numbering not reset in new chapters
+\usepackage{chngcntr}
+\counterwithout{footnote}{chapter}
+
+
+%Remove last point after section/subsections
+\renewcommand{\autodot}{}
+
+\usepackage[htt]{hyphenat} %damit texttt noch Linebreaks mit Silbentrennung erzeugt
+\newcommand{\code}[1]{\texttt{#1}} %Programmcode im Textfluss in passendem Font ausgeben
+
+%Literatur
+%Ordering in references checken, vermutlich was mit style=numeric zu tun
+\usepackage[
+backend=biber,
+sorting= none,
+firstinits=true,
+date=long,
+urldate=long
+]{biblatex}
+\addbibresource{database.bib}
+%\addbibresource{literatur2.bib}
+
+
+\usepackage[]{hyperref}
+
+\begin{document}
+\frontmatter %roman page numbers
+
+
+
+
+
+\titlehead{
+\begin{center}
+\includegraphics[width=10cm]{figures/unilogo.pdf}\\
+Institute of Computer Science, Software Engineering Group
+\end{center}
+}
+\subject{Master Thesis: }
+\title{ Refactoring data clumps with the help of ChatGPT
+}
+\author{Timo Schoemaker\\ Immatriculation number: 978621} %engl. Matriculation Number
+
+\date{\today\\
+Advisor: Prof. Dr.-Ing. Elke Pulvermüller \\ %Deutsch: Erstebetreuer
+Co-Advisor: Nils Baumgartner, M. Sc.} %Deutsch: Zweitbetreuer
+
+\maketitle
+
+\clearpage
+
+\input{Misc/Abstract}
+input
+masterthesis/Misc/Abstract
+\addchap*{Abstract}
+\textbf{Deutsch}
+Die Softwaredokumentation ist ein essenzieller Bestandteil der heutigen Softwareentwicklung geworden. Nichtsdestotrotz leidet die Qualität der Dokumentation häufig und viele Entwickler sind nicht motiviert genug, um eine gute Dokumentation zu schreiben. Das Ziel dieser Arbeit ist es, ein Tool zu entwickeln, dass exemplarisch die Dokumentationsqualität in Java-Programmen analysiert und mittels verschiedener Metriken (Anteil dokumentierter Komponenten an allen Komponenten, Flesch-Score, Kohärenz und Nichterwähnung von Randfällen) bewertet. Dieses Tool ist in GitHub Actions eingebunden, um den Entwickler bei einer sehr schlechten Dokumentationsqualität zu warnen und gegebenenfalls Mergevorgänge zu verhindern.
+
+%\linebreak
+\bigskip
+
+\noindent
+%\bigskip
+\textbf{English}
+The software documentation has become an integral part of software development. Nevertheless, the quality of the documentation is often poor and developers are often not motivated to write good documentation. The goal of this thesis is to develop a tool that can analyze the documentation quality of Java applications by applying different metrics (percentage of documented components in all components, Flesch score, coherence, not mentioning the handling of edge cases). This tool will be integrated in GitHub Actions to warn the developer about poor software documentation quality and to prevent a merge if the quality becomes too poor.
+
+%TODO Bis jetzt nur Osi Abstract, evtl. etwas ausführlicher für Masterarbeit
+
+
+\clearpage
+
+\tableofcontents
+\clearpage
+
+
+
+
+
+
+\input{Misc/langDef}
+input
+masterthesis/Misc/langDef
+\lstdefinelanguage{YAML}{
+morekeywords=
+{
+name:,on:,jobs:,steps:,uses:,run:,echo,workflow_dispatch:,description:,inputs:,required:,default:,runs-on:,using:,main:,with:,author:, absolute_threshold:
+},
+keywordstyle=\color{black}\bfseries,
+ndkeywords={false,compf/JavaDocEvaluator@action},
+ndkeywordstyle=\color{black}\bfseries,
+identifierstyle=\color{black},
+sensitive=false,
+comment=[l]{//},
+morecomment=[s]{/*}{*/},
+commentstyle=\color{purple}\ttfamily,
+%stringstyle=\color{red}\ttfamily,
+morestring=[b]',
+morestring=[b]",
+alsodigit={:},
+alsoletter={/,@,-}
+}
+
+
+
+
+\lstdefinelanguage{ANTLR}{
+keywords=
+{
+formalParameter:,variableModifier:,typeType:,variableDeclaratorId:,JCOMMENT:
+},
+keywordstyle=\color{black}\itshape,
+identifierstyle=\color{black},
+sensitive=false,
+comment=[l]{//},
+morecomment=[s]{/*}{*/},
+commentstyle=\color{purple}\ttfamily,
+morestring=[b]',
+morestring=[b]",
+alsodigit={:},
+}
+
+\lstdefinelanguage{JSON}{
+tabsize             = 4,
+showstringspaces    = false,
+keywords            = {false,true,include,exclude,metrics,metric_name,weight,unique_name,params,absolute_threshold,builder,relative_threshold},
+alsoletter          = 0123456789.*,
+ndkeywordstyle         = \color{red},
+keywordstyle=\color{black}\bfseries,
+}
+
+
+
+
+
+\lstdefinelanguage{javascript}{
+keywords={typeof, new, true, false, catch, function, return, null, catch, switch, var, if, in, while, do, else, case, break,let,this,private},
+keywordstyle=\color{black}\bfseries,
+identifierstyle=\color{black},
+sensitive=true,
+comment=[l]{//},
+morecomment=[s]{/*}{*/},
+commentstyle=\color{purple}\ttfamily,
+stringstyle=\color{red}\ttfamily,
+morestring=[b]',
+morestring=[b]",
+}
+\input{Misc/Acronyms} %See inside for usage of acronmys
+input
+masterthesis/Misc/Acronyms
+%\ac{Abk.}         % fügt die Abkürzung ein, außer beim ersten Aufruf, hier wird die Erklärung mit angefügt
+%\acs{Abk.}        % fügt die Abkürzung ein
+%\acf{Abk.}        % fügt die Abkürzung UND die Erklärung ein
+%\acl{Abk.}        % fügt nur die Erklärung ein
+
+%\chapter*{Acronyms}
+\addchap{Abkürzungsverzeichnis}
+
+%%%%%%%%%%%%%%%%%%%%%%%
+\begin{acronym}[E/E/PE] %sorgt fuer proper indention
+\acro{API}{\emph{Application Programming Interface}}
+\acro{AST}{\emph{Abstract Syntax Tree}}
+\acro{ATL}{\emph{Atlas Transformation Language}}
+\acro{BMWi}{\emph{Bundesministerium für Wirtschaft und Energie}}
+\acro{CIM}{\emph{Computation-Independent Model}}
+\acro{CDC}{\emph{Code-level design choice}}
+\acro{CR}{\emph{Code-level requirement}}
+\acro{CI/CD}{\emph{Continuous Integration/Continuous Delivery}}
+\acro{CRC}{\emph{Cycling Redundancy Checks}}
+\acro{E/E/PE}{\emph{Electrical/Electronic/Programmable Electronic}}
+\acro{ECC}{\emph{Error Detecting and Correcting Codes}}
+\acro{EMF}{\emph{Eclipse Modeling Framework}}
+\acro{EGL}{\emph{Epsilon Generation Language}}
+\acro{EOL}{\emph{Epsilon Object Language}}
+\acro{HTML}{\emph{Hyper Text Markup Language}}
+\acro{Epsilon}{\emph{Extensible Platform of Integrated Languages for mOdel maNagement}}
+\acro{FS}{\emph{Functional Safety}}
+\acro{HAL}{\emph{Hardware Abstraction Layer}}
+\acro{HolMES}{\emph{Holistische Modell-getriebene Entwicklung für Eingebettete Systeme unter Berücksichtigung unterschiedlicher Hardware-Architekturen}}
+\acro{IDE}{\emph{Integrated Development Environment}}
+\acro{JSON}{\emph{JavaScript Object Notation}}
+\acro{JDT}{\emph{Java Development Tools}}
+
+\acro{LOC}{\emph{Lines of Code}}
+\acro{LM}{\emph{Language Model}}
+
+\acro{MISRA}{\emph{Motor Industry Software Reliability Association}}
+\acro{MBU}{\emph{Multi Bit Upset}}
+\acro{MDA}{\emph{Model Driven Architecture}}
+\acro{MDC}{\emph{Model-level design choice}}
+\acro{MDD}{\emph{Model Driven Development}}
+\acro{MDE}{\emph{Model Driven Engineering}}
+\acro{MOF}{\emph{Meta Object Facility}}
+\acro{MR}{\emph{Model-level requirement}}
+\acro{NLP}{\emph{Natural Language Processing}}
+\acro{OCL}{\emph{Object Constraint Language}}
+\acro{OMG}{\emph{Object Management Group}}
+\acro{PIM}{\emph{Platform-Independent Model}}
+\acro{PSM}{\emph{Platform-Specific Model}}
+\acro{SER}{\emph{Soft Error Rate}}
+\acro{SEU}{\emph{Single Event Upset}}
+\acro{TMR}{\emph{Triple Modular Redundancy}}
+\acro{UML}{\emph{Unified Modeling Language}}
+
+
+
+%\acro{cMOF}{\emph{complete MOF}}
+%\acro{eMOF}{\emph{essential MOF}}
+
+%	\acro{ETL}{\emph{Epsilon Transformation Language}}
+%	\acro{EWL}{\emph{Epsilon Wizard Language}}
+
+
+\end{acronym}
+\mainmatter %switch roman auf arabic page numbers
+
+
+
+\chapter{Introduction}
+[
+  'head',
+  'scrbook',
+  '% Schrift und -kodierung',
+  '% Sprache/Silbentrennung',
+  '',
+  '',
+  '%',
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
+  '%Footnote Numbering not reset in new chapters',
+  '',
+  '',
+  '%Remove last point after section/subsections',
+  '',
+  '',
+  '%Literatur',
+  '%Ordering in references checken, vermutlich was mit style=numeric zu tun',
+  'backend=biber,',
+  'sorting= none,',
+  'firstinits=true,',
+  'date=long,',
+  'urldate=long',
+  ']biblatex',
+  '%',
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
+  'Institute of Computer Science, Software Engineering Group',
+  '',
+  '',
+  '',
+  'Advisor: Prof. Dr.-Ing. Elke Pulvermüller ',
+  'Co-Advisor: Nils Baumgartner, M. Sc. %Deutsch: Zweitbetreuer',
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
+  ''
+] [ 1, 0, 0, 0 ]
+\setcounter{page}{1} %Seitenzahlen hier mit 1 anfangen
+
+%Include text from other files into the document --> great for structuring
+\input{Introduction/introduction}
+input
+masterthesis/Introduction/introduction
+\label{sec:introduction}
+\begin{comment}
+Ein wichtiger Bestandteil der Softwareentwicklung von heute ist die Softwaredokumentation. Dies liegt unter anderem daran, dass die Größe von Softwareprojekten steigt, sodass die Entwickler schnell den Überblick über das Projekt verlieren können und daher zusätzliche Informationen neben dem Code benötigen \cite[S.~1]{StaticAnalysis:AnIntroduction:TheFundamentalChallengeofSoftwareEngineeringisOneofComplexity.}. Nichtsdestotrotz wird die Softwaredokumentation von Entwicklern oft vernachlässigt \cite[S.~83]{Qualityanalysisofsourcecodecomments}.  Die Gründe für schlechte Dokumentation sind vielfältig. Das Schreiben der Dokumentation wird oft als mühevoll empfunden und erfordert Fähigkeiten, die ein Programmierer nicht zwangsläufig besitzt \cite[S.~70]{AutomaticQualityAssessmentofSourceCodeComments:TheJavadocMiner} \cite[S.~593]{Softwareengineeringandsoftwaredocumentation:aunifiedlongcourse}.
+
+Weitere Studien verdeutlichen die Problematik der mangelhaften Softwaredokumentation. So belegt eine Umfrage aus dem Jahr 2002 mit 48 Teilnehmern  beispielsweise, dass die Dokumentation  bei Änderungen am System  nur mit Verzögerung angepasst wird. Knapp 70~\% der Teilnehmer stimmen der Aussage zu, dass die Dokumentation immer veraltet ist.   \cite[S.~28--29]{TheRelevanceofSoftwareDocumentationToolsandTechnologies:ASurvey}
+
+Eine weitere Studie  \cite[S.~1199--1208]{SoftwareDocumentationIssuesUnveiled} aus dem Jahr 2019 verdeutlicht viele Aspekte aus der vorgenannten Umfrage. Es wurden dabei Daten aus Stack Overflow, GitHub-Issues, Pull-Requests und Mailing-Listen automatisiert heruntergeladen und dann von den Autoren analysiert, ob und inwieweit diese durch mangelhafte Softwaredokumentation verursacht wurden.  Die Studie belegt, dass von 824 Problemen, die etwas mit dem Thema \enquote{Softwaredokumentation} zu tun haben, 485 sich auf den Inhalt der Dokumentation beziehen (wie z.~B. unvollständige, veraltete oder sogar inkorrekte Dokumentation). Bei 255 Einträgen gab es Probleme mit der Struktur der Dokumentation, sodass beispielsweise Informationen schlecht auffindbar sind oder nicht gut verständlich sind.
+
+
+Eine andere Umfrage aus dem Jahr 2014 mit 88 Teilnehmern zeigt, dass eine automatisierte Überprüfung der Dokumentationsqualität von knapp der Hälfte der befragten Entwickler gewünscht wird. Die Autoren der Studie sehen dies als Zeichen dafür, dass ein grundsätzliches Bedürfnis zur automatisierten Bewertung von Dokumentationen besteht und daher weitere Studien notwendig sind. \cite[S.~340]{TheValueofSoftwareDocumentationQuality}
+
+Die mangelhafte Dokumentation führt dazu, dass nicht nur nachfolgende Entwickler Probleme mit dem Codeverständnis haben, sondern auch Entwickler eines Moduls nach einer längeren Pause Zeit aufbringen müssen, um den Code wieder zu verstehen \cite[S.~511]{vestdam}.  Auch für Kunden/Auftraggeber ist eine gute Dokumentation wichtig, da gut dokumentierte Software tendenziell besser wartbar ist und somit mehr Nutzen bringt \cite[S.~83]{Qualityanalysisofsourcecodecomments} \cite[S.~1]{SoftwareDocumentationManagementIssuesandPractices:ASurvey}.
+
+
+
+\section{Zielsetzung}
+[
+  '',
+  'Ein wichtiger Bestandteil der Softwareentwicklung von heute ist die Softwaredokumentation. Dies liegt unter anderem daran, dass die Größe von Softwareprojekten steigt, sodass die Entwickler schnell den Überblick über das Projekt verlieren können und daher zusätzliche Informationen neben dem Code benötigen   Die Gründe für schlechte Dokumentation sind vielfältig. Das Schreiben der Dokumentation wird oft als mühevoll empfunden und erfordert Fähigkeiten, die ein Programmierer nicht zwangsläufig besitzt ',
+  '',
+  'Weitere Studien verdeutlichen die Problematik der mangelhaften Softwaredokumentation. So belegt eine Umfrage aus dem Jahr 2002 mit 48 Teilnehmern  beispielsweise, dass die Dokumentation  bei Änderungen am System  nur mit Verzögerung angepasst wird. Knapp 70~',
+  '',
+  'Eine weitere Studie  zu tun haben, 485 sich auf den Inhalt der Dokumentation beziehen (wie z.~B. unvollständige, veraltete oder sogar inkorrekte Dokumentation). Bei 255 Einträgen gab es Probleme mit der Struktur der Dokumentation, sodass beispielsweise Informationen schlecht auffindbar sind oder nicht gut verständlich sind.',
+  '',
+  '',
+  'Eine andere Umfrage aus dem Jahr 2014 mit 88 Teilnehmern zeigt, dass eine automatisierte Überprüfung der Dokumentationsqualität von knapp der Hälfte der befragten Entwickler gewünscht wird. Die Autoren der Studie sehen dies als Zeichen dafür, dass ein grundsätzliches Bedürfnis zur automatisierten Bewertung von Dokumentationen besteht und daher weitere Studien notwendig sind. ',
+  '',
+  'Die mangelhafte Dokumentation führt dazu, dass nicht nur nachfolgende Entwickler Probleme mit dem Codeverständnis haben, sondern auch Entwickler eines Moduls nach einer längeren Pause Zeit aufbringen müssen, um den Code wieder zu verstehen ',
+  '',
+  '',
+  ''
+] [ 1, 1, 0, 0 ]
+Aufgrund der Relevanz von gut dokumentierter Software ist eine regelmäßige Rückmeldung über die Dokumentation von hoher Bedeutung. Spezielle Metriken, die eine numerische Auskunft über die Qualität der Softwaredokumentation liefern, sind eine Möglichkeit, diese Rückmeldung zu geben. Diese Metriken verschaffen dem Programmierer eine Einschätzung darüber, ob die Softwaredokumentation ausreichend ist oder eine Verbesserung sinnvoll wäre. Die Qualität der Softwaredokumentation kann auf unterschiedliche Art und Weise bewertet werden. So kann beispielsweise die bloße Existenz einer Dokumentation geprüft werden oder aber auch die Verständlichkeit der Dokumentation bewertet werden, daher kann es sinnvoll sein, mehrere Metriken zu verwenden \cite[S.~29]{pfleeger1992using}. Damit ein Entwickler einen Gesamtüberblick über die Dokumentationsqualität erhält, können diese Metriken kombiniert werden, um eine einzelne numerische Bewertung der Qualität der Dokumentation zu erhalten.
+Dabei ist es auch ratsam, die Metriken zu gewichten oder eine andere Methode zur Kombination der Metrikergebnisse zu benutzen, weil nicht jede Metrik die gleiche Zuverlässigkeit und Relevanz besitzt \cite[S.~1117ff.]{Softwarequalitymetricsaggregationinindustry}.
+
+Damit das Feedback über die Softwaredokumentation auch wahrgenommen wird, sollte die Qualität regelmäßig  überprüft werden. Dies kann automatisiert im \ac{CI/CD}-Prozess erfolgen, bei dem Software kontinuierlich getestet und für den Release (z.~dt. Veröffentlichung) vorbereitet werden kann. Durch CI/CD können Unternehmen effizienter und besser Software entwickeln. So konnte das Unternehmen \textit{ING NL} die gelieferten Function-Points vervierfachen und die Kosten für einen Function-Point auf einen Drittel reduzieren \cite[S.~520]{Vassallo2016}.
+
+\hfill
+
+Basierend auf diesen Überlegungen soll ein Tool (z.~dt. Werkzeug) entwickelt werden. Dieses Tool (im Folgenden auch \textit{DocEvaluator} soll ein gegebenes Software-Projekt analysieren und eine numerische Bewertung abgeben, die eine heuristische Aussage über die Qualität der Softwaredokumentation trifft.  Dabei soll das Tool primär für Javadoc und Java bis Version 8 konzipiert werden, allerdings soll während der Entwicklung auch darauf geachtet werden, dass eine Portierung auf eine andere Programmiersprache ermöglicht wird und die Bewertung der Dokumentation unabhängig von der Programmiersprache funktioniert. Außerdem wird zur Vereinfachung nur englischsprachige Dokumentationen betrachtet. Komplexe \ac{NLP}-Metriken sollen dabei außer Acht gelassen werden. Auch Verfahren, die  den  Quellcode mit der Dokumentation vergleichen, wie z.~B. \textit{iComment} in \cite[S.~145ff.]{icomment}, sollen unberücksichtigt bleiben, da sie im Rahmen dieser Bachelorarbeit zu komplex sind.
+
+Dabei sollte es nicht unbedingt das Ziel sein, dass jede Komponente dokumentiert ist, sondern dass die wichtigen Komponenten eine gute Dokumentationsqualität haben und somit die Wartung vereinfacht wird. Als Komponente im Sinne dieser Bachelorarbeit werden dabei Klassen, Schnittstellen, Methoden und Felder verstanden.
+
+Dieses Tool soll anschließend in den \ac{CI/CD}-Prozess eingebunden werden, sodass die Dokumentationsqualität kontinuierlich geprüft werden kann. Als \ac{CI/CD}-Plattform soll dabei \textit{GitHub Actions} \cite{GithubActions} verwendet werden, da GitHub von der Mehrzahl der Entwickler und großen Unternehmen verwendet wird \cite{github_popular}. Mittels GitHub Actions soll das Tool bei einer sehr schlechten Dokumentationsqualität den Entwickler auf diesen Umstand hinweisen, indem beispielsweise ein Merge (z.~dt. Verschmelzung) in GitHub verhindert wird. Auch bei einer deutlichen inkrementellen Verschlechterung der Qualität soll der Entwickler informiert werden, um so eine ausreichende Qualität der Dokumentation sicherzustellen.
+
+Ein Forschungsziel dieser Bachelorarbeit ist es zu prüfen, wie das Programm konzipiert werden muss, um mehrere Programmiersprachen zu unterstützen. Ein weiteres Ziel der Arbeit beschäftigt sich mit der Frage, wie die Ergebnisse der Metriken kombiniert werden können, um eine präzise Aussage über die Gesamtqualität der Dokumentation eines Softwareprojektes zu erhalten. Die Konzeption einer Architektur, mit der weitere Metriken hinzugefügt werden können und der Nutzer des Tools auswählen kann, welche Metriken bei der Bewertung der Dokumentationsqualität berücksichtigt werden sollen, soll ebenfalls als Forschungsziel untersucht werden. Zuletzt soll als Forschungsfrage diskutiert werden, welche Metriken eine heuristische Aussage über die Qualität der Dokumentation treffen können.
+
+
+\section{Gliederung}
+[
+  'Zielsetzung',
+  'Aufgrund der Relevanz von gut dokumentierter Software ist eine regelmäßige Rückmeldung über die Dokumentation von hoher Bedeutung. Spezielle Metriken, die eine numerische Auskunft über die Qualität der Softwaredokumentation liefern, sind eine Möglichkeit, diese Rückmeldung zu geben. Diese Metriken verschaffen dem Programmierer eine Einschätzung darüber, ob die Softwaredokumentation ausreichend ist oder eine Verbesserung sinnvoll wäre. Die Qualität der Softwaredokumentation kann auf unterschiedliche Art und Weise bewertet werden. So kann beispielsweise die bloße Existenz einer Dokumentation geprüft werden oder aber auch die Verständlichkeit der Dokumentation bewertet werden, daher kann es sinnvoll sein, mehrere Metriken zu verwenden ',
+  'Dabei ist es auch ratsam, die Metriken zu gewichten oder eine andere Methode zur Kombination der Metrikergebnisse zu benutzen, weil nicht jede Metrik die gleiche Zuverlässigkeit und Relevanz besitzt ',
+  '',
+  'Damit das Feedback über die Softwaredokumentation auch wahrgenommen wird, sollte die Qualität regelmäßig  überprüft werden. Dies kann automatisiert im die gelieferten Function-Points vervierfachen und die Kosten für einen Function-Point auf einen Drittel reduzieren ',
+  '',
+  '',
+  'Basierend auf diesen Überlegungen soll ein Tool (z.~dt. Werkzeug) entwickelt werden. Dieses Tool (im Folgenden auch  DocEvaluator soll ein gegebenes Software-Projekt analysieren und eine numerische Bewertung abgeben, die eine heuristische Aussage über die Qualität der Softwaredokumentation trifft.  Dabei soll das Tool primär für Javadoc und Java bis Version 8 konzipiert werden, allerdings soll während der Entwicklung auch darauf geachtet werden, dass eine Portierung auf eine andere Programmiersprache ermöglicht wird und die Bewertung der Dokumentation unabhängig von der Programmiersprache funktioniert. Außerdem wird zur Vereinfachung nur englischsprachige Dokumentationen betrachtet. Komplexe Metriken sollen dabei außer Acht gelassen werden. Auch Verfahren, die  den  Quellcode mit der Dokumentation vergleichen, wie z.~B. in  sollen unberücksichtigt bleiben, da sie im Rahmen dieser Bachelorarbeit zu komplex sind.',
+  '',
+  'Dabei sollte es nicht unbedingt das Ziel sein, dass jede Komponente dokumentiert ist, sondern dass die wichtigen Komponenten eine gute Dokumentationsqualität haben und somit die Wartung vereinfacht wird. Als Komponente im Sinne dieser Bachelorarbeit werden dabei Klassen, Schnittstellen, Methoden und Felder verstanden.',
+  '',
+  'Dieses Tool soll anschließend in den Plattform soll dabei  {GitHub Actions} verwendet werden, da GitHub von der Mehrzahl der Entwickler und großen Unternehmen verwendet wird  Mittels GitHub Actions soll das Tool bei einer sehr schlechten Dokumentationsqualität den Entwickler auf diesen Umstand hinweisen, indem beispielsweise ein Merge (z.~dt. Verschmelzung) in GitHub verhindert wird. Auch bei einer deutlichen inkrementellen Verschlechterung der Qualität soll der Entwickler informiert werden, um so eine ausreichende Qualität der Dokumentation sicherzustellen.',
+  '',
+  'Ein Forschungsziel dieser Bachelorarbeit ist es zu prüfen, wie das Programm konzipiert werden muss, um mehrere Programmiersprachen zu unterstützen. Ein weiteres Ziel der Arbeit beschäftigt sich mit der Frage, wie die Ergebnisse der Metriken kombiniert werden können, um eine präzise Aussage über die Gesamtqualität der Dokumentation eines Softwareprojektes zu erhalten. Die Konzeption einer Architektur, mit der weitere Metriken hinzugefügt werden können und der Nutzer des Tools auswählen kann, welche Metriken bei der Bewertung der Dokumentationsqualität berücksichtigt werden sollen, soll ebenfalls als Forschungsziel untersucht werden. Zuletzt soll als Forschungsfrage diskutiert werden, welche Metriken eine heuristische Aussage über die Qualität der Dokumentation treffen können.',
+  '',
+  ''
+] [ 1, 2, 0, 0 ]
+In Kapitel \ref{sec:background} werden die wichtigen Grundlagen über die Themen dieser Bachelorarbeit erläutert. Dazu  wird zunächst der Begriff Softwaredokumentation definiert und ein Bezug zu Code-Smells hergestellt. Mittels Javadoc wird dann erläutert, wie Software dokumentiert werden kann. Anschließend wird eine Einführung in GitHub Actions gegeben.  Zudem wird eine Einführung in ANTLR4 gegeben, das für das Parsing der Quellcodedateien in Java verwendet wird. Zuletzt werden einige wissenschaftliche Arbeiten mit vergleichbaren Zielsetzungen präsentiert und Tools vorgestellt, die ebenfalls die Qualität der Softwaredokumentation bewerten können.
+
+In Kapitel \ref{chapter_conception} werden die Fragestellungen besprochen, die sich beim Design des Tools ergeben haben. Dazu gehören die notwendigen Objekte und ihre Interaktion untereinander und wie von einer losen Ansammlung von Dateien zu einer Bewertung der Softwaredokumentation gelangt werden kann.
+
+In Kapitel \ref{chapter:program} wird anschließend erläutert, wie aus dieser Konzeption ein vollständiges Programm entwickelt wird. Dazu wird erläutert, wie das Programm in GitHub Action eingebunden werden kann. Im Anschluss daran wird ein Überblick über die implementierten Metriken mit ihren Vor- und Nachteilen gegeben. Außerdem werden die Algorithmen bzw. Verfahren erläutert, um die Ergebnisse der einzelnen Metriken zu einem Gesamtergebnis zu aggregieren.
+
+In Kapitel \ref{sec:evaluation} wird das Programm dann mit ähnlichen Tools verglichen, indem beispielhafte Java-Projekte aus GitHub mit allen Programmen analysiert werden und die Geschwindigkeit und die Qualität jedes Programmes ermittelt wird.
+
+Im abschließenden Kapitel wird der Inhalt der Arbeit zusammengefasst und ein Fazit gezogen. Es werden offengebliebene Fragen beleuchtet und ein Ausblick gegeben, welche Möglichkeiten zur Verbesserung des Tools sinnvoll wären.
+\end{comment}
+\begingroup
+\renewcommand{\cleardoublepage}{} % TODO maybe removing this and next
+\renewcommand{\clearpage}{}
+\chapter{Background}\label{chapter:background}
+[
+  'Introduction',
+  '',
+  '%Include text from other files into the document --> great for structuring'
+] [ 2, 0, 0, 0 ]
+\endgroup
+
+%Multiple input files for larger chapters are also possible
+\input{Background/grundlagen}
+input
+masterthesis/Background/grundlagen
+In this chapter, the background of data clumps will be discussed. A formal definition of data clumps will be presented (\ref{sec:data_clumps_def}. ChatGPT will be discussed in section \ref{sec:chatgpt}. Also, there will be a discussion of the data clump type context format.
+
+\section{Data clumps}\label{sec:sec:data_clump_def}
+[
+  '',
+  'In this chapter, the background of data clumps will be discussed. A formal definition of data clumps will be presented ( Also, there will be a discussion of the data clump type context format.',
+  ''
+] [ 2, 1, 0, 0 ]
+The term \enquote{Data Clump} was coined by Martin Fowler in as one possible code smell that can occur in source code. He describes data clumps as follows:
+
+\begin{displayquote}
+Data items tend to be like children: They enjoy hanging around together.  around in groups. Often you will see
+the same three or four data items together in lots of
+places: fields in a couple of classes, parameters in many
+method signatures. \cite{fowler2019refactoring}
+\end{displayquote}
+
+This definition is somewhat imprecise. It is not specified whether three or four data items are necessary. Also \enquote{a couple of classes} and \enquote{in many method signatures} do not define concrete numbers.
+
+A more precise and algorithmic  definition of \enquote{data clumps} is provided by \cite{zhangImprovingPrecisionFowler2008}. According to them, a data clump  can be defined on the field or method-parameter levels.
+To be a method parameter data clump, a group of at least three variables must appear in multiple methods. Those variables must be duplicated, meaning they share the same name and data type. However, the inner order of the group does not need to be the same.
+
+These conditions often need to be more relaxed. For instance, methods can be inherited and overridden so that a group of parameters may appear in each derived class thereby fulfilling the definition of a method parameter data clump. Since (except for the identifiers of the parameters) an overriding method must be the same as the overridden method, they are not considered data clumps.
+
+To be a field data clump, similar conditions apply. There must be at least three fields that appear in more than one class and the names and data types of the variables must the same while the inner order may be different. Since in most programming language, a field can have an additional access modifier (e.g. \textit{private}, \textit{static} etc. ), the access modifier should also be included to determine whether two groups of variables are identical and hence a data clump.
+
+The definition might also need to be more relaxed for both method and field data clumps. Two variables, that have the same name but a compatible type in at least one direction  (e.g. \textit{int} and  \textit{double}), would be disregarded as a data clump according to the formalized definition, although some would regard them a data clump.
+
+Also, modification of a variable's identifier might not change its meaning. For instance, typos can happen, or synonyms can be used so that an automatic algorithm might not discover the connection of two variables but requires  knowledge of the semantics of the source code. \cite{zhangImprovingPrecisionFowler2008}
+
+
+To conclude, the core definition of a data clump is clear. However, this definition still leaves out some edge cases that require a semantic understanding of the source code.
+
+An example of a data clump is shown in listing \ref{lst:math_stuff_java}
+\begin{figure} [htbp!]
+[ '\t\t\t[caption', '{Some operations on vectors},' ]
+0
+label={lst:math_stuff_java},
+captionpos=b,language=java, basicstyle=\footnotesize, tabsize=2, showstringspaces=false,  numbers=left]
+{figures/chapter3/MathStuff.java}
+\end{figure}
+
+
+
+Listing \ref{lst:math_stuff_java} contains three method that execute some vector operations (calculation of length, sum of coordinates, and the maximum coordinate). T
+
+
+It can be seen that  the snippet contains a method parameter data clump since the variables \textit{x}, \textit{y}, and  \textit{z} occur thrice.  These variables might be called \textbf{data clump items}
+
+\subsection{Refactoring data clumps}
+[
+  'Data clumps',
+  'The term  Data Clump was coined by Martin Fowler in as one possible code smell that can occur in source code. He describes data clumps as follows:',
+  '',
+  'Data items tend to be like children: They enjoy hanging around together.  around in groups. Often you will see',
+  'the same three or four data items together in lots of',
+  'places: fields in a couple of classes, parameters in many',
+  'method signatures. ',
+  '',
+  'This definition is somewhat imprecise. It is not specified whether three or four data items are necessary. Also  a couple of classes and do not define concrete numbers.',
+  '',
+  'A more precise and algorithmic  definition of  data clumps is provided by  According to them, a data clump  can be defined on the field or method-parameter levels.',
+  'To be a method parameter data clump, a group of at least three variables must appear in multiple methods. Those variables must be duplicated, meaning they share the same name and data type. However, the inner order of the group does not need to be the same.',
+  '',
+  'These conditions often need to be more relaxed. For instance, methods can be inherited and overridden so that a group of parameters may appear in each derived class thereby fulfilling the definition of a method parameter data clump. Since (except for the identifiers of the parameters) an overriding method must be the same as the overridden method, they are not considered data clumps.',
+  '',
+  'To be a field data clump, similar conditions apply. There must be at least three fields that appear in more than one class and the names and data types of the variables must the same while the inner order may be different. Since in most programming language, a field can have an additional access modifier (e.g.  private, etc. ), the access modifier should also be included to determine whether two groups of variables are identical and hence a data clump.',
+  '',
+  'The definition might also need to be more relaxed for both method and field data clumps. Two variables, that have the same name but a compatible type in at least one direction  (e.g.  int and  , would be disregarded as a data clump according to the formalized definition, although some would regard them a data clump.',
+  '',
+  "Also, modification of a variable's identifier might not change its meaning. For instance, typos can happen, or synonyms can be used so that an automatic algorithm might not discover the connection of two variables but requires  knowledge of the semantics of the source code. ",
+  '',
+  '',
+  'To conclude, the core definition of a data clump is clear. However, this definition still leaves out some edge cases that require a semantic understanding of the source code.',
+  '',
+  'An example of a data clump is shown in listing ',
+  'undefinedSome operations on vectorsundefined,',
+  'label=lst:math_stuff_java,',
+  'captionpos=b,language=java, basicstyle=',
+  'figures/chapter3/MathStuff.java',
+  '',
+  '',
+  '',
+  'Listing ',
+  '',
+  '',
+  'It can be seen that  the snippet contains a method parameter data clump since the variables  x,  and  occur thrice.  These variables might be called  {data clump items}',
+  ''
+] [ 2, 1, 1, 0 ]
+Fowler suggests three steps to refactor a data clump
+\begin{enumerate}
+\item \textbf{Extract Class} Create a class with fields for each data clump item
+\item \textbf{Introduce Parameter Object} Change signature of the methods so that instead of the individual data clump items, the newly created class is used.
+\item \textbf{Preserve Whole Object} Refactor the source code so that whereever the refactored method in step 2 is used, a new object of the class in step 1 is created and provided instead of the individual data clump items.
+\end{enumerate}
+
+
+To illustrate the suggested data clump refactoring process, listing \ref{lst:math_usaer_java} shows how the methods in \ref{lst:math_stuff_java} can be used.
+
+
+\begin{figure} [htbp!]
+[ '\t\t\t[caption', '{Some operations on vectors},' ]
+0
+label={lst:math_user_java},
+captionpos=b,language=java, basicstyle=\footnotesize, tabsize=2, showstringspaces=false,  numbers=left]
+{figures/chapter3/MathUser.java}
+\end{figure}
+
+In the first step, a new class can be extracted which contains all data clump items as field. It should also contain setters and getters to access the fields in an encapsulated manner. The class should be named so that its purpose is clear. Listing \ref{lst:coordinate_java} shows how such a class may look like.
+
+\begin{figure} [htbp!]
+[ '\t\t\t[caption', '{ Resulting Coordinate class},' ]
+0
+label={lst:coordinate_java},
+captionpos=b,language=java, basicstyle=\footnotesize, tabsize=2, showstringspaces=false,  numbers=left]
+{figures/chapter3/Coordinate.java}
+\end{figure}
+
+
+
+
+\section{ChatGPT}
+[
+  'Refactoring data clumps',
+  'Fowler suggests three steps to refactor a data clump',
+  '',
+  '',
+  'To illustrate the suggested data clump refactoring process, listing can be used.',
+  '',
+  '',
+  'undefinedSome operations on vectorsundefined,',
+  'label=lst:math_user_java,',
+  'captionpos=b,language=java, basicstyle=',
+  'figures/chapter3/MathUser.java',
+  '',
+  'In the first step, a new class can be extracted which contains all data clump items as field. It should also contain setters and getters to access the fields in an encapsulated manner. The class should be named so that its purpose is clear. Listing ',
+  '',
+  'undefined Resulting Coordinate classundefined,',
+  'label=lst:coordinate_java,',
+  'captionpos=b,language=java, basicstyle=',
+  'figures/chapter3/Coordinate.java',
+  '',
+  '',
+  '',
+  ''
+] [ 2, 2, 0, 0 ]
+
+ChatGPT \cite{ChatGPT_url} is a \ac{LM} developed by OpenAI and released in November 2022. As a \ac{LM}, ChatGPT can interpret queries submitted by users and return a appropriate response.
+
+A query can be a question or a prompt directing ChatGPT to answer a question or provide some output. The range of topics ChatGPT can helkp with is basically not limited. For instance, ChatGPT can help with topics in math, history, politics, or coding. ChatGPT can also understand programming language and therefore help developers to code.  Since September 2023, ChatGPT can also process images \cite{ChatGPT_image}. However, it must be noted that ChatGPT may not always provide accurate responses since it is, in the end, just a language model without knowledge about what the inherent meaning of its responses are.
+
+The usage of ChatGPT is nevertheless somewhat restricted. For instance, content that may be regarded as hate speech or that may be used for illegal purposes will be supressed.
+
+Another important feature of ChatGPT is the ability to store conversations. A conservation is a collection of queries and linked responses that have been sent to ChatGPT. Using conversations, a user can refer to a previous query or response in a later query. For instance, if ChatGPT made a mistake or interpreted a query in a wrong way, a user can send another request that can point out the mistake or give more context, thereby helping ChatGPT to auto correct itself.
+
+
+
+
+\input{Main/konzeption}
+input
+masterthesis/Main/konzeption
+\begingroup
+\renewcommand{\cleardoublepage}{} % TODO maybe removing this and next
+\renewcommand{\clearpage}{}
+\chapter{Concept}\label{chapter_conception}
+[ '' ] [ 3, 0, 0, 0 ]
+\endgroup
+This chapter deals with  the concept of the program. It provides information about the processing pipeline (\ref{chapter:pipeline} and how the different parts of that pipelines can be modelled in a way that allows easy extension.
+
+
+\hfill
+\section{Pipeline}\label{chapter:pipeline}
+[
+  'Concept',
+  'This chapter deals with  the concept of the program. It provides information about the processing pipeline (',
+  '',
+  ''
+] [ 3, 1, 0, 0 ]
+In order to find and refactor data clumps automatically, a certain sequence of steps has to be respected. Most steps of this sequence are required to be in a specific order because they rely information extracted in a previous step or the quality of the results (which might me needed by subsequent steps) would get worse. In the following subsections, these steps will be outlined:
+
+\subsection{Detecting data clumps}\label{subsec:chap3_data_clump_detection}
+[
+  'Pipeline',
+  'In order to find and refactor data clumps automatically, a certain sequence of steps has to be respected. Most steps of this sequence are required to be in a specific order because they rely information extracted in a previous step or the quality of the results (which might me needed by subsequent steps) would get worse. In the following subsections, these steps will be outlined:',
+  ''
+] [ 3, 1, 1, 0 ]
+It is easily agreeable that data clumps cannot be fixed unless they have been found previously. Therefore, one of the first step of the pipeline must be the detection of data clumps.
+
+The data clump detection process itself can be further divided into sub steps.
+\subsubsection{Filtering}\label{subsub:filtering_files}
+[
+  'Detecting data clumps',
+  'It is easily agreeable that data clumps cannot be fixed unless they have been found previously. Therefore, one of the first step of the pipeline must be the detection of data clumps.',
+  '',
+  'The data clump detection process itself can be further divided into sub steps.'
+] [ 3, 1, 1, 1 ]
+First of all, all files of the programming language needs do detected. Usually, there are specific file extensions (e.g. \textit{.java}) for a source code file which simplifies the finding of files. It also for software project to have a root folder that contains all source code files. Therefore, one can recursively iterate through all files and directories of a given root folder that have a matching extension.
+
+However, not every source code file might be analyzed for data clumps. For instance, parts of the projects must not be refactored or a refactorization would be too time-consuming. As outlined in chapter \ref{sec:introduction}, the cost for detection of data clumps might be too high. Therefore, filtering rules might be necessary to reduce the size of the relevant files for the subsequent steps.
+
+\subsubsection{Extraction of AST}
+[
+  'Filtering',
+  'First of all, all files of the programming language needs do detected. Usually, there are specific file extensions (e.g.  .java) for a source code file which simplifies the finding of files. It also for software project to have a root folder that contains all source code files. Therefore, one can recursively iterate through all files and directories of a given root folder that have a matching extension.',
+  '',
+  'However, not every source code file might be analyzed for data clumps. For instance, parts of the projects must not be refactored or a refactorization would be too time-consuming. As outlined in chapter ',
+  ''
+] [ 3, 1, 1, 2 ]
+Then,  the source code needs to be simplified as comments, the method bodies, and other language parts are not relevant for detecting data clumps. This could be achieved by extracting a subset of the \ac{AST} from the source code which includes all the relevant information. to identify data clumps.
+\subsubsection{Similarity detection}
+[
+  'Extraction of AST',
+  'Then,  the source code needs to be simplified as comments, the method bodies, and other language parts are not relevant for detecting data clumps. This could be achieved by extracting a subset of the '
+] [ 3, 1, 1, 3 ]
+
+The next step is about finding pairs of method parameters and pairs of m´fields that are identical or at least similar.  For this, the identifier and the  data type  can be compared. Unequal variable names might not rule out a similarity between two variables. For instance, typos may happen or synonyms may be used. Also the type might be different. For instance, the data type \textit{double} can be seen as a super set of the datatype \textit{int} because every 32-bit integer can be converted tó a \textit{double}.
+
+From this, a graph can be constructed that visualizes the relationship of the several variables. A node represent a parameter or field value while an edge exists if and only if a relationship between two variables was detected.
+
+\subsubsection{Data clump detection}
+[
+  'Similarity detection',
+  '',
+  'The next step is about finding pairs of method parameters and pairs of m´fields that are identical or at least similar.  For this, the identifier and the  data type  can be compared. Unequal variable names might not rule out a similarity between two variables. For instance, typos may happen or synonyms may be used. Also the type might be different. For instance, the data type  double can be seen as a super set of the datatype because every 32-bit integer can be converted tó a ',
+  '',
+  'From this, a graph can be constructed that visualizes the relationship of the several variables. A node represent a parameter or field value while an edge exists if and only if a relationship between two variables was detected.',
+  ''
+] [ 3, 1, 1, 4 ]
+After similar variables have been been detected, it must be determined whether a cluster of variables that are deemed similar, are in fact a data clump. Here, the rules from section \ref{sec:data_clump_def} can be used. However, defining own rules can lead to better results so that  here flexibility is important too.
+
+\subsection{Data clump filtering or prioritization}
+[
+  'Data clump detection',
+  'After similar variables have been been detected, it must be determined whether a cluster of variables that are deemed similar, are in fact a data clump. Here, the rules from section ',
+  ''
+] [ 3, 1, 2, 0 ]
+In section \ref{subsub:filtering_files}, a filtering by files is performed. However, even if many data clumps were detected, they do not need always to be refactored. One can decide to ignore certain data clumps and refactor them later or even never.
+
+There can be many reasons for this approach. For instance, parts of the source code that are infrequently updated might be too risky for refactoring since any automatic tool might cause bugs or invalid code that is hard to fix because the developers are not familiar with this part of the source code. On the contrary, a part of the source code that is updated more frequently might be in an intermittent state so that refactoring is currently not recommendable. Also as noted in section  \ref{subsub:filtering_files}, if a service like ChatGPT is used, the cost of transferring many source code files with data clumps might be too high.
+
+Therefore, it can be suggested to filter out certain data clumps that are considered not worthy of refactoring.
+
+\subsection{Name finding}\label{subsec:chap3_data_clump_name_finding}
+[
+  'Data clump filtering or prioritization',
+  'In section ',
+  '',
+  'There can be many reasons for this approach. For instance, parts of the source code that are infrequently updated might be too risky for refactoring since any automatic tool might cause bugs or invalid code that is hard to fix because the developers are not familiar with this part of the source code. On the contrary, a part of the source code that is updated more frequently might be in an intermittent state so that refactoring is currently not recommendable. Also as noted in section  ',
+  '',
+  'Therefore, it can be suggested to filter out certain data clumps that are considered not worthy of refactoring.',
+  ''
+] [ 3, 1, 3, 0 ]
+The next step of the pipeline is to find a suitable identifier of the extracted class.
+
+There are some criteria for this identifier. It should be a valid name in the respective programming language so that in general only alphanumerical characters may be chosen. It should not be  in conflict with other identifiers as it may lead to bugs or compiler errors, and it should be readable and as best as feasible represent the fields of the class.
+
+Hence, the name finding is a complex process that requires domain knowledge and creativity if the resulting name is to be accepted. .
+Since English is the predominate language of of identifiers, it will be assumed that only English identifiers will be used.
+
+
+\subsection{Class Extraction}\label{subsec:chap3_data_class_extraction})
+[
+  'Name finding',
+  'The next step of the pipeline is to find a suitable identifier of the extracted class.',
+  '',
+  'There are some criteria for this identifier. It should be a valid name in the respective programming language so that in general only alphanumerical characters may be chosen. It should not be  in conflict with other identifiers as it may lead to bugs or compiler errors, and it should be readable and as best as feasible represent the fields of the class.',
+  '',
+  'Hence, the name finding is a complex process that requires domain knowledge and creativity if the resulting name is to be accepted. .',
+  'Since English is the predominate language of of identifiers, it will be assumed that only English identifiers will be used.',
+  '',
+  ''
+] [ 3, 1, 4, 0 ]
+After a class name has been found, a respective class can be added to the source code. This class will be used as a replacement  for the data clump variables or parameters.
+
+In contrast to the previous step of the pipeline, this process can be automated more straightforwardly because it does not require creativity and a general template can be used, that is:
+\begin{itemize}
+\item Create a private field for each variable of the data clump
+\item Create a public getter for each variable of the data clump. This getter may be named get\textit{Var} where \textit{Var} is replaced by the capitalized name of the variable. The method returns the value of the respective field
+\item Similarly, a setter set\textit{Var} may be created that has no return type, accepts a new value as a parameter, and sets the respective field.
+\item A constructor may be created that initialized the fields with provided values or with default values.
+\end{itemize}
+
+Additionally, methods for converting a object to a string or creating a hash code may be useful, but these methods are usually not required for the refactoring of data clumps.
+
+\subsection{Example}
+[
+  'Class Extraction',
+  'After a class name has been found, a respective class can be added to the source code. This class will be used as a replacement  for the data clump variables or parameters.',
+  '',
+  'In contrast to the previous step of the pipeline, this process can be automated more straightforwardly because it does not require creativity and a general template can be used, that is:',
+  '',
+  'Additionally, methods for converting a object to a string or creating a hash code may be useful, but these methods are usually not required for the refactoring of data clumps.',
+  ''
+] [ 3, 1, 5, 0 ]
+Listing \ref{lst:math_stuff_java} will be used a the foundation to describe a detailed approach for fixing data clumps.
+
+Looking at the parameters \textit{x}, \textit{y}, and \textit{z}, there are multiple suggestions for a class name. The most trivial one is a simple concatenation  (e.g. \textit{XYZ} or \textit{X\_Y\_Z}). However, this name is often not suitable as it can be hard to read and to understand its meaning.
+
+A more suitable approach requires domain knowledgwe. It is common knowledge, that the terms \textit{x}, \textit{y}, and \textit{z} are terms used in math to describe coordinates. using this information, a s fitting name could be \textit{Coordinate}. Simple methods would not have discovered this name as artificial or human intelligence is required.
+
+\subsubsection{Class Extraction} (see \ref{subsec:chap3_data_class_extraction}))
+[
+  'Example',
+  'Listing ',
+  '',
+  'Looking at the parameters  x,  and  there are multiple suggestions for a class name. The most trivial one is a simple concatenation  (e.g. or . However, this name is often not suitable as it can be hard to read and to understand its meaning.',
+  '',
+  'A more suitable approach requires domain knowledgwe. It is common knowledge, that the terms  x,  and are terms used in math to describe coordinates. using this information, a s fitting name could be  Simple methods would not have discovered this name as artificial or human intelligence is required.',
+  ''
+] [ 3, 1, 5, 1 ]
+
+Since a suitable class name has been found, the following class can be created with the information obtained previously.
+
+Listing \ref{lst:coordinate_java} shows an example implemtation of a coordinate class. This class contains fields, getters, and setters, for all method parameters. There is also a constructor for initialization.
+
+
+
+
+\hfill
+
+\input{Main/umsetzung}
+input
+masterthesis/Main/umsetzung
+\begin{comment}
+\begingroup
+\renewcommand{\cleardoublepage}{} % TODO maybe removing this and next
+\renewcommand{\clearpage}{}
+\chapter{Umsetzung}\label{chapter:program}
+[ '' ] [ 3, 0, 0, 0 ]
+\endgroup
+In diesem Kapitel wird auf die Umsetzung der in Kapitel \ref{chapter_conception} beschriebenen Architektur eingegangen. In Kapitel \ref{chapter:tool_running} wird zunächst erläutert, wie das Programm konkret ausgeführt wird, um die Dokumentationsqualität zu ermitteln. Danach wird in Kapitel \ref{chapter:traversing} beschrieben, wie das Programm die einzelnen Java-Dateien findet, damit diese weiterverarbeitet werden können.  Außerdem wird in Kapitel \ref{chapter:antlr4_impl} erläutert, wie ANTLR4 verwendet wird, um Java-Dateien zu parsen. Daraufhin wird erklärt, wie die strukturierten Kommentare geparst werden (Kapitel \ref{chapter:comment_parsing}).  In Kapitel \ref{chapter:conf} wird die Konfiguration des Tools erläutert. Um auch einen Vergleich zwischen den aktuellen und den vorherigen Zustand der Dokumentationsqualität zu ermöglichen, wird in Kapitel \ref{chapter:saving} beschrieben, wie das letzte Ergebnis der Bewertung gespeichert werden kann. In Kapitel \ref{chapter:github_actions_impl} wird erklärt, wie das Programm in GitHub Actions eingebunden wird und wie es so genutzt werden kann. Zum Abschluss werden in Kapitel \ref{chapter:metrics} und \ref{chapter:algos_aggregation} die implementierten Metriken und die implementierten Aggregationsalgorithmen erläutert.
+
+
+\hfill
+\section{Ausführung des Programms}\label{chapter:tool_running}
+[
+  'Umsetzung',
+  'In diesem Kapitel wird auf die Umsetzung der in Kapitel wird zunächst erläutert, wie das Programm konkret ausgeführt wird, um die Dokumentationsqualität zu ermitteln. Danach wird in Kapitel beschrieben, wie das Programm die einzelnen Java-Dateien findet, damit diese weiterverarbeitet werden können.  Außerdem wird in Kapitel erläutert, wie ANTLR4 verwendet wird, um Java-Dateien zu parsen. Daraufhin wird erklärt, wie die strukturierten Kommentare geparst werden (Kapitel .  In Kapitel wird die Konfiguration des Tools erläutert. Um auch einen Vergleich zwischen den aktuellen und den vorherigen Zustand der Dokumentationsqualität zu ermöglichen, wird in Kapitel beschrieben, wie das letzte Ergebnis der Bewertung gespeichert werden kann. In Kapitel wird erklärt, wie das Programm in GitHub Actions eingebunden wird und wie es so genutzt werden kann. Zum Abschluss werden in Kapitel und die implementierten Metriken und die implementierten Aggregationsalgorithmen erläutert.',
+  '',
+  ''
+] [ 3, 1, 0, 0 ]
+In diesem Unterabschnitt wird beschrieben, wie das Programm die in Kapitel \ref{chapter_conception}
+beschriebenen Arbeitspakete nutzt, um die Qualität der Softwaredokumentation zu bewerten.
+
+Die Koordination des Programms wird in der Datei \enquote{index.ts} durchgeführt, die als Einstiegspunkt des Programms verstanden werden kann. In dieser Datei werden die einzelnen Module des Programms in der richtigen Reihenfolge aufgerufen und die Ergebnisse eines Moduls werden durch die \enquote{index.ts}-Datei an das folgende Modul/Arbeitspaket übergeben, soweit sie dort benötigt werden. Dadurch sind die Module voneinander entkoppelt und greifen nicht direkt aufeinander zu.
+
+Im ersten Schritt  muss die Konfiguration des Programms geladen werden. Dazu wird das Arbeitsverzeichnis von der Kommandozeile gelesen. Basierend auf das Arbeitsverzeichnis kann dann die Konfiguration des Tools geladen werden, wie es in Kapitel \ref{chapter:conf} beschrieben ist.
+
+Anschließend müssen einige Objekte  initialisiert werden. Hierzu werden die Werte aus der Konfiguration (z.~B. der Konfigurationsdatei) verwendet. Beispielsweise kann durch \textit{builder} der Algorithmus festgelegt werden, der die Einzelergebnisse der einzelnen Metriken zu einem Gesamtresultat kombiniert. Dazu wird eine Fabrikmethode verwendet, da damit die Konstruktion eines Objektes aus einer Zeichenkette möglich ist und somit der Anwender in der Konfiguration nur eine bestimmte Zeichenkette oder ID zur Konstruktion eines komplexeren Objektes angeben muss \cite[S.~149--161]{gamma2015design}. Zudem werden die Metriken, die zur Analyse verwendet werden sollen, durch den Metrikmanager registriert.
+
+Außerdem wird eine assoziative Liste für die Dateien und die Metriken erstellt, die einem eindeutigen Metriknamen bzw. einem Wildcard-Pattern einer Datei ein Gewicht zuordnet. Diese Liste kann einem \textit{WeightResolver} übergeben werden, der wiederum dem  \textit{MetricResultBuilder} übergeben wird. Falls dieser keine Gewichtung benötigt, werden diese Informationen ignoriert.
+
+Danach müssen die relevanten Dateien gefunden werden. Dazu werden dem Traversierer (siehe Kapitel \ref{chapter:traversing}) die Wildcard-Patterns der zu inkludierenden Dateien und der auszuschließenden Dateien übergeben. Mit der Methode \textit{getRelevantFiles} werden dann alle relevanten Dateien zurückgegeben.
+
+In nächsten Schritt muss jede Datei mit jeder Metrik geprüft werden und die Ergebnisse gesammelt werden. Hierzu wird eine verschachtelte For-Schleife verwendet. Dabei gibt es zwei Möglichkeiten zur Verschachtelung. Im ersten Fall könnte in der äußeren Schleife jede Datei und in der inneren jede Metrik durchlaufen werden. Alternativ könnte auch die innere und äußere Schleife vertauscht werden. Der erste Ansatz hat den Vorteil, dass jede Datei nur einmal geladen werden muss, was einen Geschwindigkeitsvorteil bringen kann, deshalb wird dieses Verfahren auch gewählt. Pro Iteration der inneren Schleife wird die aktuelle Datei von der jeweiligen Metrik analysiert und alle gefundenen Metrikresultate, die von den einzelnen Komponenten der Datei stammen, zu einem \textit{MetricResultBuilder} hinzugefügt.
+
+Nach Abschluss der beiden Schleifen steht das Ergebnis durch Aggregation der Resultate in dem \textit{MetricResultBuilder} zur Verfügung und kann genutzt werden, um die Qualität der Dokumentation mit dem Grenzwert bzw. dem letzten Wert zu vergleichen. Wird bei diesem Vergleich festgestellt, dass die Dokumentationsqualität nicht ausreichend ist, wird eine Ausnahme geworfen und das Programm bricht ab. Wird das Programm mittels GitHub Actions ausgeführt, so kann durch diese Ausnahme ein Merge verhindert werden.
+
+Die Abbildungen \ref{fig:passed} und \ref{fig:absolute} im Anhang \ref{chapter:pictures_tool} visualisieren die Ausgabe des Programmes bei einer ausreichenden bzw. mangelhaften Dokumentationsqualität.
+
+\section{Traversierung aller relevanten Dateien und der Komponenten}\label{chapter:traversing}
+[
+  'Ausführung des Programms',
+  'In diesem Unterabschnitt wird beschrieben, wie das Programm die in Kapitel ',
+  'beschriebenen Arbeitspakete nutzt, um die Qualität der Softwaredokumentation zu bewerten.',
+  '',
+  'Die Koordination des Programms wird in der Datei  index.ts durchgeführt, die als Einstiegspunkt des Programms verstanden werden kann. In dieser Datei werden die einzelnen Module des Programms in der richtigen Reihenfolge aufgerufen und die Ergebnisse eines Moduls werden durch die Datei an das folgende Modul/Arbeitspaket übergeben, soweit sie dort benötigt werden. Dadurch sind die Module voneinander entkoppelt und greifen nicht direkt aufeinander zu.',
+  '',
+  'Im ersten Schritt  muss die Konfiguration des Programms geladen werden. Dazu wird das Arbeitsverzeichnis von der Kommandozeile gelesen. Basierend auf das Arbeitsverzeichnis kann dann die Konfiguration des Tools geladen werden, wie es in Kapitel ',
+  '',
+  'Anschließend müssen einige Objekte  initialisiert werden. Hierzu werden die Werte aus der Konfiguration (z.~B. der Konfigurationsdatei) verwendet. Beispielsweise kann durch  builder der Algorithmus festgelegt werden, der die Einzelergebnisse der einzelnen Metriken zu einem Gesamtresultat kombiniert. Dazu wird eine Fabrikmethode verwendet, da damit die Konstruktion eines Objektes aus einer Zeichenkette möglich ist und somit der Anwender in der Konfiguration nur eine bestimmte Zeichenkette oder ID zur Konstruktion eines komplexeren Objektes angeben muss  Zudem werden die Metriken, die zur Analyse verwendet werden sollen, durch den Metrikmanager registriert.',
+  '',
+  'Außerdem wird eine assoziative Liste für die Dateien und die Metriken erstellt, die einem eindeutigen Metriknamen bzw. einem Wildcard-Pattern einer Datei ein Gewicht zuordnet. Diese Liste kann einem  WeightResolver übergeben werden, der wiederum dem  übergeben wird. Falls dieser keine Gewichtung benötigt, werden diese Informationen ignoriert.',
+  '',
+  'Danach müssen die relevanten Dateien gefunden werden. Dazu werden dem Traversierer (siehe Kapitel werden dann alle relevanten Dateien zurückgegeben.',
+  '',
+  'In nächsten Schritt muss jede Datei mit jeder Metrik geprüft werden und die Ergebnisse gesammelt werden. Hierzu wird eine verschachtelte For-Schleife verwendet. Dabei gibt es zwei Möglichkeiten zur Verschachtelung. Im ersten Fall könnte in der äußeren Schleife jede Datei und in der inneren jede Metrik durchlaufen werden. Alternativ könnte auch die innere und äußere Schleife vertauscht werden. Der erste Ansatz hat den Vorteil, dass jede Datei nur einmal geladen werden muss, was einen Geschwindigkeitsvorteil bringen kann, deshalb wird dieses Verfahren auch gewählt. Pro Iteration der inneren Schleife wird die aktuelle Datei von der jeweiligen Metrik analysiert und alle gefundenen Metrikresultate, die von den einzelnen Komponenten der Datei stammen, zu einem  MetricResultBuilder hinzugefügt.',
+  '',
+  'Nach Abschluss der beiden Schleifen steht das Ergebnis durch Aggregation der Resultate in dem  MetricResultBuilder zur Verfügung und kann genutzt werden, um die Qualität der Dokumentation mit dem Grenzwert bzw. dem letzten Wert zu vergleichen. Wird bei diesem Vergleich festgestellt, dass die Dokumentationsqualität nicht ausreichend ist, wird eine Ausnahme geworfen und das Programm bricht ab. Wird das Programm mittels GitHub Actions ausgeführt, so kann durch diese Ausnahme ein Merge verhindert werden.',
+  '',
+  'Die Abbildungen im Anhang visualisieren die Ausgabe des Programmes bei einer ausreichenden bzw. mangelhaften Dokumentationsqualität.',
+  ''
+] [ 3, 2, 0, 0 ]
+Softwareprojekte bestehen aus Hunderten von Dateien, die nicht alle Quellcode enthalten. Beispielsweise gehören Konfigurationsdateien, Ressourcendateien wie Bilder oder binäre Dateien zu den Dateien, bei denen eine Analyse der Softwaredokumentation im Hinblick auf die begrenzte Zeit für die Bachelorarbeit nicht implementierbar ist. Daher ist es sinnvoll, bestimmte Dateien bei der Analyse auszuschließen beziehungsweise nur bestimmte Dateien zu betrachten. Bei einer Weiterentwicklung des Tools nach Abschluss der Bachelorarbeit kann das Tool auf andere Dateitypen ausgeweitet werden, um so ein besseres Gesamtbild über die Softwaredokumentation zu erhalten.
+
+Um die relevanten Dateien zu finden, wird zunächst ein übergeordnetes Verzeichnis benötigt, was bei Softwareprojekten aber der Standard sein sollte. Dieses Verzeichnis kann dann rekursiv durchlaufen werden und somit die Liste aller darin gespeicherten Dateien abgerufen werden. Die relevanten Dateien können dann durch Überprüfung ihres Dateinamens mittels bestimmter Regeln ermittelt werden, die der Benutzer des Tools festlegen kann.
+
+Beim DocEvaluator wird hierzu die NPM-Bibliothek \textit{Minimatch} \cite{Minimatch} verwendet, die es ermöglicht, Dateinamen mit Wildcard-Patterns zu vergleichen. Zum Beispiel könnte der Dateiname \enquote{test.txt} mit der Wildcard \enquote{test.*} verglichen werden und die Bibliothek würde eine Übereinstimmung melden.
+
+Auch die Komponenten einer Datei müssen traversiert werden, damit bei jeder Komponente die Dokumentation überprüft werden kann. Da die Komponenten wie in Kapitel \ref{chapter:parsing} beschrieben rekursiv aufgebaut sind, kann dies mittels einer Tiefensuche durchgeführt werden.
+
+\subsubsection{Ignorieren bestimmter Kommentare}
+[
+  'Traversierung aller relevanten Dateien und der Komponenten',
+  'Softwareprojekte bestehen aus Hunderten von Dateien, die nicht alle Quellcode enthalten. Beispielsweise gehören Konfigurationsdateien, Ressourcendateien wie Bilder oder binäre Dateien zu den Dateien, bei denen eine Analyse der Softwaredokumentation im Hinblick auf die begrenzte Zeit für die Bachelorarbeit nicht implementierbar ist. Daher ist es sinnvoll, bestimmte Dateien bei der Analyse auszuschließen beziehungsweise nur bestimmte Dateien zu betrachten. Bei einer Weiterentwicklung des Tools nach Abschluss der Bachelorarbeit kann das Tool auf andere Dateitypen ausgeweitet werden, um so ein besseres Gesamtbild über die Softwaredokumentation zu erhalten.',
+  '',
+  'Um die relevanten Dateien zu finden, wird zunächst ein übergeordnetes Verzeichnis benötigt, was bei Softwareprojekten aber der Standard sein sollte. Dieses Verzeichnis kann dann rekursiv durchlaufen werden und somit die Liste aller darin gespeicherten Dateien abgerufen werden. Die relevanten Dateien können dann durch Überprüfung ihres Dateinamens mittels bestimmter Regeln ermittelt werden, die der Benutzer des Tools festlegen kann.',
+  '',
+  'Beim DocEvaluator wird hierzu die NPM-Bibliothek  Minimatch verwendet, die es ermöglicht, Dateinamen mit Wildcard-Patterns zu vergleichen. Zum Beispiel könnte der Dateiname  {test.txt} mit der Wildcard verglichen werden und die Bibliothek würde eine Übereinstimmung melden.',
+  '',
+  'Auch die Komponenten einer Datei müssen traversiert werden, damit bei jeder Komponente die Dokumentation überprüft werden kann. Da die Komponenten wie in Kapitel ',
+  ''
+] [ 3, 2, 0, 1 ]
+
+Unter Umständen kann es sinnvoll sein, bestimmte Komponenten bei der Bewertung auszulassen, weil sie beispielsweise noch nicht vollständig implementiert sind, in einer nicht-englischen Sprache dokumentiert sind oder ein anderer gewichtiger Grund existiert. Für diesen Fall kann die allgemeine Beschreibung der Dokumentation einer Komponente  den Begriff \enquote{\%ignore\_this\%} oder \enquote{\%ignore\_node\%} enthalten. Bei Ersterem wird nur diese Komponente ignoriert und als nicht existent betrachtet. Bei Zweiterem werden sowohl diese Komponente als auch alle Kinder dieser Komponente ignoriert, sofern sie existieren.
+
+
+
+
+\section{Implementierung von ANTLR4 für Java}\label{chapter:antlr4_impl}
+[
+  'Ignorieren bestimmter Kommentare',
+  '',
+  'Unter Umständen kann es sinnvoll sein, bestimmte Komponenten bei der Bewertung auszulassen, weil sie beispielsweise noch nicht vollständig implementiert sind, in einer nicht-englischen Sprache dokumentiert sind oder ein anderer gewichtiger Grund existiert. Für diesen Fall kann die allgemeine Beschreibung der Dokumentation einer Komponente  den Begriff  enthalten. Bei Ersterem wird nur diese Komponente ignoriert und als nicht existent betrachtet. Bei Zweiterem werden sowohl diese Komponente als auch alle Kinder dieser Komponente ignoriert, sofern sie existieren.',
+  '',
+  '',
+  '',
+  ''
+] [ 3, 3, 0, 0 ]
+
+Für die Programmiersprache Java steht eine ANTLR4-Grammatik, die auf GitHub unter der BSD-Lizenz angeboten wird, zur Verfügung \cite{ANTLRgrammarforjava}, allerdings ignoriert diese Grammatik alle Kommentare. Daher müssen einige Änderungen sowohl am Lexer als auch am Parser vorgenommen werden. Im Lexer werden standardmäßig alle Tokens aus einem Kommentar in einem versteckten Kanal gespeichert, was dazu führt, dass diese Tokens vom Parser ignoriert werden. Um dieses Problem zu lösen, wird das Verhalten durch Definition eines neuen Tokens so geändert, dass Javadoc-Kommentare auch vom Parser verarbeitet werden können, aber mehrzeilige und einzeilige Kommentare weiterhin ignoriert werden. Einzeilige Kommentare sind hier nicht relevant, da sie kein Javadoc enthalten.
+
+Mehrzeilige Kommentare könnten theoretisch auch berücksichtigt werden, da einige Entwickler diese anstelle von Javadoc benutzen. Allerdings werden solche mehrzeiligen Kommentare vor Komponenten nicht von Tools erkannt und haben daher einen geringeren, aber durchaus vorhandenen Nutzen \cite[S.~4]{HowDocumentationEvolvesoverTime}. Deshalb werden Komponenten, die zwar mit mehrzeiligen Kommentaren, aber nicht mit Javadoc dokumentiert sind, wie undokumentierte Komponenten betrachtet. Für einen Entwickler sollte es so schnell möglich sein, solche nicht korrekt dokumentierten Komponenten zu identifizieren und deren mehrzeilige Kommentare in gültige Javadoc-Kommentare umzuwandeln und so die Qualität der Dokumentation zu erhöhen. Für andere Programmiersprachen können jedoch normale mehrzeilige wie strukturierte Kommentare betrachtet werden, wenn dies für sinnvollerer erachtet wird.
+
+Mehr Änderungen müssen an der entsprechenden Parser-Datei \enquote{JavaParser.g4} durchgeführt werden.  Da diese Änderungen für die eigentliche Thematik dieser Bachelorarbeit nur eine untergeordnete Rolle spielen, wird hier nicht jede Änderung genauer erklärt. Tabelle \ref{tab:parser_changes} im Anhang \ref{chapter:appendix_parser_changes} listet alle Änderungen an der Parserdatei auf. Die geänderte Parserdatei und das Original befinden sich auch im digitalen Anhang im Verzeichnis \enquote{parser\_changes}.
+
+Um die Informationen aus einer Java-Datei mittels ANTLR4 zu verarbeiten, kann das Visitor-Pattern verwendet werden \cite[S.~400ff.]{gamma2015design}. Mit einem Visitor kann die Baumstruktur, die ANTLR4 erstellt hat, traversiert werden, damit so nur die notwendigen Informationen herausgefiltert werden. Andere Informationen (wie z.~B. Conditional-Branches) können so ignoriert werden.
+\begin{figure} [htbp!]
+[ '\t\t\t[caption', '{Codeauschnitt aus  Methoden-Visitor},' ]
+0
+label={lst:visit_method_example},
+captionpos=b,language=javascript, basicstyle=\footnotesize, tabsize=2, showstringspaces=false,  numbers=left]
+{figures/chapter4/visit_method_example.js}
+\end{figure}
+Listing \ref{lst:visit_method_example} zeigt einen Ausschnitt vom Visitor für Methodendeklarationen aus dem Quellcode des Tools. Hier ist die Baumstruktur leicht sichtbar. Alle Einzelbestandteile einer Methode wie z. B. Bezeichner, Rückgabetyp etc. sind Kindknoten des \textit{RuleContext} und können über die Methode \textit{getChild} abgerufen werden. So werden sowohl der Bezeichner als auch der Rückgabetyp direkt als Text abgerufen. Diese  beiden Bestandteile bestehen wiederum auch aus weiteren Kindknoten, doch eine weitergehende Betrachtung ist nicht nötig, da nur die Bezeichnung als Zeichenkette benötigt wird. Andere Bestandteile wie die Methodenparameter sind jedoch komplexer, deswegen werden sie von separaten Visitors betrachtet.
+
+\section{Parsen der strukturierten Kommentare}\label{chapter:comment_parsing}
+[
+  'Implementierung von ANTLR4 für Java',
+  '',
+  'Für die Programmiersprache Java steht eine ANTLR4-Grammatik, die auf GitHub unter der BSD-Lizenz angeboten wird, zur Verfügung ',
+  '',
+  'Mehrzeilige Kommentare könnten theoretisch auch berücksichtigt werden, da einige Entwickler diese anstelle von Javadoc benutzen. Allerdings werden solche mehrzeiligen Kommentare vor Komponenten nicht von Tools erkannt und haben daher einen geringeren, aber durchaus vorhandenen Nutzen ',
+  '',
+  'Mehr Änderungen müssen an der entsprechenden Parser-Datei  JavaParser.g4 durchgeführt werden.  Da diese Änderungen für die eigentliche Thematik dieser Bachelorarbeit nur eine untergeordnete Rolle spielen, wird hier nicht jede Änderung genauer erklärt. Tabelle im Anhang listet alle Änderungen an der Parserdatei auf. Die geänderte Parserdatei und das Original befinden sich auch im digitalen Anhang im Verzeichnis ',
+  '',
+  'Um die Informationen aus einer Java-Datei mittels ANTLR4 zu verarbeiten, kann das Visitor-Pattern verwendet werden ',
+  'undefinedCodeauschnitt aus  Methoden-Visitorundefined,',
+  'label=lst:visit_method_example,',
+  'captionpos=b,language=javascript, basicstyle=',
+  'figures/chapter4/visit_method_example.js',
+  'Listing und können über die Methode abgerufen werden. So werden sowohl der Bezeichner als auch der Rückgabetyp direkt als Text abgerufen. Diese  beiden Bestandteile bestehen wiederum auch aus weiteren Kindknoten, doch eine weitergehende Betrachtung ist nicht nötig, da nur die Bezeichnung als Zeichenkette benötigt wird. Andere Bestandteile wie die Methodenparameter sind jedoch komplexer, deswegen werden sie von separaten Visitors betrachtet.',
+  ''
+] [ 3, 4, 0, 0 ]
+Um die strukturierten Kommentare in das Format nach Kapitel \ref{chapter:structured_comments} zu bringen, wird eine simple Heuristik verwendet. Es werden so viele Zeilen als allgemeine Beschreibung betrachtet, bis eine Zeile auftaucht, die mit einem Tag wie z.~B. \enquote{@param} beginnt, der den allgemeinen Teil beendet.
+
+Anschließend werden diese Tags verarbeitet. Benötigt ein Tag einen Parameter, so wird die Zeile in drei Teilen an den Leerzeichen aufgetrennt. Dabei ist der erste Teil der Typ des Tags, der zweite Teil der Parameter und der Rest (mit allen übrigen Leerzeichen) die Beschreibung des Tags.
+Bei einem Tag ohne Parameter wird die Zeile in zwei Teile getrennt, wobei hier der erste Teil der Typ des Tags und der letzte Teil die Beschreibung ist.
+
+Diese Heuristik sollte die gängigsten Javadoc-Blöcke verarbeiten können. Alternativ könnte auch ANTLR4 Javadoc parsen. Allerdings ist dies aufgrund der Mischung von natürlicher Sprache und der relativen Flexibilität von Javadoc nicht trivial und wird daher nicht implementiert.
+
+
+
+\section{Konfiguration des Tools}\label{chapter:conf}
+[
+  'Parsen der strukturierten Kommentare',
+  'Um die strukturierten Kommentare in das Format nach Kapitel beginnt, der den allgemeinen Teil beendet.',
+  '',
+  'Anschließend werden diese Tags verarbeitet. Benötigt ein Tag einen Parameter, so wird die Zeile in drei Teilen an den Leerzeichen aufgetrennt. Dabei ist der erste Teil der Typ des Tags, der zweite Teil der Parameter und der Rest (mit allen übrigen Leerzeichen) die Beschreibung des Tags.',
+  'Bei einem Tag ohne Parameter wird die Zeile in zwei Teile getrennt, wobei hier der erste Teil der Typ des Tags und der letzte Teil die Beschreibung ist.',
+  '',
+  'Diese Heuristik sollte die gängigsten Javadoc-Blöcke verarbeiten können. Alternativ könnte auch ANTLR4 Javadoc parsen. Allerdings ist dies aufgrund der Mischung von natürlicher Sprache und der relativen Flexibilität von Javadoc nicht trivial und wird daher nicht implementiert.',
+  '',
+  '',
+  ''
+] [ 3, 5, 0, 0 ]
+Zur Nutzung des Tools werden bestimmte Informationen benötigt, die aus verschiedenen Quellen bezogen werden. Zunächst benötigt das Tool den Pfad, der die Quelldateien enthält, die nach Kapitel \ref{chapter:traversing} traversiert werden sollen. Dieser wird als namenloser Parameter über die Kommandozeile übergeben. Er ist optional, da bei dessen Fehlen das aktuelle Arbeitsverzeichnis genommen wird. Die weiteren Informationen werden aus zwei Quellen bezogen. Wenn beide Quellen fehlen, werden Standardwerte genommen. Die erste Quelle ist eine \ac{JSON}-Datei namens \mbox{\enquote{comment\_conf.json}}, welche die notwendigen Daten für die Arbeit des Programms enthält. Listing \ref{lst:example_conf} zeigt eine beispielhafte Konfigurationsdatei im \ac{JSON}-Format.
+
+\begin{figure}[htbp]
+[ '[caption', '{Beispielhafte Konfigurationsdatei für das Tool},' ]
+0
+label={lst:example_conf},
+captionpos=b, basicstyle=\footnotesize, tabsize=2, showstringspaces=false,  numbers=left,language=JSON]
+{figures/chapter4/example_conf.json}
+\end{figure}
+
+In dieser Beispieldatei  werden alle Dateien mit der Dateiendung \enquote{.java} bei der Traversierung betrachtet (Z. 1). Außerdem werden dabei keine Dateien bei der Traversierung ausgeschlossen (Z. 2). Diese beiden Werte entsprechend dabei ihre Standardwerte. Sie könnten also bei dieser Konfigurationsdatei weggelassen werden und das Programmverhalten würde sich nicht ändern.
+
+Anschließend (Z. 4--11) werden die zu verwendenden Metriken definiert. Jede Metrik besitzt einen \textit{metric\_name}, der den Typ der Metrik spezifiziert. In Zeile 6 wäre dies beispielhaft die Metrik \enquote{Anteil der dokumentierten Komponenten an allen Komponenten} (vgl. Kapitel \ref{chapter:metrics_coverage}). Anhang  \ref{appendix_metrics} beschreibt alle implementierten Metriken mit ihren Namen. Diese Namen werden vom Metrikmanager dazu genutzt, um die passende Klasse zu finden und so ein Metrikobjekt zu erzeugen. Außerdem erhält jede Metrik durch \textit{unique\_name} einen eindeutigen Namen (hier z.~B. \enquote{m1}). Dieser kann auch weggelassen werden. Dann wird der eindeutige Name aus dem Namen der Metrik und einer fortlaufenden Nummerierung erzeugt. Zudem besitzt jede Metrik das Attribut \textit{weight}, welches zur Bestimmung der Relevanz bzw. des Gewichts der Metrik dient und von einem \textit{MetricResultBuilder} zur Bestimmung eines Gesamtergebnisses benutzt werden kann. Ein \textit{MetricResultBuilder}, der keine Gewichtung der Metriken benötigt, wird diese Information ignorieren. Das Gewicht ist ebenfalls optional. Bei dessen Fehlen wird das Gewicht \enquote{1} eingesetzt.  Durch \textit{params}  werden der Metrik die Parameter übergeben, die sie benötigt. Die genaue Anzahl und Struktur der Parameter hängen von der jeweiligen Metrik ab. Fehlen diese Parameter, so werden standardmäßige Parameter verwendet.
+
+Fehlt der Eintrag \enquote{metrics}, so werden alle implementierten Metriken mit ihren Standardwerten genommen.
+
+Als Nächstes (Z. 12) wird der Schwellwert festgelegt. Dieser Wert legt fest, ob das Programm beim Unterschreiten dieses Wertes mit einer Fehlermeldung abbrechen soll. In Zeile 13 wird der \textit{MetricResultBuilder} festgelegt, der bestimmt, wie die Einzelergebnisse aggregiert werden. In dem Beispiel werden alle Teilresultate mittels eines gewichteten Mittelwertes zu einem Gesamtergebnis aggregiert.  In Zeile 14 wird durch \mbox{\textit{ relative\_threshold }} festgelegt, um wie viel sich die Dokumentationsqualität verschlechtern muss, damit ebenfalls eine Fehlermeldung erscheint. Dies wird in Kapitel \ref{chapter:saving} genauer erläutert.
+
+
+
+\bigskip
+Die zweite Quelle für die Informationen sind die Eingabeparameter aus GitHub Actions. Dazu wird, wie in Kapitel \ref{chapter:github_actions_impl} beschrieben, jeder Parameter aus der \ac{JSON}-Datei auch in der \enquote{action.yml}-Datei übernommen. Bei der Ausführung des Programms stehen diese Eingabedaten über Umgebungsvariablen bereit. Jede Umgebungsvariable beginnt mit der Zeichenkette \enquote{INPUT\_}, anschließend folgt der Name des entsprechenden Parameters (wie in der \ac{JSON}-Datei), wobei der Name allerdings komplett in Großbuchstaben geschrieben ist. So steht  \enquote{absolute\_threshold} als \enquote{INPUT\_ABSOLUTE\_THRESHOLD} zur Verfügung.
+
+Da es durchaus sein kann, dass sowohl eine Konfigurationsdatei existiert als auch die Umgebungsvariablen gesetzt sind, muss klar festgelegt werden, welcher Wert eines Parameters am Ende genommen wird. Bei dem Tool haben die von GitHub Actions erzeugten Umgebungsvariablen  Vorrang, da das Tool für die Verwendung in GitHub Actions konzipiert wurde.  Die Auflistung im Anhang \ref{enum:tool_javadoc_conf} listet alle Parameter des Tools nochmals auf und erläutert sie zusätzlich.
+
+
+\section{Speicherung des letzten Ergebnisses}\label{chapter:saving}
+[
+  'Konfiguration des Tools',
+  'Zur Nutzung des Tools werden bestimmte Informationen benötigt, die aus verschiedenen Quellen bezogen werden. Zunächst benötigt das Tool den Pfad, der die Quelldateien enthält, die nach Kapitel Datei namens , welche die notwendigen Daten für die Arbeit des Programms enthält. Listing zeigt eine beispielhafte Konfigurationsdatei im Format.',
+  '',
+  'undefinedBeispielhafte Konfigurationsdatei für das Toolundefined,',
+  'label=lst:example_conf,',
+  'captionpos=b, basicstyle=',
+  'figures/chapter4/example_conf.json',
+  '',
+  'In dieser Beispieldatei  werden alle Dateien mit der Dateiendung  .java bei der Traversierung betrachtet (Z. 1). Außerdem werden dabei keine Dateien bei der Traversierung ausgeschlossen (Z. 2). Diese beiden Werte entsprechend dabei ihre Standardwerte. Sie könnten also bei dieser Konfigurationsdatei weggelassen werden und das Programmverhalten würde sich nicht ändern.',
+  '',
+  'Anschließend (Z. 4--11) werden die zu verwendenden Metriken definiert. Jede Metrik besitzt einen  metric(vgl. Kapitel . Anhang  beschreibt alle implementierten Metriken mit ihren Namen. Diese Namen werden vom Metrikmanager dazu genutzt, um die passende Klasse zu finden und so ein Metrikobjekt zu erzeugen. Außerdem erhält jede Metrik durch einen eindeutigen Namen (hier z.~B. . Dieser kann auch weggelassen werden. Dann wird der eindeutige Name aus dem Namen der Metrik und einer fortlaufenden Nummerierung erzeugt. Zudem besitzt jede Metrik das Attribut  welches zur Bestimmung der Relevanz bzw. des Gewichts der Metrik dient und von einem zur Bestimmung eines Gesamtergebnisses benutzt werden kann. Ein  der keine Gewichtung der Metriken benötigt, wird diese Information ignorieren. Das Gewicht ist ebenfalls optional. Bei dessen Fehlen wird das Gewicht eingesetzt.  Durch  werden der Metrik die Parameter übergeben, die sie benötigt. Die genaue Anzahl und Struktur der Parameter hängen von der jeweiligen Metrik ab. Fehlen diese Parameter, so werden standardmäßige Parameter verwendet.',
+  '',
+  'Fehlt der Eintrag  metrics, so werden alle implementierten Metriken mit ihren Standardwerten genommen.',
+  '',
+  'Als Nächstes (Z. 12) wird der Schwellwert festgelegt. Dieser Wert legt fest, ob das Programm beim Unterschreiten dieses Wertes mit einer Fehlermeldung abbrechen soll. In Zeile 13 wird der  MetricResultBuilder festgelegt, der bestimmt, wie die Einzelergebnisse aggregiert werden. In dem Beispiel werden alle Teilresultate mittels eines gewichteten Mittelwertes zu einem Gesamtergebnis aggregiert.  In Zeile 14 wird durch  festgelegt, um wie viel sich die Dokumentationsqualität verschlechtern muss, damit ebenfalls eine Fehlermeldung erscheint. Dies wird in Kapitel genauer erläutert.',
+  '',
+  '',
+  '',
+  'Die zweite Quelle für die Informationen sind die Eingabeparameter aus GitHub Actions. Dazu wird, wie in Kapitel Datei auch in der  {action.yml}-Datei übernommen. Bei der Ausführung des Programms stehen diese Eingabedaten über Umgebungsvariablen bereit. Jede Umgebungsvariable beginnt mit der Zeichenkette  anschließend folgt der Name des entsprechenden Parameters (wie in der Datei), wobei der Name allerdings komplett in Großbuchstaben geschrieben ist. So steht  als zur Verfügung.',
+  '',
+  'Da es durchaus sein kann, dass sowohl eine Konfigurationsdatei existiert als auch die Umgebungsvariablen gesetzt sind, muss klar festgelegt werden, welcher Wert eines Parameters am Ende genommen wird. Bei dem Tool haben die von GitHub Actions erzeugten Umgebungsvariablen  Vorrang, da das Tool für die Verwendung in GitHub Actions konzipiert wurde.  Die Auflistung im Anhang ',
+  '',
+  ''
+] [ 3, 6, 0, 0 ]
+Neben der bereits erwähnten Möglichkeit, einen absoluten Grenzwert für die Dokumentationsqualität zu definieren, ist auch ein inkrementeller Vergleich interessant. Dabei wird das Ergebnis der Dokumentationsqualität zwischengespeichert. Bei einem neuen Start des Tools kann das alte Ergebnis mit dem neuen Ergebnis verglichen werden. Verschlechtert sich das Ergebnis über einen gewissen Schwellwert hinaus, so sollte der Entwickler ebenfalls gewarnt werden, selbst wenn die Dokumentationsqualität noch über der absoluten Grenze liegt. Schließlich kann dies ein Trend sein, der zum baldigen Unterschreiten des absoluten Grenzwertes führen kann.
+
+Der Ort zur Speicherung des letzten Wertes ist dabei flexibel. Standardmäßig wird der Wert in einer Datei namens \enquote{.evaluator\_last\_state.txt} gespeichert. Falls das Programm im Kontext von GitHub Actions ausgeführt wird, sollte allerdings beachtet werden, dass diese Datei nach der Beendigung des Workflows gelöscht wird. Dieses Problem kann dadurch gelöst werden, dass die geänderte Datei im Repository des zu analysierenden Projektes hochgeladen wird. Dies kann beispielsweise mit dem Tool \textit{Add \& Commit} \cite{add_commit} erledigt werden. Nachteilhaft ist an diesem Vorgehen allerdings, dass hierdurch in dem Commit-Verlauf automatisierte Commits erscheinen, sodass der Überblick verloren gehen kann.  Eine weitere Möglichkeit zur Speicherung des Wertes wäre es, den Wert an einen externen Server zu senden und bei einem erneuten Start diesen Wert abzurufen.
+
+
+\section{Einbindung in GitHub Actions}\label{chapter:github_actions_impl}
+[
+  'Speicherung des letzten Ergebnisses',
+  'Neben der bereits erwähnten Möglichkeit, einen absoluten Grenzwert für die Dokumentationsqualität zu definieren, ist auch ein inkrementeller Vergleich interessant. Dabei wird das Ergebnis der Dokumentationsqualität zwischengespeichert. Bei einem neuen Start des Tools kann das alte Ergebnis mit dem neuen Ergebnis verglichen werden. Verschlechtert sich das Ergebnis über einen gewissen Schwellwert hinaus, so sollte der Entwickler ebenfalls gewarnt werden, selbst wenn die Dokumentationsqualität noch über der absoluten Grenze liegt. Schließlich kann dies ein Trend sein, der zum baldigen Unterschreiten des absoluten Grenzwertes führen kann.',
+  '',
+  'Der Ort zur Speicherung des letzten Wertes ist dabei flexibel. Standardmäßig wird der Wert in einer Datei namens  .evaluatorerledigt werden. Nachteilhaft ist an diesem Vorgehen allerdings, dass hierdurch in dem Commit-Verlauf automatisierte Commits erscheinen, sodass der Überblick verloren gehen kann.  Eine weitere Möglichkeit zur Speicherung des Wertes wäre es, den Wert an einen externen Server zu senden und bei einem erneuten Start diesen Wert abzurufen.',
+  '',
+  ''
+] [ 3, 7, 0, 0 ]
+Um das Tool in GitHub Actions einzubinden, müssen einige Schritte erfolgen. Zunächst muss eine \enquote{action.yaml} geschrieben werden, die das GitHub-Repository als Aktion markiert und die notwendigen Befehle für die Ausführung enthält. Listing  \ref{lst:action} zeigt einen beispielhaften Code der Action. Zur Übersichtlichkeit wird in diesem Listing nur ein Eingabeparameter definiert. Die restlichen Eingabeparameter werden im Programm analog definiert.
+\begin{figure} [htbp]
+[ '[caption', '{Beispielhafte Action-Datei für das Tool},' ]
+0
+label={lst:action},
+captionpos=b, basicstyle=\footnotesize, tabsize=2, showstringspaces=false,  numbers=left,language=YAML]
+{figures/chapter4/action.yml}
+\end{figure}
+
+In den ersten beiden Zeilen werden Attribute wie der Name und eine Beschreibung gesetzt. Danach (Z. 4--7) wird der Eingabeparameter für die minimal erlaubte Bewertung für die Dokumentationsqualität definiert, damit dieser von den Nutzern der Aktion verändert werden kann. In den Zeilen 8 bis 10 ist der wichtige Programmcode enthalten, in denen die Aktion als JavaScript-Aktion mit der Node-Version 16 festgelegt wird. Zudem enthält die letzte Zeile auch den Pfad zur Quellcodedatei, mit dem das Programm gestartet werden soll.
+
+\bigskip
+Eine JavaScript-Aktion in GitHub Actions benötigt JavaScript, sodass der TypeScript-Code des Tools erst in JavaScript umgewandelt werden muss. Damit das Programm bei der Veröffentlichung einer neuen Version in einen auslieferbaren Zustand gebracht werden kann, wird ein weiterer Workflow benötigt, der bei jedem Push in dem Main-Zweig folgende Schritte ausführt:
+\begin{enumerate}
+\item Klonen des Main-Branch des Repositorys (wie bei den meisten anderen Workflows)
+\item Aufruf von TSC, Konvertierung des TypeScript-Codes in JavaScript
+\item Aufruf und Benutzung von \textit{NCC} \cite{ncc}. Packen aller JavaScript-Dateien in einer einzigen Datei
+\item Kopieren der generierten Datei, die den gesamten Quellcode enthält, und der \enquote{action.yml}, in eine (neue) Branch \textit{action}. Dies wird mittels der Aktion \textit{Branch-Push} \cite{Branch-Push} durchgeführt
+\end{enumerate}
+Durch diese Schritte wird eine neue Branch erstellt, die nur die notwendige JavaScript-Datei und die \textit{action.yml} enthält. Dadurch können Nutzer der Aktion diese schneller herunterladen und nutzen. Es wäre auch möglich, kein \textit{NCC} zu verwenden, also alle Javascript-Dateien in die neue Branch zu kopieren, allerdings ist die hier gewählte Methode praktikabler, da dann nur ein Lesezugriff beim Starten des Programms erforderlich ist und so ein Geschwindigkeitsvorteil existiert.
+
+\subsubsection{Nutzung der Aktion}
+[
+  'Einbindung in GitHub Actions',
+  'Um das Tool in GitHub Actions einzubinden, müssen einige Schritte erfolgen. Zunächst muss eine  action.yaml geschrieben werden, die das GitHub-Repository als Aktion markiert und die notwendigen Befehle für die Ausführung enthält. Listing  zeigt einen beispielhaften Code der Action. Zur Übersichtlichkeit wird in diesem Listing nur ein Eingabeparameter definiert. Die restlichen Eingabeparameter werden im Programm analog definiert.',
+  'undefinedBeispielhafte Action-Datei für das Toolundefined,',
+  'label=lst:action,',
+  'captionpos=b, basicstyle=',
+  'figures/chapter4/action.yml',
+  '',
+  'In den ersten beiden Zeilen werden Attribute wie der Name und eine Beschreibung gesetzt. Danach (Z. 4--7) wird der Eingabeparameter für die minimal erlaubte Bewertung für die Dokumentationsqualität definiert, damit dieser von den Nutzern der Aktion verändert werden kann. In den Zeilen 8 bis 10 ist der wichtige Programmcode enthalten, in denen die Aktion als JavaScript-Aktion mit der Node-Version 16 festgelegt wird. Zudem enthält die letzte Zeile auch den Pfad zur Quellcodedatei, mit dem das Programm gestartet werden soll.',
+  '',
+  'Eine JavaScript-Aktion in GitHub Actions benötigt JavaScript, sodass der TypeScript-Code des Tools erst in JavaScript umgewandelt werden muss. Damit das Programm bei der Veröffentlichung einer neuen Version in einen auslieferbaren Zustand gebracht werden kann, wird ein weiterer Workflow benötigt, der bei jedem Push in dem Main-Zweig folgende Schritte ausführt:',
+  'Durch diese Schritte wird eine neue Branch erstellt, die nur die notwendige JavaScript-Datei und die  action.yml enthält. Dadurch können Nutzer der Aktion diese schneller herunterladen und nutzen. Es wäre auch möglich, kein zu verwenden, also alle Javascript-Dateien in die neue Branch zu kopieren, allerdings ist die hier gewählte Methode praktikabler, da dann nur ein Lesezugriff beim Starten des Programms erforderlich ist und so ein Geschwindigkeitsvorteil existiert.',
+  ''
+] [ 3, 7, 0, 1 ]
+
+Die oben erstellte Aktion kann nun von jedem GitHub-Repository verwendet werden. Dazu kann das folgende Listing \ref{lst:action_using} als zusätzlicher Schritt in einem Workflow eingebunden werden.
+\begin{figure} [htbp]
+[ '[caption', '{Verwendung der Aktion in einem Workflow},' ]
+0
+label={lst:action_using},
+captionpos=b, basicstyle=\footnotesize, tabsize=2, showstringspaces=false,  numbers=left,language=YAML]
+{figures/chapter4/action_using.yml}
+\end{figure}
+
+Hier wird die aktuelle Version des DocEvaluators aus der Branch \textit{action} heruntergeladen und automatisch ausgeführt. Als Parameter wird beispielsweise ein Grenzwert von 20 übergeben, der jedoch nach Belieben angepasst werden kann. Wenn das entsprechende Ereignis des Workflows eintritt (z. B. ein Push-Ereignis), wird der DocEvaluator mit diesem Parameter aufgerufen und zeigt unter der Registerkarte \textit{Actions} eine Fehlermeldung an, wenn die Dokumentationsqualität den Grenzwert unterschreitet und somit nicht ausreichend ist.
+
+\end{comment}
+
+%\input{Main/main}
+
+
+\input{Main/Metriken}
+input
+masterthesis/Main/Metriken
+\begin{comment}
+\section{Implementierte Metriken}\label{chapter:metrics}
+[ '' ] [ 2, 1, 0, 0 ]
+In diesem Abschnitt wird ein Überblick über einige Metriken gegeben, die in der finalen Version des Tools implementiert sind. Dabei werden die Hintergründe der Metriken erläutert und Vor- und Nachteile der einzelnen Metriken genannt. Die implementierten Metriken lassen sich -- abhängig von den berücksichtigten Aspekte der Dokumentation -- grob in drei Kategorien einteilen.
+
+\subsection{Metriken, welche die Abdeckung überprüfen}\label{chapter:metrics_coverage}
+[
+  'Implementierte Metriken',
+  'In diesem Abschnitt wird ein Überblick über einige Metriken gegeben, die in der finalen Version des Tools implementiert sind. Dabei werden die Hintergründe der Metriken erläutert und Vor- und Nachteile der einzelnen Metriken genannt. Die implementierten Metriken lassen sich -- abhängig von den berücksichtigten Aspekte der Dokumentation -- grob in drei Kategorien einteilen.',
+  ''
+] [ 2, 1, 1, 0 ]
+Eine grundsätzliche Möglichkeit zur Bewertung der Dokumentationsqualität ist es, die Abdeckung der Dokumentation zu prüfen. Dabei werden aus einer  Teilmenge aller Komponenten alle dokumentierten Komponenten mit dem maximalen Wert 100 bewertet und alle undokumentierten Komponenten mit 0 bewertet.  Diese Metriken werden in der wissenschaftlichen Literatur auch als \textit{ANYJ} oder \textit{DIR} bezeichnet \cite[S.~5]{HowDocumentationEvolvesoverTime}.
+
+Bei der Wahl der Teilmenge gibt es zwei naheliegenden Möglichkeiten. Bei der ersten Möglichkeit werden alle Komponenten überprüft, sodass die Teilmenge gleich der Gesamtmenge der Komponenten ist. Für eine gute Bewertung wird somit verlangt, dass möglichst jede Komponente dokumentiert wird. Bei der zweiten Möglichkeit werden nur die öffentlichen Komponenten untersucht und alle nicht öffentlichen Komponenten so behandelt, als ob sie nicht existieren würden. Dies hat den Vorteil, dass nur Komponenten untersucht werden, die wahrscheinlich von anderen Komponenten verwendet werden und somit besser verstanden werden müssen \cite[S.~253]{JavadocViolationsandTheirEvolutioninOpen-SourceSoftware}.
+
+
+Durch diese Metriken kann geprüft werden, ob ausreichend viele Komponenten dokumentiert sind. Allerdings überprüfen diese Metriken nur, ob die Komponente dokumentiert ist oder nicht. Ein leerer, sinnloser oder sachfremder Kommentar würde dennoch mit 100 Punkten bewertet werden. Falls alle Komponenten untersucht werden, kann außerdem das Problem auftreten, dass einige Komponenten nur in einem kleinen Bereich des Programms verwendet werden, sodass sie für die Dokumentationsqualität weniger relevant sein können.
+
+Als Erweiterung der Abdeckungsmetriken kann bei Methoden überprüft werden, ob auch ihre Parameter und der Rückgabewert dokumentiert sind. Dies ist sinnvoll, da diese auch Teil der Methode sind und zum Verständnis der Methode beitragen \cite[S.~5]{HowDocumentationEvolvesoverTime}. Zudem kann es sinnvoll sein, triviale Getter und Setter, die den Wert eines privaten Feldes auslesen oder verändern, bei der Bewertung auszuschließen. Schließlich haben diese Methoden einen klaren Zweck, der oft keiner weiteren Kommentierung bedarf \cite[S.~254]{JavadocViolationsandTheirEvolutioninOpen-SourceSoftware}.
+
+Bei der Abdeckung der Dokumentation von Methoden könnte auch die Länge der Methode berücksichtigt werden, was aber in der Literatur nicht erwähnt wird. Dabei wird jede Methode mit ihrem \ac{LOC} gewichtet und die Summe der \ac{LOC} der dokumentierten Methoden innerhalb einer Klasse wird durch die Summe der \ac{LOC} aller Methoden der Klasse geteilt. Dies hat den Vorteil, dass undokumentierte Getter und Setter, die nur wenige Codezeilen haben, das Ergebnis nicht so stark beeinflussen, aber trotzdem berücksichtigt werden.
+
+
+\subsection{Metriken, welche die Semantik überprüfen}\label{chapter:metrics_semantic}
+[
+  'Metriken, welche die Abdeckung überprüfen',
+  'Eine grundsätzliche Möglichkeit zur Bewertung der Dokumentationsqualität ist es, die Abdeckung der Dokumentation zu prüfen. Dabei werden aus einer  Teilmenge aller Komponenten alle dokumentierten Komponenten mit dem maximalen Wert 100 bewertet und alle undokumentierten Komponenten mit 0 bewertet.  Diese Metriken werden in der wissenschaftlichen Literatur auch als  ANYJ oder bezeichnet ',
+  '',
+  'Bei der Wahl der Teilmenge gibt es zwei naheliegenden Möglichkeiten. Bei der ersten Möglichkeit werden alle Komponenten überprüft, sodass die Teilmenge gleich der Gesamtmenge der Komponenten ist. Für eine gute Bewertung wird somit verlangt, dass möglichst jede Komponente dokumentiert wird. Bei der zweiten Möglichkeit werden nur die öffentlichen Komponenten untersucht und alle nicht öffentlichen Komponenten so behandelt, als ob sie nicht existieren würden. Dies hat den Vorteil, dass nur Komponenten untersucht werden, die wahrscheinlich von anderen Komponenten verwendet werden und somit besser verstanden werden müssen ',
+  '',
+  '',
+  'Durch diese Metriken kann geprüft werden, ob ausreichend viele Komponenten dokumentiert sind. Allerdings überprüfen diese Metriken nur, ob die Komponente dokumentiert ist oder nicht. Ein leerer, sinnloser oder sachfremder Kommentar würde dennoch mit 100 Punkten bewertet werden. Falls alle Komponenten untersucht werden, kann außerdem das Problem auftreten, dass einige Komponenten nur in einem kleinen Bereich des Programms verwendet werden, sodass sie für die Dokumentationsqualität weniger relevant sein können.',
+  '',
+  'Als Erweiterung der Abdeckungsmetriken kann bei Methoden überprüft werden, ob auch ihre Parameter und der Rückgabewert dokumentiert sind. Dies ist sinnvoll, da diese auch Teil der Methode sind und zum Verständnis der Methode beitragen ',
+  '',
+  'Bei der Abdeckung der Dokumentation von Methoden könnte auch die Länge der Methode berücksichtigt werden, was aber in der Literatur nicht erwähnt wird. Dabei wird jede Methode mit ihrem der dokumentierten Methoden innerhalb einer Klasse wird durch die Summe der aller Methoden der Klasse geteilt. Dies hat den Vorteil, dass undokumentierte Getter und Setter, die nur wenige Codezeilen haben, das Ergebnis nicht so stark beeinflussen, aber trotzdem berücksichtigt werden.',
+  '',
+  ''
+] [ 2, 1, 2, 0 ]
+
+Da nicht nur das Vorhandensein, sondern auch die Aussagekraft und Verständlichkeit der Dokumentation wichtig sind, bietet das Tool weitere Metriken an. Diese Metriken überprüfen die Semantik, also den Inhalt, der Dokumentation und können so Aufschluss darüber geben, ob die Dokumentation tatsächlich hilfreich ist.
+
+Zur Bewertung der Verständlichkeit eines englischsprachigen Textes ist der \textbf{Flesch-Score} sehr bekannt \cite[S.~21]{ThePrinciplesofReadability}. Dies ist eine Formel zur heuristischen Bewertung der Lesbarkeit eines Textes, welches die Anzahl der Sätze, Silben und Wörter berücksichtigt. Die Formel lautet:
+\begin{equation}
+206,835-1,015*\frac{W}{S}-84,6*\frac{H}{W}
+\end{equation}
+
+Dabei ist $S$ die Anzahl der Sätze, $W$ die Anzahl der Wörter und $H$ die Anzahl der Silben. Die Formel liefert einen Wert von 0 bis 100 zurück, wobei 0 auf einen sehr komplizierten und 100 auf einen leichten Text hindeutet. Diese Formel und verwandte Formeln werden auch von verschiedenen US-Behörden verwendet, um die Lesbarkeit ihrer Dokumente zu verbessern \cite[S.~72]{AutomaticQualityAssessmentofSourceCodeComments:TheJavadocMiner}. Die Implementation der Metrik nimmt an, dass ein Flesch-Score von 70 mit 100 Punkten bewertet werden sollte, da mehr als 80~\% der US-Bevölkerung solche Texte verstehen können und diese Texte weder zu leicht noch zu schwer sein sollen \cite[S.~22]{ThePrinciplesofReadability}. Für kleinere Flesch-Score werden weniger Punkte vergeben. Für größere Flesch-Scores werden ebenfalls Punkte abgezogen, aber nicht mehr als 15, da sehr leichte Texte besser sind als schwierige Texte.
+Bei der Verwendung des Flesch-Scores sollte beachtet werden, dass die Bestimmung der Silbenzahl eines Wortes nicht immer trivial ist. Bei der Entwicklung des Tools musste bei einem Austausch einer Bibliothek die Testmethode angepasst werden, da das Wort \enquote{themselves} plötzlich drei statt zwei Silben hatte. Dies hängt natürlich auch von der Aussprache und somit von kulturellen Gegebenheiten ab. Dies gilt natürlich auch für die Bestimmung von Wörtern und Sätze.
+
+Der \textbf{Gunning-Fog-Index} ist eine ähnliche Formel. Sie berücksichtigt nicht die Anzahl der Silben, sondern die Zahl der komplizierten Wörter. Ein Wort gilt dabei als kompliziert, wenn es mehr als zwei Silben hat \cite[S. 24]{ThePrinciplesofReadability}. Dabei gibt der Gunning-Fog-Index die Anzahl an Schuljahren zurück, die ein Leser absolviert haben muss, um den Text gut verstehen zu können. Die Definition des komplizierten Wortes ist aber umstritten. So ist beispielsweise das Wort \enquote{vacation} drei Silben lang, aber nicht unbedingt kompliziert \cite[S.~10]{bogert1985defense}.
+
+\bigskip
+Eine weitere Möglichkeit zu Bewertung der Semantik der Dokumentation ist ein Vergleich der Dokumentation mit dem Namen der dokumentierten Komponente. Ein Kommentar, der einen Großteil des Namens der Komponente wiederholt, bietet keinen Mehrwert. Auch ein Kommentar, der keinen Zusammenhang mit der dokumentierten Komponente erkennen lässt, verliert an Nutzen \cite[S.~86]{Qualityanalysisofsourcecodecomments}.
+Um diese \textbf{Kohärenz} zu messen, kann die Anzahl der gemeinsamen Wörter zwischen Dokumentation und des Namens der dokumentierten Komponente ermittelt werden und dies durch die Zahl der Wörter der Dokumentation geteilt werden. Die Autoren in \cite[S.~87]{Qualityanalysisofsourcecodecomments} vertreten die Ansicht, dass dieser \textbf{Kohärenzkoeffizient} von mehr als 0,5 oder gleich 0 auf eine schlechte Dokumentation hindeutet, da es im ersteren Fall eine starke Ähnlichkeit zwischen dem Namen und der Dokumentation gibt und im zweiten Fall überhaupt keine Gemeinsamkeiten existiert. Die Implementation der Metrik bewertet in beiden Fällen die Dokumentation mit 0 Punkten, in allen anderen Fällen vergibt sie 100 Punkte.
+
+\begin{figure}[ht!]
+[ '\t\t\t[caption', '{Zwei Methoden mit mangelhafter Kohärenz},' ]
+0
+label={lst:coherence_example},
+captionpos=b,language=java, basicstyle=\footnotesize, tabsize=1, showstringspaces=false,  numbers=left]
+{figures/metrics/coherence.java}
+\end{figure}
+
+Listing \ref{lst:coherence_example} zeigt zwei Methoden, bei denen die Kohärenz nicht gut ist. Bei der ersten Methode ist der Kohärenzkoeffizient 0,75, da alle Wörter der allgemeinen Beschreibung der Komponente (Z. 2) außer \enquote{the} im Komponentennamen auftreten. Zur Verbesserung der Kohärenz könnte beispielsweise erwähnt werden, wie sich die Methode bei negativen Werten verhält. Bei der zweiten Methode gibt es überhaupt keine Gemeinsamkeiten zwischen den Namen der Komponente und der Dokumentation (Z. 11), sodass der Kohärenzkoeffizient gleich 0 ist. Hier könnte z.~B. zur Verbesserung  das Wort \enquote{absolute} in der Dokumentation erwähnt werden.
+
+Die Kohärenzmetrik hilft dem Entwickler dabei, dass die Dokumentation zu dem Namen der dokumentierten Komponente passt und gleichzeitig einen Mehrwert bietet, sodass die Dokumentation nützlich ist. Allerdings können Synonyme den Wert verfälschen, da dann keine gemeinsamen Wörter gefunden werden. Auch durch Füllwörter (wie z.~B. \textit{the}, \textit{of} etc.) kann die Bewertung unterschätzt werden.
+
+\subsection{Metriken, welche  nach Fehlern suchen}\label{chapter:metrics_errors}
+[
+  'Metriken, welche die Semantik überprüfen',
+  '',
+  'Da nicht nur das Vorhandensein, sondern auch die Aussagekraft und Verständlichkeit der Dokumentation wichtig sind, bietet das Tool weitere Metriken an. Diese Metriken überprüfen die Semantik, also den Inhalt, der Dokumentation und können so Aufschluss darüber geben, ob die Dokumentation tatsächlich hilfreich ist.',
+  '',
+  'Zur Bewertung der Verständlichkeit eines englischsprachigen Textes ist der  Flesch-Score sehr bekannt  Dies ist eine Formel zur heuristischen Bewertung der Lesbarkeit eines Textes, welches die Anzahl der Sätze, Silben und Wörter berücksichtigt. Die Formel lautet:',
+  '206,835-1,015*84,6*W}',
+  '',
+  'Dabei ist $S$ die Anzahl der Sätze, $W$ die Anzahl der Wörter und $H$ die Anzahl der Silben. Die Formel liefert einen Wert von 0 bis 100 zurück, wobei 0 auf einen sehr komplizierten und 100 auf einen leichten Text hindeutet. Diese Formel und verwandte Formeln werden auch von verschiedenen US-Behörden verwendet, um die Lesbarkeit ihrer Dokumente zu verbessern  Für kleinere Flesch-Score werden weniger Punkte vergeben. Für größere Flesch-Scores werden ebenfalls Punkte abgezogen, aber nicht mehr als 15, da sehr leichte Texte besser sind als schwierige Texte.',
+  'Bei der Verwendung des Flesch-Scores sollte beachtet werden, dass die Bestimmung der Silbenzahl eines Wortes nicht immer trivial ist. Bei der Entwicklung des Tools musste bei einem Austausch einer Bibliothek die Testmethode angepasst werden, da das Wort  themselves plötzlich drei statt zwei Silben hatte. Dies hängt natürlich auch von der Aussprache und somit von kulturellen Gegebenheiten ab. Dies gilt natürlich auch für die Bestimmung von Wörtern und Sätze.',
+  '',
+  'Der  Gunning-Fog-Index ist eine ähnliche Formel. Sie berücksichtigt nicht die Anzahl der Silben, sondern die Zahl der komplizierten Wörter. Ein Wort gilt dabei als kompliziert, wenn es mehr als zwei Silben hat  Dabei gibt der Gunning-Fog-Index die Anzahl an Schuljahren zurück, die ein Leser absolviert haben muss, um den Text gut verstehen zu können. Die Definition des komplizierten Wortes ist aber umstritten. So ist beispielsweise das Wort  {vacation} drei Silben lang, aber nicht unbedingt kompliziert ',
+  '',
+  'Eine weitere Möglichkeit zu Bewertung der Semantik der Dokumentation ist ein Vergleich der Dokumentation mit dem Namen der dokumentierten Komponente. Ein Kommentar, der einen Großteil des Namens der Komponente wiederholt, bietet keinen Mehrwert. Auch ein Kommentar, der keinen Zusammenhang mit der dokumentierten Komponente erkennen lässt, verliert an Nutzen ',
+  'Um diese  Kohärenz zu messen, kann die Anzahl der gemeinsamen Wörter zwischen Dokumentation und des Namens der dokumentierten Komponente ermittelt werden und dies durch die Zahl der Wörter der Dokumentation geteilt werden. Die Autoren in vertreten die Ansicht, dass dieser von mehr als 0,5 oder gleich 0 auf eine schlechte Dokumentation hindeutet, da es im ersteren Fall eine starke Ähnlichkeit zwischen dem Namen und der Dokumentation gibt und im zweiten Fall überhaupt keine Gemeinsamkeiten existiert. Die Implementation der Metrik bewertet in beiden Fällen die Dokumentation mit 0 Punkten, in allen anderen Fällen vergibt sie 100 Punkte.',
+  '',
+  'undefinedZwei Methoden mit mangelhafter Kohärenzundefined,',
+  'label=lst:coherence_example,',
+  'captionpos=b,language=java, basicstyle=',
+  'figures/metrics/coherence.java',
+  '',
+  'Listing im Komponentennamen auftreten. Zur Verbesserung der Kohärenz könnte beispielsweise erwähnt werden, wie sich die Methode bei negativen Werten verhält. Bei der zweiten Methode gibt es überhaupt keine Gemeinsamkeiten zwischen den Namen der Komponente und der Dokumentation (Z. 11), sodass der Kohärenzkoeffizient gleich 0 ist. Hier könnte z.~B. zur Verbesserung  das Wort in der Dokumentation erwähnt werden.',
+  '',
+  'Die Kohärenzmetrik hilft dem Entwickler dabei, dass die Dokumentation zu dem Namen der dokumentierten Komponente passt und gleichzeitig einen Mehrwert bietet, sodass die Dokumentation nützlich ist. Allerdings können Synonyme den Wert verfälschen, da dann keine gemeinsamen Wörter gefunden werden. Auch durch Füllwörter (wie z.~B.  the, etc.) kann die Bewertung unterschätzt werden.',
+  ''
+] [ 2, 1, 3, 0 ]
+
+Die letzte Kategorie an Metriken analysiert die Dokumentation und sucht nach dem Vorkommen von bestimmten Fehlern, welche die Qualität der Dokumentation negativ beeinflussen können. Solche Fehler können beispielsweise Rechtschreibfehler oder fehlerhafte Formatierung (wie z.~B. nicht konformes \ac{HTML}) sein. In der offiziellen Javadoc-Dokumentation wird außerdem geraten, bestimmte Abkürzungen (wie z.~B. \textit{e.~g.}, \textit{aka.} oder \textit{i.~e.}) zu vermeiden \cite{HowtoWriteDocCommentsfortheJavadocTool}.
+
+\begin{figure}[ht!]
+[
+  '\t\t\t[caption',
+  '{Methode mit unvollständiger Erklärung der Behandlung von Nullwerten},'
+]
+0
+label={lst:null_handling_example},
+captionpos=b,language=java, basicstyle=\footnotesize, tabsize=1, showstringspaces=false,  numbers=left]
+{figures/metrics/null_handling.java}
+\end{figure}
+
+Bei Methoden sollte zudem darauf eingegangen werden, ob die Methode \textit{null} als Parameterwert akzeptiert oder \textit{null} zurückgeben kann, damit der Benutzer die Methode korrekt verwenden kann \cite{javadoc_coding_standards}. Listing \ref{lst:null_handling_example} zeigt eine Methode, bei denen die Behandlung von \textit{null} nur teilweise erwähnt wird. Beim ersten Parameter (Z. 3) wird erwähnt, dass der Parameter niemals null sein kann und daher ein Nullwert zu einer Ausnahme führen kann.  Beim zweiten Parameter (Z. 4) ist dies nicht klar und der Benutzer der Dokumentation wird im Unklaren gelassen, was zu einer fehlerhaften Verwendung der Methode führen kann.
+
+In allen Fällen sollte ein Verstoß gegen diese Konventionen zu Punkteabzug führen.
+Dazu können pro Verstoß Fehlerpunkte vergeben werden. Diese Fehlerpunkte können dann der Funktion
+\begin{equation}
+B(l)=S-(S-B_0)*e^{-k*l}
+\end{equation}
+
+übergeben werden, die eine beschränkt fallende Exponentialfunktion ist. Dabei ist $S$ die untere Schranke für die Bewertung, $B_0$ die bestmögliche Bewertung,  $k$ eine Konstante für die Wachstumsrate und $l$ die Zahl der Fehlerpunkte. Durch diese Funktion erhalten Kommentare mit vielen Fehlerpunkten eine geringere Bewertung als Kommentare mit keinen oder wenigen Fehlerpunkten. Die Wachstumsrate $k$ kann dabei parametrisiert sein und sollte auch von der jeweiligen Fehlerkategorie abhängen. So kann beispielsweise argumentiert werden, dass Rechtschreibfehler weniger gravierend sind als fehlerhaftes \ac{HTML}.
+
+Bei allen Metriken sollte allerdings beachtet werden, dass diese nur nach relativ einfachen Fehlern suchen. Bei einer Prüfung des \ac{HTML}-Inhaltes werden beispielsweise nur nicht geschlossene Tags detektiert. Auch falsch-positive Ergebnisse können auftreten, wenn beispielsweise bei der Rechtschreibprüfung ein nicht im Wörterbuch vorkommendes Wort, das aber korrekt geschrieben ist, bemängelt wird.
+
+Als weitere Möglichkeit, die in der Literatur nicht erwähnt wird, könnten lange Methoden, die bestimmte Fehler aufweisen, härter bestraft werden. So kann beispielsweise argumentiert werden, dass lange Methoden, die sowieso vermieden werden sollten \cite[S.~34]{martin2009clean}, eher dokumentiert werden sollten, da sie komplexer sind. Daher können längere undokumentierte Methoden schlechter bewertet werden, indem sie mit Fehlerpunkten, welche äquivalent zu ihren \ac{LOC} sind, bestraft werden.
+
+\section{Algorithmen zur Bildung eines Gesamtergebnisses}\label{chapter:algos_aggregation}
+[
+  'Metriken, welche  nach Fehlern suchen',
+  '',
+  'Die letzte Kategorie an Metriken analysiert die Dokumentation und sucht nach dem Vorkommen von bestimmten Fehlern, welche die Qualität der Dokumentation negativ beeinflussen können. Solche Fehler können beispielsweise Rechtschreibfehler oder fehlerhafte Formatierung (wie z.~B. nicht konformes  oder  zu vermeiden ',
+  '',
+  'undefinedMethode mit unvollständiger Erklärung der Behandlung von Nullwertenundefined,',
+  'label=lst:null_handling_example,',
+  'captionpos=b,language=java, basicstyle=',
+  'figures/metrics/null_handling.java',
+  '',
+  'Bei Methoden sollte zudem darauf eingegangen werden, ob die Methode  null als Parameterwert akzeptiert oder zurückgeben kann, damit der Benutzer die Methode korrekt verwenden kann  Listing zeigt eine Methode, bei denen die Behandlung von nur teilweise erwähnt wird. Beim ersten Parameter (Z. 3) wird erwähnt, dass der Parameter niemals null sein kann und daher ein Nullwert zu einer Ausnahme führen kann.  Beim zweiten Parameter (Z. 4) ist dies nicht klar und der Benutzer der Dokumentation wird im Unklaren gelassen, was zu einer fehlerhaften Verwendung der Methode führen kann.',
+  '',
+  'In allen Fällen sollte ein Verstoß gegen diese Konventionen zu Punkteabzug führen.',
+  'Dazu können pro Verstoß Fehlerpunkte vergeben werden. Diese Fehlerpunkte können dann der Funktion',
+  'B(l)=S-(S-B_0)*e^-k*l',
+  '',
+  'übergeben werden, die eine beschränkt fallende Exponentialfunktion ist. Dabei ist $S$ die untere Schranke für die Bewertung, $B_0$ die bestmögliche Bewertung,  $k$ eine Konstante für die Wachstumsrate und $l$ die Zahl der Fehlerpunkte. Durch diese Funktion erhalten Kommentare mit vielen Fehlerpunkten eine geringere Bewertung als Kommentare mit keinen oder wenigen Fehlerpunkten. Die Wachstumsrate $k$ kann dabei parametrisiert sein und sollte auch von der jeweiligen Fehlerkategorie abhängen. So kann beispielsweise argumentiert werden, dass Rechtschreibfehler weniger gravierend sind als fehlerhaftes ',
+  '',
+  'Bei allen Metriken sollte allerdings beachtet werden, dass diese nur nach relativ einfachen Fehlern suchen. Bei einer Prüfung des ',
+  '',
+  'Als weitere Möglichkeit, die in der Literatur nicht erwähnt wird, könnten lange Methoden, die bestimmte Fehler aufweisen, härter bestraft werden. So kann beispielsweise argumentiert werden, dass lange Methoden, die sowieso vermieden werden sollten sind, bestraft werden.',
+  ''
+] [ 2, 2, 0, 0 ]
+Zur Bildung eines Gesamtergebnisses aus verschiedenen Teilresultaten gibt es verschiedene Möglichkeiten, die in diesen Abschnitt vorgestellt werden. Jeder vorgestellte Algorithmus hat bestimmte Voraussetzungen und  kann eine große Auswirkung auf die Interpretation des Gesamtergebnisses haben, sodass die Wahl sorgsam überlegt werden muss.
+
+\subsection{Klassische Algorithmen}
+[
+  'Algorithmen zur Bildung eines Gesamtergebnisses',
+  'Zur Bildung eines Gesamtergebnisses aus verschiedenen Teilresultaten gibt es verschiedene Möglichkeiten, die in diesen Abschnitt vorgestellt werden. Jeder vorgestellte Algorithmus hat bestimmte Voraussetzungen und  kann eine große Auswirkung auf die Interpretation des Gesamtergebnisses haben, sodass die Wahl sorgsam überlegt werden muss.',
+  ''
+] [ 2, 2, 1, 0 ]
+Die klassischen Algorithmen zur Berechnung eines Ergebnisses aus mehreren Ergebnissen sind hinlänglich bekannt. Sie alle basieren auf der Annahme, dass die dahinter liegende Verteilung symmetrisch ist. Im Kontext der besprochenen Metriken bedeutet dies, dass die Wahrscheinlichkeit für eine gute Bewertung genauso sein sollte wie eine schlechte Bewertung. Bei vielen Metriken zur Bewertung der Softwarequalität kann diese Annahme nicht getroffen werden \cite[S.~313]{Youcantcontroltheunfamiliar:Astudyontherelationsbetweenaggregationtechniquesforsoftwaremetrics}. Auch bei den vorgestellten Metriken muss diese Annahme nicht zwangsläufig stimmen, sodass die Gesamtbewertung stets kritisch hinterfragt werden sollte.
+\subsubsection{Arithmetischer Mittelwert}
+[
+  'Klassische Algorithmen',
+  'Die klassischen Algorithmen zur Berechnung eines Ergebnisses aus mehreren Ergebnissen sind hinlänglich bekannt. Sie alle basieren auf der Annahme, dass die dahinter liegende Verteilung symmetrisch ist. Im Kontext der besprochenen Metriken bedeutet dies, dass die Wahrscheinlichkeit für eine gute Bewertung genauso sein sollte wie eine schlechte Bewertung. Bei vielen Metriken zur Bewertung der Softwarequalität kann diese Annahme nicht getroffen werden '
+] [ 2, 2, 1, 1 ]
+Der arithmetische Mittelwert wird durch die Klasse \textit{MetricResultBuilder} implementiert. Dieser Algorithmus berücksichtigt jedes Ergebnis gleichermaßen. Dies ist insbesondere dann sinnvoll, wenn keine guten Kriterien für die Gewichtung von Metriken, Dateien oder Komponenten gefunden werden können. Es sollte allerdings auch beachtet werden, dass der Mittelwert extreme Ausreißer berücksichtigt. Dies kann hier sinnvoll sein, da eine in Teilen sehr schlechte Dokumentation besser berücksichtigt wird und so ein verlässliches Gesamtergebnis geliefert wird.
+
+
+\subsubsection{Median}
+[
+  'Arithmetischer Mittelwert',
+  'Der arithmetische Mittelwert wird durch die Klasse  MetricResultBuilder implementiert. Dieser Algorithmus berücksichtigt jedes Ergebnis gleichermaßen. Dies ist insbesondere dann sinnvoll, wenn keine guten Kriterien für die Gewichtung von Metriken, Dateien oder Komponenten gefunden werden können. Es sollte allerdings auch beachtet werden, dass der Mittelwert extreme Ausreißer berücksichtigt. Dies kann hier sinnvoll sein, da eine in Teilen sehr schlechte Dokumentation besser berücksichtigt wird und so ein verlässliches Gesamtergebnis geliefert wird.',
+  '',
+  ''
+] [ 2, 2, 1, 2 ]
+Der Median der Einzelresultate wird von der Klasse \textit{MedianResultBuilder} berechnet. Dabei werden die Einzelresultate nach dem bekannten Median-Algorithmus verarbeitet. Bei einer geraden Anzahl an Elementen wird der Median aus dem Mittelwert der zwei infrage kommenden Ergebnisse gebildet.
+
+Der Median berücksichtigt einzelne Ausreißer nicht und kann daher interessant sein, wenn ein allgemeines Bild von der Dokumentationsqualität erhalten werden soll. Es sollte aber beachtet werden, dass die Anwendung des Medians ein Sortiervorgang benötigt, der in den meisten Fällen eine Komplexität von $O(n*log(n))$ hat.  Zudem kann sich der Median stark ändern, wenn einzelne Komponenten hinzugefügt oder entfernt werden.
+
+
+\subsubsection{Gewichteter Mittelwert}\label{chapter:weighted_aggreg}
+[
+  'Median',
+  'Der Median der Einzelresultate wird von der Klasse  MedianResultBuilder berechnet. Dabei werden die Einzelresultate nach dem bekannten Median-Algorithmus verarbeitet. Bei einer geraden Anzahl an Elementen wird der Median aus dem Mittelwert der zwei infrage kommenden Ergebnisse gebildet.',
+  '',
+  'Der Median berücksichtigt einzelne Ausreißer nicht und kann daher interessant sein, wenn ein allgemeines Bild von der Dokumentationsqualität erhalten werden soll. Es sollte aber beachtet werden, dass die Anwendung des Medians ein Sortiervorgang benötigt, der in den meisten Fällen eine Komplexität von $O(n*log(n))$ hat.  Zudem kann sich der Median stark ändern, wenn einzelne Komponenten hinzugefügt oder entfernt werden.',
+  '',
+  ''
+] [ 2, 2, 1, 3 ]
+Der gewichtete Mittelwert ist in der Klasse \textit{WeightedMetricResultBuilder} implementiert. Die Zuweisung der Gewichte erfolgt, wie in Kapitel \ref{chapter_weights_assign} beschrieben, durch einen \textit{WeightResolver}. Die Gewichte müssen nicht normiert werden, da dies während der Berechnung implizit erledigt wird. Die Resultate jeder Metrik werden multipliziert mit dessen Gewicht, dann aufsummiert und zuletzt durch die Summe aller Gewichte geteilt.
+
+
+Dieser Algorithmus ermöglicht es zum Beispiel, bestimmte Metriken zu bevorzugen bzw. zu benachteiligen. Dies ist sinnvoll, da nicht jede Metrik immer ein aussagekräftiges Ergebnis liefert und bestimmte Metriken je nach Situation ein besseres Bild über die Dokumentationsqualität liefern. Allerdings ist auch zu beachten, dass die Wahl der Gewichte nicht trivial ist und ein Vergleich von Ergebnissen, die verschiedene Gewichte verwenden, nicht sinnvoll ist.
+
+\subsubsection{Gewichteter Median}
+[
+  'Gewichteter Mittelwert',
+  'Der gewichtete Mittelwert ist in der Klasse  WeightedMetricResultBuilder implementiert. Die Zuweisung der Gewichte erfolgt, wie in Kapitel beschrieben, durch einen  Die Gewichte müssen nicht normiert werden, da dies während der Berechnung implizit erledigt wird. Die Resultate jeder Metrik werden multipliziert mit dessen Gewicht, dann aufsummiert und zuletzt durch die Summe aller Gewichte geteilt.',
+  '',
+  '',
+  'Dieser Algorithmus ermöglicht es zum Beispiel, bestimmte Metriken zu bevorzugen bzw. zu benachteiligen. Dies ist sinnvoll, da nicht jede Metrik immer ein aussagekräftiges Ergebnis liefert und bestimmte Metriken je nach Situation ein besseres Bild über die Dokumentationsqualität liefern. Allerdings ist auch zu beachten, dass die Wahl der Gewichte nicht trivial ist und ein Vergleich von Ergebnissen, die verschiedene Gewichte verwenden, nicht sinnvoll ist.',
+  ''
+] [ 2, 2, 1, 4 ]
+Der gewichtete Median wurde leicht abweichend nach \cite[S.~37]{YAGER199835} implementiert. Dabei wird zunächst die Summe der Gewichte berechnet und die Resultate nach ihrem Gewicht sortiert. Anschließend werden die sortierten Resultate und ihre Gewichte so lange aufsummiert, bis diese temporäre Summe die Hälfte der Gesamtsumme überschreitet. Das Metrikergebnis, bei der diese Bedingung zutrifft, ist das gesuchte Gesamtergebnis. Die Vor- und Nachteile dieses Algorithmus entsprechen den Vor- und Nachteilen des gewichteten Mittelwerts und des Medians. So muss auch hier eine Sortierung durchgeführt werden und die Wahl der richtigen Gewichte ist nicht trivial.
+
+\subsection{Algorithmen aus der Ökonomie}
+[
+  'Gewichteter Median',
+  'Der gewichtete Median wurde leicht abweichend nach ',
+  ''
+] [ 2, 2, 2, 0 ]
+
+Als Alternative zu den klassischen Algorithmen wurden Verfahren aus den Wirtschaftswissenschaften vorgestellt, die eine bessere Aggregierung der Einzelergebnisse ermöglichen sollen. Diese Verfahren werden in der Ökonomie benutzt, um die Ungleichheit von Einkommen mathematisch darzustellen. So besitzen in den meisten Staaten viele Menschen nur wenig Einkommen und nur einige Menschen ein sehr hohes Einkommen. Auch auf Softwareprojekten lässt sich diese Erfahrung übertragen, da es beispielsweise nur wenige Methoden mit sehr vielen Codezeilen geben wird, aber dafür sehr viele Methoden mit einer relativ kleinen Anzahl an Zeilen. Beispiele für diese Algorithmen sind Gini, Theil oder Atkinson. Einige implementierte Metriken  basierend auf die Anzahl der \ac{LOC}, sodass eine Anwendung der klassischen Algorithmen problematisch sein kann, wenn die Verteilung sehr asymmetrisch ist. \cite[S.~314]{Youcantcontroltheunfamiliar:Astudyontherelationsbetweenaggregationtechniquesforsoftwaremetrics}
+
+Allerdings beschreiben diese Algorithmen nur, ob die Ergebnisse der Metriken ungleich verteilt sind und nicht, wie gut die Ergebnisse sind. Ein Projekt, bei dem alle Metriken schlechte Resultate liefern, würde dann ein ähnliches Gesamtergebnis liefern als ein Projekt, welches überall gut bewertet wird \cite[S.~1121]{Softwarequalitymetricsaggregationinindustry}.  Im Kontext der Bachelorarbeit könnte dies bedeuten, dass eine nicht vorhandene Dokumentation genauso gut bewertet wird wie eine exzessive Kommentierung aller Komponenten.
+
+Daher werden diese Algorithmen vom Tool in der ausgelieferten Fassung nicht implementiert. Sie können aber in Verbindung mit anderen Aggregationsalgorithmen interessant sein, um mehr über eventuelle Ungleichheiten bei der Dokumentation zu erfahren.
+
+\subsection{Squale}\label{chapter:squale}
+[
+  'Algorithmen aus der Ökonomie',
+  '',
+  'Als Alternative zu den klassischen Algorithmen wurden Verfahren aus den Wirtschaftswissenschaften vorgestellt, die eine bessere Aggregierung der Einzelergebnisse ermöglichen sollen. Diese Verfahren werden in der Ökonomie benutzt, um die Ungleichheit von Einkommen mathematisch darzustellen. So besitzen in den meisten Staaten viele Menschen nur wenig Einkommen und nur einige Menschen ein sehr hohes Einkommen. Auch auf Softwareprojekten lässt sich diese Erfahrung übertragen, da es beispielsweise nur wenige Methoden mit sehr vielen Codezeilen geben wird, aber dafür sehr viele Methoden mit einer relativ kleinen Anzahl an Zeilen. Beispiele für diese Algorithmen sind Gini, Theil oder Atkinson. Einige implementierte Metriken  basierend auf die Anzahl der ',
+  '',
+  'Allerdings beschreiben diese Algorithmen nur, ob die Ergebnisse der Metriken ungleich verteilt sind und nicht, wie gut die Ergebnisse sind. Ein Projekt, bei dem alle Metriken schlechte Resultate liefern, würde dann ein ähnliches Gesamtergebnis liefern als ein Projekt, welches überall gut bewertet wird ',
+  '',
+  'Daher werden diese Algorithmen vom Tool in der ausgelieferten Fassung nicht implementiert. Sie können aber in Verbindung mit anderen Aggregationsalgorithmen interessant sein, um mehr über eventuelle Ungleichheiten bei der Dokumentation zu erfahren.',
+  ''
+] [ 2, 2, 3, 0 ]
+Eine andere Möglichkeit zur Aggregierung von Metrikergebnissen wird in \cite[S.~1124ff.]{Softwarequalitymetricsaggregationinindustry} vorgestellt. Das sogenannte Squale-Modell berechnet aus verschiedenen Teilergebnissen von Metriken ein Gesamtergebnis und kann dabei besonders schlechte Ergebnisse stärker gewichten, damit eventuelle Probleme schnell erkannt werden können.
+
+Im ersten Schritt werden die Ergebnisse der einzelnen Metriken, die auf unterschiedliche Skalen basieren, auf einer Skala normalisiert. Die Autoren nutzen dafür das Intervall 0 bis 3, da so eine Einteilung in Ziel nicht erfüllt (0 bis 1), Ziel größtenteils erfüllt (1 bis 2) und Ziel erfüllt (2 bis 3) möglich ist. Diese normalisierten Ergebnisse werden von den Autoren als \enquote{Individual marks (IM)} (z.~dt. individuelle Bewertungen) bezeichnet \cite[S.~142]{AnEmpiricalModelforContinuousandWeightedMetricAggregation}.
+
+Im nächsten Schritt werden die einzelnen Ergebnisse aggregiert. Dazu wird jeder IM der Funktion
+\begin{equation}
+g(\text{IM})=\lambda^{-\text{IM}}
+\end{equation} übergeben. Dabei ist $\lambda$ eine Konstante, welche bei der Gewichtung der Ergebnisse hilft. Sollen schlechte Ergebnisse sehr hart bestraft werden, sodass bereits einige Fehler zu einer schlechten Bewertung führen, so muss $\lambda$ eine große Zahl sein. Durch die Wahl einer kleineren Zahl kann die Bewertung toleranter ausfallen. Aus den Ergebnissen der Funktion $g(IM)$ wird anschließend der Mittelwert $W_{avg}$ gebildet.
+
+Im Anschluss daran muss der Mittelwert wieder in den ursprünglichen Wertebereich abgebildet werden. Dazu wird die Umkehrfunktion
+\begin{equation}
+g^{-1}(W_{avg})=-\log_\lambda (W_{avg})
+\end{equation} angewendet. Dieses Ergebnis wird von den Autoren als \enquote{global mark (GM)} (z.~dt. globale Bewertung) bezeichnet und repräsentiert das endgültige Ergebnis.
+
+Durch diese Aggregierung werden Komponenten mit schlechten Ergebnissen stärker gewichtet und haben so einen größeren Einfluss auf das Gesamtergebnis. Allerdings kann dies bei der Dokumentation dazu führen, dass nur wenige schlecht dokumentierte Komponenten die Bewertung stark nach unten ziehen, sodass das Erreichen einer guten Bewertung einen hohen Aufwand erfordert.
+
+Im Tool wird dieser Algorithmus ebenfalls unterstützt. Die Konstante $\lambda$ kann über den Konfigurationsparameter \textit{builder\_params} festgelegt werden. Standardmäßig ist er 9, was für eine mittlere Bestrafung von schlechter Dokumentationsqualität führt \cite[S.~1127]{Softwarequalitymetricsaggregationinindustry}. Intern werden die Teilergebnisse in das Intervall 0 bis 3 konvertiert, da ein Intervall von 0 bis 100 zu einer hohen negativen Potenz führen kann und dementsprechend mit Rundungsungenauigkeiten behaftet ist. Am Ende wird das Ergebnis wieder in das originale Intervall von 0 bis 100 gebracht.
+
+
+
+
+\end{comment}
+
+\begingroup
+\renewcommand{\cleardoublepage}{} % TODO maybe removing this and next
+\renewcommand{\clearpage}{}
+\chapter{Evaluation}\label{sec:evaluation}
+[
+  'Background',
+  '',
+  '%Multiple input files for larger chapters are also possible',
+  '',
+  '',
+  '',
+  '%',
+  '',
+  ''
+] [ 3, 0, 0, 0 ]
+\endgroup
+\input{Evaluation/eval}
+input
+masterthesis/Evaluation/eval
+
+\begin{comment}
+\newcommand{\checkpmd}{\textit{Checkstyle} und \textit{PMD} }
+\newcommand{\doceval}{\textit{DocEvaluator} }
+In diesem Kapitel soll das Programm evaluiert werden, um zu prüfen, ob der \doceval eine gute heuristische Aussage über den Stand der Dokumentationsqualität treffen kann und in der Praxis auch einsetzbar ist. Dazu wird der \textit{DocEvaluator} mit \textit{Checkstyle} und \textit{PMD} verglichen, indem drei exemplarische Open-Source-Projekte mit allen drei Programmen analysiert werden und die Treffergenauigkeit und Geschwindigkeit der Programme verglichen werden. Zunächst müssen diese drei Projekte ausgewählt werden, was in Kapitel \ref{chapter:choosing_project} erläutert wird. Anschließend wird in Kapitel \ref{chapter:quality} beschrieben, wie die Evaluation der Treffergenauigkeit durchgeführt wird. In Kapitel \ref{chapter:speed} wird die Geschwindigkeitsevaluation durchgeführt. Zum Abschluss der Evaluation werden die Ergebnisse der Evaluation in Kapitel \ref{chapter:eval_conclusion} resümiert.
+
+\clearpage
+
+\section{Wahl der zu analysierenden Projekte}\label{chapter:choosing_project}
+[
+  '',
+  '',
+  'In diesem Kapitel soll das Programm evaluiert werden, um zu prüfen, ob der und verglichen, indem drei exemplarische Open-Source-Projekte mit allen drei Programmen analysiert werden und die Treffergenauigkeit und Geschwindigkeit der Programme verglichen werden. Zunächst müssen diese drei Projekte ausgewählt werden, was in Kapitel erläutert wird. Anschließend wird in Kapitel beschrieben, wie die Evaluation der Treffergenauigkeit durchgeführt wird. In Kapitel wird die Geschwindigkeitsevaluation durchgeführt. Zum Abschluss der Evaluation werden die Ergebnisse der Evaluation in Kapitel resümiert.',
+  '',
+  ''
+] [ 3, 1, 0, 0 ]
+Zur Durchführung der Evaluation wurden verschiedene Softwareprojekte aus GitHub heruntergeladen. Grundsätzlich kann der Vergleich mit jedem Java-Projekt durchgeführt werden, dennoch wurden einige Bedingungen festgelegt, die bei der Auswahl der Projekte eine wichtige Rolle spielen. Diese Bedingungen werden in der folgenden Auflistung präsentiert:
+
+\begin{enumerate}
+\item \label{enum:size} Die Projekte müssen mindestens einen Umfang von 10~000 \ac{LOC} haben
+\item \label{enum:already_cited} Die Projekte müssen bereits in einer in dieser Bachelorarbeit zitierten Quelle in puncto Dokumentationsqualität analysiert worden sein
+\item \label{enum:parsing_error}  Die Projekte sollen möglichst wenige Parsing-Fehler beim \doceval produzieren. Bei mehr als zwei Fehlern wird ein Projekt nicht betrachtet. Können jedoch Fehler folgenlos behoben werden, so kann das Projekt dennoch betrachtet werden
+\item Das größte Projekt sollte mindestens zehnmal so groß sein wie das kleinste Projekt
+\end{enumerate}
+
+Die \ac{LOC} sollen nur als sehr grobe Heuristik der Größe eines Softwareprojektes verstanden werden und enthalten nur den reinen Code ohne Kommentare. Dabei wird heuristisch vermutet, dass mit steigender \ac{LOC} die Anzahl der Komponenten in einem Softwareprojekt steigt, wobei all diese Komponenten fehlerhaft (oder gar nicht) dokumentiert sein können. Somit dienen die \ac{LOC} als approximative Schätzung der zu erwartenden Fehler.
+
+Durch die Bedingung in Nr. \ref{enum:size} wird sichergestellt, dass eine ausreichende Anzahl an Fehlern in der Dokumentation zu erwarten ist, um eine gute Analyse der Dokumentationsqualität  und eine aussagekräftige Bewertung der Geschwindigkeit zu ermöglichen. Durch die Bedingung in Nr.  \ref{enum:already_cited} werden nur Projekte in Betracht gezogen, die bereits in der wissenschaftlichen Literatur berücksichtigt wurden und daher (zumindest für den jeweiligen Autor der Quelle) geeignet für eine Analyse der Dokumentation sind. Mit der Bedingung in Nr. \ref{enum:parsing_error} wird eine Verzerrung zugunsten oder zuungunsten des \textit{DocEvaluators} vermieden, denn durch Parsing-Fehler können Komponenten falsch analysiert werden, die von den anderen Tools richtig analysiert werden. Indirekt wird dadurch gefordert, dass ein Projekt keine neueren Java-Funktionen verwendet, da  der \textit{DocEvaluator} nur Java bis Version 8 unterstützt. Die letzte Bedingung ist besonders für die Bewertung der Geschwindigkeit relevant, da so geprüft werden kann, ob der \doceval auch bei größeren Projekten noch in annehmbarer Zeit ein Ergebnis berechnen kann.
+
+\subsubsection{Analysierte Projekte}\label{chapter:eval_projects}
+[
+  'Wahl der zu analysierenden Projekte',
+  'Zur Durchführung der Evaluation wurden verschiedene Softwareprojekte aus GitHub heruntergeladen. Grundsätzlich kann der Vergleich mit jedem Java-Projekt durchgeführt werden, dennoch wurden einige Bedingungen festgelegt, die bei der Auswahl der Projekte eine wichtige Rolle spielen. Diese Bedingungen werden in der folgenden Auflistung präsentiert:',
+  '',
+  '',
+  'Die die Anzahl der Komponenten in einem Softwareprojekt steigt, wobei all diese Komponenten fehlerhaft (oder gar nicht) dokumentiert sein können. Somit dienen die als approximative Schätzung der zu erwartenden Fehler.',
+  '',
+  'Durch die Bedingung in Nr. werden nur Projekte in Betracht gezogen, die bereits in der wissenschaftlichen Literatur berücksichtigt wurden und daher (zumindest für den jeweiligen Autor der Quelle) geeignet für eine Analyse der Dokumentation sind. Mit der Bedingung in Nr. wird eine Verzerrung zugunsten oder zuungunsten des  {DocEvaluators} vermieden, denn durch Parsing-Fehler können Komponenten falsch analysiert werden, die von den anderen Tools richtig analysiert werden. Indirekt wird dadurch gefordert, dass ein Projekt keine neueren Java-Funktionen verwendet, da  der nur Java bis Version 8 unterstützt. Die letzte Bedingung ist besonders für die Bewertung der Geschwindigkeit relevant, da so geprüft werden kann, ob der ',
+  ''
+] [ 3, 1, 0, 1 ]
+Die folgende Auflistung zeigt die gewählten Projekte für die Evaluation. Die Quellen verweisen auf das Verzeichnis in GitHub, das von den drei Tools analysiert werden soll.  In runden Klammern dahinter befinden sich die  (auf Zehntausenderstelle gerundeten) \ac{LOC}.
+\begin{itemize}
+\item Log4J Version 1 \cite{log4j} (20~000)
+\item ArgoUML \cite{argouml} (17~000)
+\item Eclipse \ac{JDT} \cite{eclipsejdt} (400~000)
+\end{itemize}
+
+ArgoUML und Eclipse wurden in \cite[S.~74] {AutomaticQualityAssessmentofSourceCodeComments:TheJavadocMiner} bewertet, wobei hier nur Eclipse \ac{JDT} betrachtet werden soll, da das gesamte Eclipse-Projekt zu umfassend ist. Log4J wurde in \cite[S.~267] {@tComment:TestingJavadocCommentstoDetectComment-CodeInconsistencies} betrachtet.
+
+Bei allen Projekten traten zunächst Parsing-Fehler auf. Dies lag allerdings in den meisten Fällen daran, dass auskommentierte Methoden noch ein Javadoc-Präfix hatten. Dies kann vom \doceval nicht korrekt verarbeitet werden. Da diese Methoden offensichtlich nicht verwendet werden und keinen Einfluss auf die Qualität der Dokumentation haben können, wurden sie ersatzlos entfernt. Bei einem Fehler in Eclipse \ac{JDT} konnte der \doceval eine Datei mit mehr als 3000 Codezeilen nicht verarbeiten. Diese Datei wurde bei der Evaluation von allen Programmen ignoriert.
+
+\section{Analyse der Qualität}\label{chapter:quality}
+[
+  'Analysierte Projekte',
+  'Die folgende Auflistung zeigt die gewählten Projekte für die Evaluation. Die Quellen verweisen auf das Verzeichnis in GitHub, das von den drei Tools analysiert werden soll.  In runden Klammern dahinter befinden sich die  (auf Zehntausenderstelle gerundeten) ',
+  '',
+  'ArgoUML und Eclipse wurden in betrachtet werden soll, da das gesamte Eclipse-Projekt zu umfassend ist. Log4J wurde in betrachtet.',
+  '',
+  'Bei allen Projekten traten zunächst Parsing-Fehler auf. Dies lag allerdings in den meisten Fällen daran, dass auskommentierte Methoden noch ein Javadoc-Präfix hatten. Dies kann vom ',
+  ''
+] [ 3, 2, 0, 0 ]
+Durch die Evaluation der Qualität soll geprüft werden, ob der \doceval trotz des in Kapitel \ref{chapter_conception}
+beschriebenen abstrakten Formates eine Java-Datei richtig parsen kann und alle für die Dokumentation relevanten Informationen korrekt extrahieren kann. Zur Durchführung der Evaluation muss zunächst definiert werden, welche Funktionen der einzelnen Programme miteinander verglichen werden können, da die Programme unterschiedliche Aspekte der Dokumentation überprüfen und die Darstellung der Ergebnisse im Vergleich zum \textit{DocEvaluator} abweicht.
+
+\checkpmd können als fehlersuchend bezeichnet werden. Sie prüfen die einzelnen Komponenten eines Programms und finden Abweichungen von vorher definierten Regeln. Eine solche Regel kann beispielsweise sein, dass jede öffentliche Methode dokumentiert sein muss, dass bestimmte Wörter nicht verwendet werden dürfen oder dass die Syntax der Dokumentation gültig sein muss. Damit sind sie vergleichbar mit den Metriken aus den Kapiteln \ref{chapter:metrics_coverage}  und \ref{chapter:metrics_errors}, welche ebenfalls bestimmte Fehler suchen und bei einem Verstoß gegen die Regeln eine Warnmeldung ausgeben. Allerdings berechnen \checkpmd keine Metriken, sondern finden nur die besagten Verstöße gegen die definierten Regeln. Somit kann ein Entwickler sehen, dasś ein Projekt beispielsweise 100 Verstöße gegen die Dokumentationsrichtlinien hat, erfährt aber nicht, ob die Anzahl der Verstöße unter Berücksichtigung der Projektgröße schwerwiegend ist und erhält keine normierte Bewertung, die dem Entwickler bei der Beurteilung der Dokumentationsqualität hilft.
+
+Im Gegensatz dazu verwendet der \doceval Metriken, die stets einen Wert von 0 bis 100 zurückgeben, sodass ein Entwickler weiß, dass ein hoher Wert für eine hohe Qualität steht. Außerdem kann der \doceval auch die Semantik des Kommentars heuristisch prüfen, um zu erfahren, ob der Kommentar verständlich ist und nicht redundant ist (vgl. Kapitel \ref{chapter:metrics_semantic}). Nichtsdestotrotz gibt der \doceval auch Warnmeldungen aus, wenn er bestimmte Komponenten schlechter bewerten muss.
+
+Aus diesen Gründen wird die Evaluation nicht mit den Metriken an sich, sondern mit den Warnmeldungen der jeweiligen Tools durchgeführt. Jedes Programm wird mit einem Verweis auf das zu analysierende Projekt aufgerufen und die Ausgaben der Programme werden in separaten Dateien umgeleitet.  Diese Dateien dienen dann als Grundlage für die spätere Evaluation.
+
+\subsubsection{Durchführung der Evaluation}
+[
+  'Analyse der Qualität',
+  'Durch die Evaluation der Qualität soll geprüft werden, ob der ',
+  'beschriebenen abstrakten Formates eine Java-Datei richtig parsen kann und alle für die Dokumentation relevanten Informationen korrekt extrahieren kann. Zur Durchführung der Evaluation muss zunächst definiert werden, welche Funktionen der einzelnen Programme miteinander verglichen werden können, da die Programme unterschiedliche Aspekte der Dokumentation überprüfen und die Darstellung der Ergebnisse im Vergleich zum  DocEvaluator abweicht.',
+  '',
+  '',
+  'Im Gegensatz dazu verwendet der ',
+  '',
+  'Aus diesen Gründen wird die Evaluation nicht mit den Metriken an sich, sondern mit den Warnmeldungen der jeweiligen Tools durchgeführt. Jedes Programm wird mit einem Verweis auf das zu analysierende Projekt aufgerufen und die Ausgaben der Programme werden in separaten Dateien umgeleitet.  Diese Dateien dienen dann als Grundlage für die spätere Evaluation.',
+  ''
+] [ 3, 2, 0, 1 ]
+Wie im vorherigen Absatz beschrieben, dienen die Logdateien der drei Programme als Datengrundlage für die Evaluation. Jede Zeile in diesen Logdateien enthält mindestens den Dateipfad des gefundenen Fehlers, die Zeilennummer des Fehlers und einen Fehlercode als Zeichenkette.  Wenn die drei Programme einen übereinstimmenden Fehler finden, sollte es in allen drei Logdateien einen Eintrag geben, bei dem der Dateipfad identisch ist, die Zeilennummer innerhalb eines gewissen Intervalls identisch ist und die der Fehlercode identisch ist. Die Zeilennummer muss nicht zwingend identisch sein, da  \checkpmd die exakte Zeile des Fehlers ausgeben, während der \doceval nur ein Intervall ausgibt, in dem der Fehler liegt. Beispielsweise wird von \checkpmd bei einem unzulässigen Wort die exakte Zeile des Wortes genannt. Da die drei Tools unterschiedliche Fehlercodes ausgeben, werden diese so kategorisiert, dass Verstöße, welche von mehr als einem Tool erkannt werden, einen eigenen Fehlercode erhalten. Alle anderen Verstöße erhalten einen allgemeinen programmspezifischen Fehlercode, der somit keine näheren Informationen über die Art des Fehlers hergibt.
+
+Basierend auf diesen Vorbereitungen kann nun für jeden Fehler jedes Programm gefunden werden, das diesen Fehler entdeckt hat. Beispielsweise kann ein Fehler von allen drei Programmen, nur von \textit{Checkstyle} oder ausschließlich von \textit{PMD} und \doceval gefunden werden. Mathematisch gesehen kann die Potenzmenge der Menge \textit{\{Checkstyle, PMD, DocEvaluator\}} genommen werden, wodurch alle möglichen Kombinationen an Programmen entstehen, die einen bestimmten Fehler erkennen können. Durch Zählen der Fehler pro Programmkombination lässt sich bewerten, welche Programme besonders viele Fehler finden, die andere Programme nicht erkennen und ob alle drei Programme viele gemeinsame Fehler finden.
+
+
+\subsubsection{Auswahl der Regeln}
+[
+  'Durchführung der Evaluation',
+  'Wie im vorherigen Absatz beschrieben, dienen die Logdateien der drei Programme als Datengrundlage für die Evaluation. Jede Zeile in diesen Logdateien enthält mindestens den Dateipfad des gefundenen Fehlers, die Zeilennummer des Fehlers und einen Fehlercode als Zeichenkette.  Wenn die drei Programme einen übereinstimmenden Fehler finden, sollte es in allen drei Logdateien einen Eintrag geben, bei dem der Dateipfad identisch ist, die Zeilennummer innerhalb eines gewissen Intervalls identisch ist und die der Fehlercode identisch ist. Die Zeilennummer muss nicht zwingend identisch sein, da  ',
+  '',
+  'Basierend auf diesen Vorbereitungen kann nun für jeden Fehler jedes Programm gefunden werden, das diesen Fehler entdeckt hat. Beispielsweise kann ein Fehler von allen drei Programmen, nur von  Checkstyle oder ausschließlich von und  genommen werden, wodurch alle möglichen Kombinationen an Programmen entstehen, die einen bestimmten Fehler erkennen können. Durch Zählen der Fehler pro Programmkombination lässt sich bewerten, welche Programme besonders viele Fehler finden, die andere Programme nicht erkennen und ob alle drei Programme viele gemeinsame Fehler finden.',
+  '',
+  ''
+] [ 3, 2, 0, 2 ]
+Zum Vergleich der drei Programme müssen zunächst Regeln festgelegt werden, bei denen die Programme eine Warnmeldung ausgeben. Bei \checkpmd{} erfolgt die Konfiguration über  Extensible-Markup-Language-Dateien. Beim \doceval erfolgt die Konfiguration über das in Kapitel \ref{chapter:conf} beschriebene \ac{JSON}-Format. Bei der Auswahl der Regeln muss beachtet werden, dass \checkpmd auch andere Fehler wie z.~B. komplexe Methoden finden können. Diese sind in diesem Kontext nicht relevant und werden ignoriert. Außerdem können die drei Programme zum Teil unterschiedliche Fehler finden, da beispielsweise \textit{PMD} (anders als \textit{Checkstyle}) den Inhalt der Dokumentation auf das Auftauchen bestimmter Begriffe prüfen kann.  \textit{Checkstyle} kann aber dafür (anders als \textit{PMD}) prüfen, ob die Block-Tags in der richtigen Reihenfolge definiert werden. Die letztere Regel wird vom \doceval in der ausgelieferten Fassung nicht geprüft. Alle drei Programme können jedoch prüfen, ob eine Komponente dokumentiert ist oder nicht. Tabelle \ref{tab:inters_rules} vergleicht die Überschneidungen der Regeln, welche die drei Programme anwenden können. Dabei stehen (sowohl hier als auch im Rest des Kapitels 5) die Abkürzungen \textit{CS} für \textit{Checkstyle} und \textit{DE} für \textit{DocEvaluator}.
+
+\begin{table}[]
+\centering
+\begin{tabular}{m{4.5cm}|m{4.5cm}|m{4.5cm}}
+\textbf{CS} $\cap$ \textbf{DE}  & \textbf{PMD} $\cap$ \textbf{DE} & \textbf{PMD} $\cap$ \textbf{DE} $\cap$  \textbf{CS}  \\\hline
+\begin{itemize}
+\item Komponente dokumentiert
+\item Methode vollständig dokumentiert
+\item Fehler in Javadoc
+\end{itemize}
+&
+\begin{itemize}
+\item  Komponente dokumentiert
+
+\item Bestimmte Wörter in Kommentar verbieten
+\end{itemize}
+&
+\begin{itemize}
+\item  Komponente dokumentiert
+
+\end{itemize}
+\\\hline
+\end{tabular}
+\caption{Überschneidungen der Regeln der drei Programme}
+\label{tab:inters_rules}
+\end{table}
+
+Aus der Tabelle lässt sich entnehmen, dass der \doceval mit \textit{Checkstyle} die meisten Übereinstimmungen hat. Beide Programme können die Vollständigkeit der Methodendokumentation und typische Fehler in Javadoc-Kommentaren (wie z.~B. fehlerhaftes HTML) finden. PMD und der \doceval können bestimmte Wörter in der Dokumentation bemängeln, die in einer Dokumentation vermieden werden sollten. Alle drei Programme können das Vorhandensein der Dokumentation überprüfen. Allerdings ignoriert \textit{PMD} alle privaten Komponenten außer Felder. Vor allem bei Checkstyle gibt es zudem viele Regeln, die von den anderen beiden Programmen nicht gefunden werden und auf der Webseite \cite{checkstyle_doc_metrics} aufgelistet werden.
+
+Da ein Vergleich der drei Tools somit nur eingeschränkt möglich ist, wird sich die qualitative Evaluation nur auf den Kernbereich beschränken. Es werden also nur die Regeln verwendet, die von mindestens zwei Tools unterstützt werden. Dies sind alle Regeln in Tabelle \ref{tab:inters_rules}. Da somit nur relativ leichte Fehler gefunden werden, können die Ergebnisse der Evaluation dazu verwendet werden, um die Parsing-Qualität zu ermitteln, denn wenn solche grundlegenden Fehler (wie z.~B. das Nichtvorhandensein der Dokumentation) nicht gefunden werden, besteht eine erhebliche Chance, dass eine Java-Datei falsch interpretiert wird.
+
+
+
+\subsection{Ergebnisse}
+[
+  'Auswahl der Regeln',
+  'Zum Vergleich der drei Programme müssen zunächst Regeln festgelegt werden, bei denen die Programme eine Warnmeldung ausgeben. Bei beschriebene Format. Bei der Auswahl der Regeln muss beachtet werden, dass (anders als  den Inhalt der Dokumentation auf das Auftauchen bestimmter Begriffe prüfen kann.  kann aber dafür (anders als  prüfen, ob die Block-Tags in der richtigen Reihenfolge definiert werden. Die letztere Regel wird vom vergleicht die Überschneidungen der Regeln, welche die drei Programme anwenden können. Dabei stehen (sowohl hier als auch im Rest des Kapitels 5) die Abkürzungen für und für ',
+  '',
+  '&',
+  '',
+  '&',
+  '',
+  '',
+  'Aus der Tabelle lässt sich entnehmen, dass der alle privaten Komponenten außer Felder. Vor allem bei Checkstyle gibt es zudem viele Regeln, die von den anderen beiden Programmen nicht gefunden werden und auf der Webseite aufgelistet werden.',
+  '',
+  'Da ein Vergleich der drei Tools somit nur eingeschränkt möglich ist, wird sich die qualitative Evaluation nur auf den Kernbereich beschränken. Es werden also nur die Regeln verwendet, die von mindestens zwei Tools unterstützt werden. Dies sind alle Regeln in Tabelle ',
+  '',
+  '',
+  ''
+] [ 3, 2, 1, 0 ]
+
+Tabelle \ref{tab:eval_results} listet die Anzahl der gefundenen Fehler (gemäß Tabelle \ref{tab:inters_rules}) auf. In den Spalten werden die Fehler nach dem Projekt gruppiert. Die ersten drei Zeilen beschreiben, wie viele Fehler die einzelnen Tools pro Projekt gefunden haben. So hat  der \textit{DocEvaluator} 1710 Fehler in \textit{Log4J} gefunden.  In den übrigen Zeilen wird aufgeführt, welche Kombinationen der Tools wie viele Fehler gefunden haben. Die Zeile mit der ersten Spalte \enquote{\{PMD, DE\}} beschreibt beispielsweise, dass \textit{PMD} und der  \textit{DocEvaluator} (aber nicht \textit{Checkstyle}) 41 Fehler bei \textit{Log4J}, 264 Fehler bei \textit{ArgoUML} und 253 Fehler bei \textit{Eclipse \ac{JDT}} gefunden haben.
+\sisetup{group-minimum-digits=4,table-number-alignment =center,table-format=5.0}
+\begin{table}[]
+\centering
+\begin{tabular}{c|S|S|S}
+& {Log4J} & {ArgoUML} & {Eclipse \ac{JDT}} \\ \hline
+|DE|            & 1710 & 10054  & 17380      \\ \hline
+|CS|            & 1590 & 9961   & 17638      \\ \hline
+|PMD|           & 1008 & 9051   & 12702      \\ \hline\hline
+\{DE\}          & 108   & 124     & 555         \\ \hline
+\{CS\}          & 26    & 285     & 273         \\ \hline
+\{PMD\}         & 86    & 377     & 298         \\ \hline
+\{PMD, DE\}     & 41    & 264     & 253         \\ \hline
+\{CS, DE\}      & 683   & 1266    & 5214       \\ \hline
+\{PMD, CS\}     & 3     & 10      & 793         \\ \hline
+\{PMD, CS, DE\} & 878   & 8400   & 11358      \\ \hline
+\end{tabular}
+\caption{Anzahl der gefundenen Fehler pro Projekt}
+\label{tab:eval_results}
+\end{table}
+
+Aus der Tabelle ist ersichtlich, dass stets über 50~\% aller Fehler von allen drei Tools gefunden werden. Bei \textit{Eclipse \ac{JDT}} und \textit{Log4J} werden mehr als ein Viertel der Fehler von der Kombination  \textit{DocEvaluator} und \textit{Checkstyle} gefunden. Beim Projekt \enquote{ArgoUML} liegt diese Quote bei weniger als 15~\%.  Weniger als 10~\% der Fehler werden nur von einem Tool erkannt.
+
+Die Überschneidungen der Fehler lassen sich auch mit Venn-Diagrammen darstellen.  Die Abbildungen \ref{fig:log4j_venn}, \ref{fig:argo_venn} und  \ref{fig:eclipse_venn} zeigen für jedes Projekt die Überschneidungen der gefundenen Fehler. Die Abbildung \ref{fig:legend_venn} ist die Legende dieser drei Abbildungen:
+
+
+\begin{figure}[ht!]
+[ '    \\caption{Venn-Diagramm: Log4J}' ]
+0
+\label{fig:log4j_venn}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.4\textwidth}
+\centering
+\includesvg[scale=0.7,width=\textwidth]{figures/chapter5/argo.svg}
+\caption{Venn-Diagramm: ArgoUML}
+\label{fig:argo_venn}
+\end{subfigure}
+\hspace{10cm}
+\begin{subfigure}[b]{0.4\textwidth}
+\centering
+\includesvg[scale=0.7,width=\textwidth]{figures/chapter5/eclipse.svg}
+\caption{Venn-Diagramm: Eclipse \ac{JDT}}
+\label{fig:eclipse_venn}
+\end{subfigure}
+\hspace{3.4cm}
+\begin{subfigure}[b]{0.25\textwidth}
+\centering
+\includesvg[width=1\textwidth]{figures/chapter5/legende_venn.svg}
+\vspace{0.3cm}
+\caption{Legende der Venn-Diagramme}
+\label{fig:legend_venn}
+\end{subfigure}
+\end{figure}
+
+Auch hier zeigt der graue Bereich visuell, dass die drei verglichenen Tools viele Fehler gemeinsam finden.  Dies ist vor allem bei \textit{ArgoUML} deutlich, da der graue Kreis fast alle anderen Kreise großflächig überdeckt. Bei den anderen beiden Projekten ist zudem eine große Überschneidung von \textit{Checkstyle} und \doceval (hellbraun) zu erkennen. Bei \textit{Log4J} zeigt das Diagramm einen im Vergleich zu den anderen Projekten größeren Bereich (dunkelblau) an Fehlern, die nur von \textit{PMD} gefunden werden. Auch der Bereich der exklusiv vom \textit{DocEvaluator} gefundenen Fehler (rot) ist bei \textit{Log4J} größer. Die nur vom \textit{DocEvaluator} und \textit{PMD} gefundenen Fehler (lila) sind bei  \textit{Eclipse \ac{JDT}} nicht zu erkennen, bei den anderen Venn-Diagrammen allerdings schon. Dafür scheint es bei  \textit{Eclipse \ac{JDT}} relativ viele Fehler zu geben, die nur von \checkpmd gefunden werden, da der hellblaue Abschnitt nur dort sichtbar ist. Außerdem gibt es bei  \textit{Eclipse \ac{JDT}} mehr Fehler, die nur von \textit{Checkstyle} gefunden werden, da der grüne Bereich größer ist.
+
+Um die Trefferrate mathematisch auszudrücken, kann die Formel
+\begin{equation}\label{eq1}
+1-\frac{\text{\{DE\}}}{|\text{DE}|}
+\end{equation} verwendet werden. Diese gibt in Prozent an, wie viele Fehler, die vom \doceval gefunden werden, auch von den anderen beiden Tools gefunden werden. Demgegenüber kann auch ermittelt werden, wie viele Fehler von \textit{Checkstyle} oder \textit{PMD} gefunden wurden, die auch vom \doceval erkannt wurden:
+
+\begin{equation}\label{eq2}
+1-\frac{\text{\{CS\}}+\text{\{PMD\}}+\text{\{CS,PMD\}}}{|\text{PMD}|+|\text{CS}|}
+\end{equation}
+
+Tabelle \ref{tab:hit_rate} zeigt basierend auf den genannten Formeln (\ref{eq1} und \ref{eq2}) die Treffergenauigkeit des \textit{DocEvaluators} für jedes analysierte Projekt:
+\begin{table}[]
+\centering
+\begin{tabular}{c|c|c|c}
+Formel & Log4J & ArgoUML & Eclipse \ac{JDT} \\ \hline
+\ref{eq1} &   93,68~\% &	98,77~\% &	96,81~\% \\\hline
+\ref{eq2} & 95,57~\% &	96,47~\% &	95,50~\% \\\hline
+
+\end{tabular}
+\caption{Trefferrate des \textit{DocEvaluators} gemäß den Formeln \ref{eq1} und \ref{eq2}}
+\label{tab:hit_rate}
+\end{table}
+Es ist klar erkennbar, dass die Trefferrate unabhängig von der Formel und dem analysierten Projekt größer als 90~\% ist, sodass die meisten Fehler, die vom \doceval gefunden werden, von mindestens einem anderen Tool gefunden werden. Zudem werden die meisten Fehler, die von \textit{Checkstyle} oder \textit{PMD} gefunden werden, auch vom \doceval gefunden.
+
+
+
+
+
+
+\subsection{Bewertung der Qualitätsevaluation}
+[
+  'Ergebnisse',
+  '',
+  'Tabelle  auf. In den Spalten werden die Fehler nach dem Projekt gruppiert. Die ersten drei Zeilen beschreiben, wie viele Fehler die einzelnen Tools pro Projekt gefunden haben. So hat  der  {DocEvaluator} 1710 Fehler in gefunden.  In den übrigen Zeilen wird aufgeführt, welche Kombinationen der Tools wie viele Fehler gefunden haben. Die Zeile mit der ersten Spalte  { beschreibt beispielsweise, dass und der  (aber nicht  41 Fehler bei  264 Fehler bei und 253 Fehler bei  gefunden haben.',
+  '& Log4J & {ArgoUML} & {Eclipse  ',
+  '|DE|            & 1710 & 10054  & 17380      ',
+  '|CS|            & 1590 & 9961   & 17638      ',
+  '|PMD|           & 1008 & 9051   & 12702      ',
+  '',
+  'Aus der Tabelle ist ersichtlich, dass stets über 50~und werden mehr als ein Viertel der Fehler von der Kombination  und gefunden. Beim Projekt  {ArgoUML} liegt diese Quote bei weniger als 15~',
+  '',
+  'Die Überschneidungen der Fehler lassen sich auch mit Venn-Diagrammen darstellen.  Die Abbildungen und  zeigen für jedes Projekt die Überschneidungen der gefundenen Fehler. Die Abbildung ist die Legende dieser drei Abbildungen:',
+  '',
+  '',
+  '',
+  'Auch hier zeigt der graue Bereich visuell, dass die drei verglichenen Tools viele Fehler gemeinsam finden.  Dies ist vor allem bei  ArgoUML deutlich, da der graue Kreis fast alle anderen Kreise großflächig überdeckt. Bei den anderen beiden Projekten ist zudem eine große Überschneidung von und zeigt das Diagramm einen im Vergleich zu den anderen Projekten größeren Bereich (dunkelblau) an Fehlern, die nur von gefunden werden. Auch der Bereich der exklusiv vom gefundenen Fehler (rot) ist bei größer. Die nur vom und gefundenen Fehler (lila) sind bei   nicht zu erkennen, bei den anderen Venn-Diagrammen allerdings schon. Dafür scheint es bei   relativ viele Fehler zu geben, die nur von  mehr Fehler, die nur von gefunden werden, da der grüne Bereich größer ist.',
+  '',
+  'Um die Trefferrate mathematisch auszudrücken, kann die Formel',
+  '1-{|}',
+  '',
+  '1-+}{|+|}',
+  '',
+  'Tabelle und  die Treffergenauigkeit des  {DocEvaluators} für jedes analysierte Projekt:',
+  'Formel & Log4J & ArgoUML & Eclipse ',
+  '',
+  'Es ist klar erkennbar, dass die Trefferrate unabhängig von der Formel und dem analysierten Projekt größer als 90~gefunden werden, auch vom ',
+  '',
+  '',
+  '',
+  '',
+  '',
+  ''
+] [ 3, 2, 2, 0 ]
+Insgesamt zeigt die Evaluation der Qualität, dass der \doceval eine hohe Abdeckung mit \checkpmd hat und somit die meisten von diesen Tools gefundenen Fehler auch findet. Somit ist das abstrakte Format zur Repräsentation einer Quellcodedatei geeignet, um die meisten Aspekte, welche für die Dokumentation relevant sind, zu beschreiben. Allerdings wurde diese Evaluation auf größere Projekte (über 10~000 \ac{LOC}) beschränkt, sodass nicht geprüft wurde, ob der \doceval auch bei kleineren Projekten eine genaue Einschätzung der Dokumentationsqualität gibt. Tendenziell wird die Trefferrate kleiner sein, da durch die geringere Größe jeder nicht gefundene Fehler ein höheres Gewicht hat.
+
+Während der Evaluation wurde geprüft, warum einige Fehler nicht vom \doceval gefunden wurden. In einigen Fällen waren dies einfache Fehler, die bereits behoben sind, sodass dadurch die Trefferrate erhöht wurde. In anderen Fällen gibt es größere strukturelle Probleme, die nicht mehr leicht behebbar sind. Einige dieser Fehler werden im Folgenden präsentiert:
+\subsubsection{Fehler durch verschiedene Zeilennummerierung}
+[
+  'Bewertung der Qualitätsevaluation',
+  'Insgesamt zeigt die Evaluation der Qualität, dass der ',
+  '',
+  'Während der Evaluation wurde geprüft, warum einige Fehler nicht vom '
+] [ 3, 2, 2, 1 ]
+
+Einige Fehler sind keine Fehler des \textit{DocEvaluators} an sich, sondern sind in der Methodik der Evaluation begründet. Um gemeinsame Fehler zu finden, müssen die gefundene Fehler pro Tool abgeglichen werden, wozu die Zeilennummer elementar ist. Allerdings gibt es Unterschiede bei der Festlegung der Zeilennummer. Der \doceval verwendet in seiner Logausgabe ein Zeilennummerintervall, der mit der Zeile des Bezeichners der Komponente endet und dessen Anfang durch Subtraktion der Anzahl der Zeilen der Dokumentation von der Zeile des Bezeichners definiert wird. Die anderen Tools verwenden die exakte Zeile eines Fehlers. In den meisten Fällen ist dies kein Problem, da diese Zeilennummer von \checkpmd innerhalb des vom \doceval beschriebenen Intervalls liegen muss. Listing \ref{lst:multiline_method} zeigt ein Beispiel, wo es problematisch wird.
+
+\begin{figure}[ht!]
+[ '\t\t\t[caption', '{Methode auf viele Zeilen verteilt},' ]
+0
+label={lst:multiline_method},
+captionpos=b,language=java, basicstyle=\footnotesize, tabsize=1, showstringspaces=false,  numbers=left]
+{figures/chapter5/multiline_method.java}
+\end{figure}
+Besonders an dieser Methode ist, dass die Parameter auf verschiedenen Zeilen verteilt ist. Während \textit{Checkstyle} bei einem undokumentierten Parameter die exakte Zeile eines nicht dokumentierten Parameters ausgibt (z.~B. Z. 5), würde der \doceval die Zeilen 1 bis 4 ausgeben, da die Dokumentation bei Zeile 1 beginnt und der Bezeichner der Komponente in Zeile 4 definiert ist. Ähnlich problematisch ist es, wenn zwischen der Dokumentation und dem Bezeichner noch Annotationen stehen, sodass der Bezeichner um eine Zeile nach unten rutscht.
+
+\subsubsection{Klassen in Methoden}
+[
+  'Fehler durch verschiedene Zeilennummerierung',
+  '',
+  'Einige Fehler sind keine Fehler des  DocEvaluators an sich, sondern sind in der Methodik der Evaluation begründet. Um gemeinsame Fehler zu finden, müssen die gefundene Fehler pro Tool abgeglichen werden, wozu die Zeilennummer elementar ist. Allerdings gibt es Unterschiede bei der Festlegung der Zeilennummer. Der zeigt ein Beispiel, wo es problematisch wird.',
+  '',
+  'undefinedMethode auf viele Zeilen verteiltundefined,',
+  'label=lst:multiline_method,',
+  'captionpos=b,language=java, basicstyle=',
+  'figures/chapter5/multiline_method.java',
+  'Besonders an dieser Methode ist, dass die Parameter auf verschiedenen Zeilen verteilt ist. Während  Checkstyle bei einem undokumentierten Parameter die exakte Zeile eines nicht dokumentierten Parameters ausgibt (z.~B. Z. 5), würde der ',
+  ''
+] [ 3, 2, 2, 2 ]
+
+In Java können Klassen in Methoden deklariert werden bzw. anonyme Klassen direkt instantiiert werden. Diese Klassen können ebenfalls Javadoc besitzen, werden allerdings vom \doceval ignoriert, da der \doceval jeglichen Code in Methoden nur unstrukturiert als Zeichenkette speichert und nicht weiterverarbeitet. Die anderen beiden Tools prüfen auch diese Klassen, sodass sie entsprechend einige Fehler finden, die der \doceval nicht mehr finden kann.
+
+
+\subsubsection{Fehler in einzeiligen Kommentaren bei PMD}
+[
+  'Klassen in Methoden',
+  '',
+  'In Java können Klassen in Methoden deklariert werden bzw. anonyme Klassen direkt instantiiert werden. Diese Klassen können ebenfalls Javadoc besitzen, werden allerdings vom ',
+  '',
+  ''
+] [ 3, 2, 2, 3 ]
+Anders als der \doceval und \textit{Checkstyle} berücksichtigt \textit{PMD} auch einzeilige Kommentare. Wenn ein einzeiliger Kommentar ein unzulässiges Wort enthält, so würde \textit{PMD} einen Fehler melden, aber der \doceval nicht, da er nur Javadoc-Kommentare prüft. Dadurch kommt es zu einer Verzerrung und der Anteil der alleinig von \textit{PMD} gefundenen Fehler wird überschätzt.
+
+
+
+\section{Analyse der Geschwindigkeit} \label{chapter:speed}
+[
+  'Fehler in einzeiligen Kommentaren bei PMD',
+  'Anders als der auch einzeilige Kommentare. Wenn ein einzeiliger Kommentar ein unzulässiges Wort enthält, so würde einen Fehler melden, aber der gefundenen Fehler wird überschätzt.',
+  '',
+  '',
+  ''
+] [ 3, 3, 0, 0 ]
+In diesem Abschnitt wird der \doceval mit \checkpmd bezüglich der Geschwindigkeit verglichen. Damit soll geprüft werden, ob das Tool nicht nur eine ausreichende Qualität besitzt, sondern auch in einer angemessenen Zeit ein Ergebnis liefert. Dies ist im \ac{CI/CD}-Kontext wichtig, da bei einer langen Laufzeit des Tools  die Bereitstellung eines geprüften Softwareprojektes verzögert wird und somit die Produktivität reduziert wird.
+
+\subsubsection{Durchführung der Geschwindigkeitsevaluation}
+[ 'Analyse der Geschwindigkeit', 'In diesem Abschnitt wird der ', '' ] [ 3, 3, 0, 1 ]
+Zur Durchführung der Evaluation der Geschwindigkeit analysieren die drei Tools die in Kapitel \ref{chapter:eval_projects} genannten Projekte. Damit jedes Programm fair behandelt wird und eine ungefähr gleiche Menge an Analysen durchführen kann, werden die Regeln so beschränkt, dass nur noch das Vorhandensein von Dokumentation geprüft wird. So wird verhindert, dass beispielsweise der \textit{DocEvaluator} und \textit{Checkstyle} die Dokumentation von Methodenparameter überprüfen, während \textit{PMD} dies ignoriert. Bei jeder Analyse wird die Zeit gemessen, die vom Start eines Tools bis zu dessen Beendigung vergehen.
+
+Die Ausgabe jedes Tools wird auf \enquote{dev/null} umgeleitet, sodass jegliche Ausgabe ignoriert wird. Dadurch können Schwankungen unberücksichtigt bleiben, die bei der Verwendung von Eingabe- und Ausgabegeräten auftreten. So sind die Ergebnisse näher an der tatsächlichen Verarbeitungsgeschwindigkeit.  Nachteilhaft an diesem Vorgehen ist, dass die Tools im Praxiseinsatz eine Ausgabe produzieren müssen, um überhaupt dem Entwickler helfen zu können, sodass dieser wichtige Aspekt hier ignoriert wird.
+
+Die Analyse jedes Projektes mit jedem Tool wird zehnmal durchgeführt, um Schwankungen durch Hintergrundprozesse oder andere Einflussfaktoren auszugleichen. Die Evaluation der Geschwindigkeit wird auf einem Laptop mit dem Prozessor \enquote{i7-1165G7} mit 16 GB Arbeitsspeicher durchgeführt. Dabei wurden alle Programme auf dem Computer geschlossen und die Berechnungen wurden ohne grafische Benutzeroberfläche durchgeführt, um Schwankungen in der Laufzeit zu minimieren.
+\subsection{Ergebnisse}\label{chapter:eval_speed_result}
+[
+  'Durchführung der Geschwindigkeitsevaluation',
+  'Zur Durchführung der Evaluation der Geschwindigkeit analysieren die drei Tools die in Kapitel und die Dokumentation von Methodenparameter überprüfen, während dies ignoriert. Bei jeder Analyse wird die Zeit gemessen, die vom Start eines Tools bis zu dessen Beendigung vergehen.',
+  '',
+  'Die Ausgabe jedes Tools wird auf  dev/null umgeleitet, sodass jegliche Ausgabe ignoriert wird. Dadurch können Schwankungen unberücksichtigt bleiben, die bei der Verwendung von Eingabe- und Ausgabegeräten auftreten. So sind die Ergebnisse näher an der tatsächlichen Verarbeitungsgeschwindigkeit.  Nachteilhaft an diesem Vorgehen ist, dass die Tools im Praxiseinsatz eine Ausgabe produzieren müssen, um überhaupt dem Entwickler helfen zu können, sodass dieser wichtige Aspekt hier ignoriert wird.',
+  '',
+  'Die Analyse jedes Projektes mit jedem Tool wird zehnmal durchgeführt, um Schwankungen durch Hintergrundprozesse oder andere Einflussfaktoren auszugleichen. Die Evaluation der Geschwindigkeit wird auf einem Laptop mit dem Prozessor  i7-1165G7 mit 16 GB Arbeitsspeicher durchgeführt. Dabei wurden alle Programme auf dem Computer geschlossen und die Berechnungen wurden ohne grafische Benutzeroberfläche durchgeführt, um Schwankungen in der Laufzeit zu minimieren.'
+] [ 3, 3, 1, 0 ]
+Die Tabellen \ref{tab:median_speed} und \ref{tab:std_speed} zeigen den Median und die Standardabweichung der benötigten Durchlaufzeit pro Tool und Projekt in Sekunden. Die Abbildungen \ref{fig:log4j_box}, \ref{fig:argo_box} und \ref{fig:eclipse_box} visualisieren den Inhalt der Tabellen als Boxplot.
+
+Im Verzeichnis \enquote{speed\_eval} des digitalen Anhangs befinden sich die Rohdaten der Geschwindigkeitsmessung, gruppiert nach dem analysierten Projekt. Auch die Originaldateien der Boxplots befinden sich dort.
+\sisetup{group-minimum-digits=4,table-number-alignment =center,table-format=2.3,output-decimal-marker = {,}}
+\begin{table}[ht!]
+\centering
+\begin{tabular}{c|S|S|S}
+& {DE} & {CS} & {PMD}  \\\hline
+Log4J & 2.538 & 2.30 & 1.907\\\hline
+ArgoUML & 16.965 & 9.301 & 7.917 \\\hline
+Eclipse \ac{JDT} & 69.148 & 27.316 & 21.586
+\end{tabular}
+\caption{Median der Laufzeit in Sekunden}
+\label{tab:median_speed}
+\end{table}
+
+\begin{table}[ht!]
+\centering
+\begin{tabular}{c|S|S|S}
+& {DE} & {CS} & {PMD}  \\\hline
+Log4J & 0,077 &  0,174 &  0,068\\\hline
+ArgoUML & 0,197 &  0,083 & 0,157 \\\hline
+Eclipse \ac{JDT} & 1,594 & 0,265 & 0,270\\\hline
+\end{tabular}
+\caption{Standardabweichung der Laufzeit in Sekunden}
+\label{tab:std_speed}
+\end{table}
+
+\begin{figure}
+[ '    \\caption{Boxplot: Log4J}' ]
+0
+\label{fig:log4j_box}
+\end{subfigure}
+\hspace{0.01cm}
+\begin{subfigure}[b]{0.49\textwidth}
+\centering
+\includesvg[width=\textwidth]{figures/chapter5/argo_speed_boxplot.svg}
+\caption{Boxplot: ArgoUML}
+\label{fig:argo_box}
+\end{subfigure}
+
+\begin{subfigure}[b]{0.49\textwidth}
+\centering
+\includesvg[,width=\textwidth]{figures/chapter5/eclipse_speed_boxplot.svg}
+\caption{Boxplot: Eclipse \ac{JDT} }
+\label{fig:eclipse_box}
+\end{subfigure}
+
+\end{figure}
+
+
+Aus den Tabellen und Boxplot-Diagrammen wird ersichtlich, dass der \doceval im Durchschnitt länger benötigt, um die Projekte zu bewerten. Wie aus dem Boxplot-Diagramm \ref{fig:log4j_box} zu entnehmen ist, gab es nur bei Log4J einen Ausreißer, bei dem \textit{Checkstyle} mehr Zeit benötigt hat.   Ansonsten war \textit{Checkstyle} stets schneller als der \textit{DocEvaluator}. \textit{PMD} analysiert am schnellsten ein Projekt. Der Unterschied in der Laufzeit zwischen dem \doceval und den anderen Tools steigt stark  mit wachsender Größe des analysierten Projektes.  Bei dem kleinsten Projekt \textit{Log4J} benötigt der \doceval  durchschnittlich die 1,103-fache Zeit im Vergleich zu \textit{Checkstyle}. Bei dem größten Projekt \textit{Eclipse \ac{JDT}} benötigt der \doceval durchschnittlich 2,53-mal so viel Zeit wie \textit{Checkstyle}. Beim \doceval und \textit{PMD} steigt die Standardabweichung mit der Größe des Projektes, während dieser Trend bei \textit{Checkstyle} nicht so eindeutig ist.
+
+Bei dem Boxplot-Diagramm \ref{fig:log4j_box} zu \textit{Log4J} ist auch erkennbar, dass Ausreißer der Laufzeit nach oben häufiger sind als nach unten, da der Median sich stets im unteren Bereich des Boxplot-Quartils befindet. Bei den anderen Projekten ist dies aufgrund des größeren Zeitabstandes  zwischen dem \doceval und den anderen Tools  und der daraus resultierenden Verkleinerung der einzelnen Boxplots  nicht so klar im Boxplot ersichtlich, allerdings stimmt diese Aussage größtenteils auch dort. Nur bei der Analyse von \textit{ArgoUML} durch den \doceval (Abbildung \ref{fig:argo_box}) scheinen Abweichungen nach unten häufiger zu sein.
+
+\subsection{Bewertung der Ergebnisse}
+[
+  'Ergebnisse',
+  'Die Tabellen zeigen den Median und die Standardabweichung der benötigten Durchlaufzeit pro Tool und Projekt in Sekunden. Die Abbildungen  und visualisieren den Inhalt der Tabellen als Boxplot.',
+  '',
+  'Im Verzeichnis  speed',
+  '& DE & {CS} & {PMD}  ',
+  'Log4J & 2.538 & 2.30 & 1.907',
+  'ArgoUML & 16.965 & 9.301 & 7.917 ',
+  'Eclipse ',
+  '',
+  '& DE & {CS} & {PMD}  ',
+  'Log4J & 0,077 &  0,174 &  0,068',
+  'ArgoUML & 0,197 &  0,083 & 0,157 ',
+  'Eclipse ',
+  '',
+  '',
+  '',
+  '',
+  '',
+  'Aus den Tabellen und Boxplot-Diagrammen wird ersichtlich, dass der mehr Zeit benötigt hat.   Ansonsten war stets schneller als der  analysiert am schnellsten ein Projekt. Der Unterschied in der Laufzeit zwischen dem benötigt der  Bei dem größten Projekt  benötigt der  Beim steigt die Standardabweichung mit der Größe des Projektes, während dieser Trend bei nicht so eindeutig ist.',
+  '',
+  'Bei dem Boxplot-Diagramm ist auch erkennbar, dass Ausreißer der Laufzeit nach oben häufiger sind als nach unten, da der Median sich stets im unteren Bereich des Boxplot-Quartils befindet. Bei den anderen Projekten ist dies aufgrund des größeren Zeitabstandes  zwischen dem durch den  scheinen Abweichungen nach unten häufiger zu sein.',
+  ''
+] [ 3, 3, 2, 0 ]
+Insgesamt zeigt die Evaluation der Geschwindigkeit, dass der \doceval langsamer arbeitet als die anderen Programmen. Allerdings  bleibt die Laufzeit auf einem angemessenen Niveau, da die Verarbeitung von dem größten Projekt \textit{Eclipse \ac{JDT}} mit 400~000 \ac{LOC} im Durchschnitt nur etwas mehr als einer Minute benötigt. Nichtsdestotrotz ignoriert diese Analyse, dass die Ausgabe von Ergebnissen über die Konsole hier nicht berücksichtigt wurde und nur eine einfache Metrik angewendet wurde. Bei einem Experiment mit aktivierter Ausgabe wurden ähnliche Ergebnisse produziert, insbesondere ist der \doceval weiterhin das langsamste Programm.
+
+Für die schlechtere Laufzeit des \doceval im Vergleich zu \checkpmd lassen sich zwei Hauptargumente finden. So soll \textit{Node.Js}, welches die Plattform des Tools ist, langsamer sein als Java, in dem \checkpmd programmiert sind \cite{node_java_speed}.  Außerdem ist zu beachten, dass der \doceval Metriken berechnen soll und daher die Zwischenergebnisse aller Komponenten speichern muss, um daraus ein Gesamtergebnis mittels eines arithmetischen Mittelwerts oder eines anderen Algorithmus' berechnen zu können. Auch wenn dieses Gesamtergebnis bei der Laufzeitevaluation uninteressant ist, wird es dennoch berechnet, was zusätzliche Laufzeit benötigt. Dies erklärt auch die starke Steigerung des Zeitaufwands bei größeren Projekten.
+
+\section{Fazit der Evaluation}\label{chapter:eval_conclusion}
+[
+  'Bewertung der Ergebnisse',
+  'Insgesamt zeigt die Evaluation der Geschwindigkeit, dass der mit 400~000 im Durchschnitt nur etwas mehr als einer Minute benötigt. Nichtsdestotrotz ignoriert diese Analyse, dass die Ausgabe von Ergebnissen über die Konsole hier nicht berücksichtigt wurde und nur eine einfache Metrik angewendet wurde. Bei einem Experiment mit aktivierter Ausgabe wurden ähnliche Ergebnisse produziert, insbesondere ist der ',
+  '',
+  'Für die schlechtere Laufzeit des   Außerdem ist zu beachten, dass der ',
+  ''
+] [ 3, 4, 0, 0 ]
+
+Insgesamt zeigt die Evaluation sowohl bezüglich der Qualität als auch der Geschwindigkeit, dass der \doceval mit den anderen Tools mithalten kann. Zwar wird nicht jeder Fehler gefunden, aber die Trefferrate ist hoch und durch die Verwendung eines abstrakten Formates, das für mehrere Programmiersprachen geeignet ist, sind solche Abstriche nicht vermeidbar.
+
+Auch bei der Geschwindigkeit zeigt sich, dass der \doceval zwar im Extremfall zweieinhalbmal langsamer ist als die anderen Tools, allerdings ist die Laufzeit mit knapp 70 Sekunden im Extremfall bei einem großen Projekt noch in einem (relativ) angemessenen Rahmen. Nichtsdestotrotz ist es eine Überlegung wert, den \doceval weiter zu optimieren, damit die Laufzeit verbessert wird.
+\end{comment}
+\begingroup
+\renewcommand{\cleardoublepage}{} % TODO maybe removing this and next
+\renewcommand{\clearpage}{}
+\chapter{Fazit}\label{chapter:conclusion}
+[ 'Evaluation' ] [ 4, 0, 0, 0 ]
+\endgroup
+\label{sec:conclusion}
+\input{Conclusion/conclusion}
+input
+masterthesis/Conclusion/conclusion
+\begin{comment}
+Ziel dieser Bachelorarbeit war es, ein Tool zu Bewertung der Dokumentation zu entwickeln, das in einem \ac{CI/CD}-Prozess eingebunden werden kann und nicht auf einer Programmiersprache beschränkt ist. Dabei beschränkt sich diese Bachelorarbeit auf strukturierte Kommentaren wie z.~B. Javadoc. Dieses Ziel wurde im Großen und Ganzen erreicht.
+
+Durch die allgemein gehaltene Klassenstruktur für das Parsing ist es möglich, Quellcode in anderen Programmiersprachen bewerten zu lassen. Allerdings muss dafür ein entsprechender Parser geschrieben werden, welcher den Quellcode in die vorgegebene Struktur transformiert. Dabei ist es natürlich nicht möglich, jedes Detail abzubilden, sondern es müssen Abstriche gemacht werden. Nichtsdestotrotz können auch sprachspezifische Eigenheiten berücksichtigt werden, indem eine entsprechende abgeleitete Klasse von \textit{ComponentMetaInformation} gebildet wird und diese sprachspezifischen Informationen dort gespeichert werden. Diese Daten können von einem geeigneten \textit{LanguageSpecificHelper} dazu verwendet werden, um sprachabhängige Details bei der Bewertung der Dokumentation zu berücksichtigen.
+
+Auch das Parsen der strukturierten Kommentare erfolgt recht abstrakt, indem  die Informationen in den Beschreibungstexten unstrukturiert als Zeichenketten gespeichert werden, sodass die einzelnen Metriken diese Informationen weiterverarbeiten müssen. Da es Metriken gibt, die mit den einzelnen Wörtern ein eines Kommentars arbeiten und auch Metriken, welche die interne Struktur des Kommentars analysieren, wäre es ein mögliches Forschungsthema, wie diese zwei Darstellungen besser repräsentiert werden können.
+
+Um das Tool konfigurierbar zu halten, wurde ein Konzept für eine Konfigurationsdatei im \ac{JSON}-Format vorgestellt, das alle wichtigen Informationen enthält. Die Konfiguration kann auch über GitHub Actions durchgeführt werden, indem passende Umgebungsvariablen gesetzt werden.  So kann das Tool sowohl als reguläres Programm auf einem lokalen System verwendet werden als auch mittels GitHub Actions in den \ac{CI/CD}-Prozess eingebunden werden. Durch die flexible Konfiguration kann ein Nutzer frei entscheiden, welche Metriken er für sinnvoll hält und wie er sie gewichten will. Dabei überschreibt die Konfiguration mittels GitHub Actions stets die Konfiguration in der \ac{JSON}-Datei. Außerdem können die Metriken selbst begrenzt konfiguriert werden. Eine Nutzung des Tools auf anderen \ac{CI/CD}-Plattformen, die mit GitHub Actions vergleichbar sind,  ist prinzipiell ebenfalls möglich, da die Konfiguration von dem  übrigen Programm entkoppelt ist.
+
+Für das Tool wurden bereits einige Metriken entwickelt, welche verschiedene Bereiche der Dokumentation analysieren können. Leider war eine Evaluation der einzelnen Metriken nicht möglich, sodass weiterhin offenbleibt, welche Metriken in welchen Situationen valide Ergebnisse liefern und wie eine sinnvolle Gewichtung der Metriken aussehen kann.  Weitere Metriken lassen sich durch Einfügen einer neuen abgeleiteten Klasse von \textit{DocumentationAnalysisMetric} bilden. Schwierig kann im konkreten Einzelfall allerdings das Finden einer geeigneten Funktion werden, welche die Werte der Metrik in das vorgegebene Intervall von 0 bis 100 transformiert. Mögliche Ideen für weitere Metriken lassen sich in \cite{checkstyle_doc_metrics} finden. Auch die wissenschaftliche Literatur liefert weitere Metriken, die fortschrittliche Techniken im Bereich des \ac{NLP} nutzen und daher im Rahmen dieser Bachelorarbeit zu komplex waren. Beispielhaft sei hier das Tool \enquote{iComment} aus  \cite[S.~145ff.]{icomment} genannt, bei dem geprüft wurde, ob die Dokumentation mit dem Code auch konsistent ist und somit korrekt und aktuell ist. Diese Metriken können als Inspiration genommen werden, um die Dokumentationsqualität umfassender analysieren zu können, sodass Entwickler bei der Identifikation und Behebung von mangelhafter Softwaredokumentation  besser unterstützt werden.
+
+
+\end{comment}
+
+
+%Prints references
+\printbibliography[title=Literaturverzeichnis]
+
+
+\clearpage
+
+%Appendix (comes after bibliography)
+\input{Misc/Appendix}
+input
+masterthesis/Misc/Appendix
+
+\renewcommand\appendixpagename{Anhänge}
+\begin{appendices}
+
+\begin{comment}
+\chapter{Änderungen an der Parserdatei}\label{chapter:appendix_parser_changes}
+[ '', '', '' ] [ 5, 0, 0, 0 ]
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{m{0.75cm}|m{4cm}|m{10cm}}
+\textbf{Zeile} & \textbf{Änderung} & \textbf{Begründung} \\
+\hline
+116 & Deklaration Kommentar & Hier wird ein mehrzeiliger Kommentar definiert, dies ist hier ein Alias für den Token \textit{JCOMMENT}\\
+\hline
+127--128 & \textit{comment} als mögliches Präfix in Klassenmember & Hier wird dem Parser mitgeteilt, dass ein Bestandteil einer Klasse wie z. B. eine Methode einen Javadoc-Kommentar besitzen kann\\
+\hline
+47 & \textit{comment} als mögliches Präfix vor Datentyp & Hier wird dem Parser mitgeteilt, dass ein Datentyp (Klasse, Schnittstelle etc. ) einen Javadoc-Kommentar haben kann \\
+\hline
+404 & Zulassung von Javadoc in Methoden & Da Javadoc-Kommentare an beliebigen Stellen auftauchen können, auch wenn es nicht empfohlen wird und keinen Mehrwert bietet, wird hier sichergestellt, dass solche Kommentare nicht zu Warnungen oder Fehler von ANTLR4 führen. Diese Javadoc-Kommentare werden nichtsdestotrotz später ignoriert\\
+\hline
+34, 38& Zulassung von Kommentaren vor Paketdeklarationen und Imports & Hier werden Kommentare auch vor Paketdeklarationen und Import-Statements erlaubt, was vor allem bei Klassen mit Urheberrechtsangabe sinnvoll ist\\
+\hline
+105 & Zulassung von Kommentaren bei Enumerationen & Zwar werden Javadoc-Kommentare in Enumerationen mit diesem Tool nicht betrachtet, sie führen aber dennoch zu Warnungen und Fehlermeldungen. Daher werden sie hier zugelassen, aber später ignoriert \\
+\hline
+82, 83 & Erzeugung eines separaten Knotens für \textit{Extends}- und \textit{Implements}-Deklarationen & In der originalen Version der Parserdatei wurde die Definition der Basisklasse bzw. der implementierten Schnittstellen direkt über die Tokens \textit{EXTENDS} bzw. \textit{IMPLEMENTS} gelöst. Dies wurde in einem neuen Knoten \textit{extendClass} bzw. \textit{implementInterfaces} ausgegliedert, um so das Parsing etwas zu vereinfachen  \\
+
+\end{tabular}
+\caption{Änderungen an der Parserdatei}
+\label{tab:parser_changes}
+\end{table}
+
+\chapter{UML-Diagramm: Parser}\label{appendix_parsing_uml}
+[
+  'Änderungen an der Parserdatei',
+  '',
+  '116 & Deklaration Kommentar & Hier wird ein mehrzeiliger Kommentar definiert, dies ist hier ein Alias für den Token  JCOMMENT',
+  '127--128 &  comment als mögliches Präfix in Klassenmember & Hier wird dem Parser mitgeteilt, dass ein Bestandteil einer Klasse wie z. B. eine Methode einen Javadoc-Kommentar besitzen kann',
+  '47 &  comment als mögliches Präfix vor Datentyp & Hier wird dem Parser mitgeteilt, dass ein Datentyp (Klasse, Schnittstelle etc. ) einen Javadoc-Kommentar haben kann ',
+  '404 & Zulassung von Javadoc in Methoden & Da Javadoc-Kommentare an beliebigen Stellen auftauchen können, auch wenn es nicht empfohlen wird und keinen Mehrwert bietet, wird hier sichergestellt, dass solche Kommentare nicht zu Warnungen oder Fehler von ANTLR4 führen. Diese Javadoc-Kommentare werden nichtsdestotrotz später ignoriert',
+  '34, 38& Zulassung von Kommentaren vor Paketdeklarationen und Imports & Hier werden Kommentare auch vor Paketdeklarationen und Import-Statements erlaubt, was vor allem bei Klassen mit Urheberrechtsangabe sinnvoll ist',
+  '105 & Zulassung von Kommentaren bei Enumerationen & Zwar werden Javadoc-Kommentare in Enumerationen mit diesem Tool nicht betrachtet, sie führen aber dennoch zu Warnungen und Fehlermeldungen. Daher werden sie hier zugelassen, aber später ignoriert ',
+  '82, 83 & Erzeugung eines separaten Knotens für  Extends- und Deklarationen & In der originalen Version der Parserdatei wurde die Definition der Basisklasse bzw. der implementierten Schnittstellen direkt über die Tokens bzw. gelöst. Dies wurde in einem neuen Knoten bzw. ausgegliedert, um so das Parsing etwas zu vereinfachen  ',
+  '',
+  ''
+] [ 6, 0, 0, 0 ]
+\begin{figure}[ht!]
+[
+  '    \\caption{UML-Diagramme aller Klassen, die relevant für das Parsen sind}'
+]
+0
+\label{fig:uml_parsing}
+\end{figure}
+\chapter{UML-Diagramm: Metriken}\label{appendix_metrics_uml}
+[ 'UML-Diagramm: Parser' ] [ 7, 0, 0, 0 ]
+\begin{figure}[ht!]
+[
+  '    \\caption{UML-Diagramme aller Klassen, die relevant für die Metriken sind}'
+]
+0
+\label{fig:uml_metrics}
+\end{figure}
+\chapter{Konfiguration des Tools}
+[ 'UML-Diagramm: Metriken' ] [ 8, 0, 0, 0 ]
+\begin{description}
+\item[include]  Alle Dateien, die bei der Bewertung der Dokumentationsqualität berücksichtigt werden müssen
+\item[exclude]  Teilmenge von include, enthält Dateien, die nicht weiter betrachtet werden müssen
+\item[metrics]  Alle Metriken, die das Tool verwenden soll. Dies ist ein Array von Objekten mit der Struktur \enquote{(name,weight, unique\_name, params)}, wobei \textit{weight} das Gewicht der jeweiligen Metrik ist (Bei Algorithmen ohne Relevanz des Gewichts wird es ignoriert), \textit{name} der Name der Metrik und \textit{params} ein Objekt mit den Parametern der Metrik
+\item[absolute\_threshold] Mindestwert der Bewertung, die erreicht werden muss, sonst wird die Dokumentationsqualität nicht akzeptiert
+
+\item[builder] Der Algorithmus/\textit{ResultBuilder}, der die einzelnen Ergebnisse verarbeitet.
+
+\item[parser]  Kann verwendet, um die zu parsende Programmiersprache zu wählen. Dazu muss \textit{ParserFactory} angepasst werden
+
+\item[path\_weights] Ein Array von Objekten der Struktur \enquote{(path,weight)}. Wird verwendet, um einzelne Pfade höher oder niedriger zu gewichtet
+
+\item[component\_weights] Ein Array von Objekten der Struktur \enquote{(name,weight)}. Wird verwendet, um einzelne Komponenten höher oder niedriger zu gewichtet
+
+\item[default\_path\_weight] Das Standardgewicht für eine Datei, wenn keine passende Gewichtung gefunden wurde
+
+\item[default\_component\_weight] Das Standardgewicht einer Komponente, wenn keine passende Gewichtung gefunden wurde
+
+\item[state\_manager] Kann verwendet werden, um festzulegen, wie das letzte Ergebnis der Dokumentationsqualität gespeichert werden soll. Weitere Möglichkeiten können durch Erweiterung der \textit{StateManagerFactory} hinzugefügt werden.
+
+\item[relative\_threshold] Der maximale  relative Abstand zur letzten Dokumentationsqualität bevor eine Fehlermeldung geworfen wird.
+\item[builder\_params] Parameter für die \textit{MetricResultBuilder}. Diese wird aktuell nur von dem Squale-Builder (Kapitel \ref{chapter:squale}) genutzt
+
+
+
+\label{enum:tool_javadoc_conf}
+\end{description}
+\chapter{Implementierte Metriken}\label{appendix_metrics}
+[
+  'Konfiguration des Tools',
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
+  ''
+] [ 9, 0, 0, 0 ]
+
+\begin{description}
+
+\item[Anteil dokumentierter Komponenten an allen Komponenten]
+\begin{description}
+\item[]
+\item [Metrikname]  simple\_comment
+\item [Klassenname] SimpleCommentPresentMetric
+\item[Beschreibung] Berechnet den Anteil der dokumentierten Komponenten an allen Komponenten, kann Getter und Setter ignorieren
+\item[Quellen] \cite[S. 5]{HowDocumentationEvolvesoverTime}
+\end{description}
+
+\item[Anteil öffentlicher dokumentierter Komponenten]
+\begin{description}
+\item[]
+\item [Metrikname]  public\_members\_only
+\item [Klassenname] SimplePublicMembersOnlyMetric
+\item[Beschreibung] Berechnet den Anteil der öffentlichen dokumentierten Komponenten an allen öffentlichen Komponenten, kann Getter und Setter ignorieren
+\item[Quellen] \cite[S. 253]{JavadocViolationsandTheirEvolutioninOpen-SourceSoftware}
+\end{description}
+
+\item[Bestrafung langer undokumentierter Methoden]
+\begin{description}
+\item[]
+\item [Metrikname]  large\_method\_commented
+\item [Klassenname] SimpleLargeMethodCommentedMetric
+\item[Beschreibung] Bestraft undokumentierte Methoden je nach ihrer Länge
+\item[Quellen] Eigene Idee
+\end{description}
+
+\item[Vollständigkeit der Dokumentation von Methoden]
+\begin{description}
+\item[]
+\item [Metrikname]  method\_fully\_documented
+\item [Klassenname] SimpleMethodDocumentationMetric
+\item[Beschreibung] Prüft, ob alle Methodenparameter und Rückgabewert dokumentiert sind
+\item[Quellen] \cite[S. 5]{HowDocumentationEvolvesoverTime}
+\end{description}
+\clearpage
+\item[Anteil dokumentierter Methoden unter
+Berücksichtigung der LOC]
+\begin{description}
+\item[]
+\item [Metrikname]  commented\_lines
+\item [Klassenname] CommentedLinesRatioMetric
+\item[Beschreibung]  Berechnet den Anteil der \ac{LOC} der dokumentierten Methoden an allen \ac{LOC} aller Methoden
+\item[Quellen] Eigene Idee
+\end{description}
+
+\item[Flesch-Score]
+\begin{description}
+\item[]
+\item [Metrikname]  flesch
+\item [Klassenname] FleschMetric
+\item[Beschreibung]   Berechnet den Flesch-Score des Kommentars und bewertet so, ob der Kommentar verständlich ist
+\item[Quellen] \cite[S. 72]{AutomaticQualityAssessmentofSourceCodeComments:TheJavadocMiner}
+\end{description}
+
+\item[Kohärenz zwischen Kommentar und
+Komponentenname]
+\begin{description}
+\item[]
+\item [Metrikname]  comment\_name\_coherence
+\item [Klassenname] CommentNameCoherenceMetric
+\item[Beschreibung]  Prüft, ob der Kommentar und der Name der dokumentierten Komponente sehr ähnlich sind oder keine Ähnlichkeit haben, arbeitet nur mit Methoden
+\item[Quellen] \cite[S. 86ff ]{Qualityanalysisofsourcecodecomments}
+\end{description}
+
+\item[Verwendung bestimmter Wörter bestrafen]
+\begin{description}
+\item[]
+\item [Metrikname]  certain\_terms
+\item [Klassenname] CertainTermCountMetric
+\item[Beschreibung]  Bestraft das Vorkommen bestimmter Wörter (wie z.~B. Abkürzungen)
+\item[Quellen] Inspiriert von Verbot lateinischer Ausdrücke nach \cite{HowtoWriteDocCommentsfortheJavadocTool}
+\end{description}
+
+\item[Bewertung der Formatierung]
+\begin{description}
+\item[]
+\item [Metrikname]  formatting\_good
+\item [Klassenname] FormattingGoodMetric
+\item[Beschreibung] Überprüft, ob korrekte Tags verwendet wurde, HTML-Tags geschlossen wurden und bei langen Methoden überhaupt eine Formatierung verwendet wurden
+\item[Quellen] Inspiriert von Regel in Checkstyle \cite{checkstyle_doc_metrics}
+\end{description}
+
+\clearpage
+\item[Rechtschreibfehler bestrafen]
+
+\begin{description}
+\item[]
+\item [Metrikname]  spellling
+\item [Klassenname] SpellingMetric
+\item[Beschreibung]Sucht nach Rechtschreibfehlern und bestraft sie
+\item[Quellen] Eigene Idee
+\end{description}
+
+\item[Erwähnung von Randfällen bei Methodenparameter
+und -rückgabewerte]
+\begin{description}
+\item[]
+\item [Metrikname]  edge\_case
+\item [Klassenname] EdgeCaseMetric
+\item[Beschreibung] Prüft, ob bei der Dokumentation von Parametern die Behandlung des Wertes \textit{null} erwähnt wird
+\item[Quellen] Inspiriert von Idee in  \cite{javadoc_coding_standards}. In \cite[S.~1ff.]{@tComment:TestingJavadocCommentstoDetectComment-CodeInconsistencies} wird ebenfalls auf einer ähnlichen Art und Weise die Erwähnung von Randfällen geprüft, dort aber auch, ob diese Angaben korrekt sind
+\end{description}
+
+
+\item[Gunning-Fog-Index]
+\begin{description}
+\item[]
+\item [Metrikname]  gunning\_fog
+\item [Klassenname] GunningFogMetric
+\item[Beschreibung] Berechnet den Gunning-Fog-Index des Kommentars und bewertet so, ob der Kommentar verständlich ist
+\item[Quellen] \cite[S. 71]{AutomaticQualityAssessmentofSourceCodeComments:TheJavadocMiner}
+\end{description}
+\end{description}
+
+\chapter{Bilder des Tools}\label{chapter:pictures_tool}
+[
+  'Implementierte Metriken',
+  '',
+  '',
+  '',
+  '',
+  '',
+  'Berücksichtigung der LOC]',
+  '',
+  '',
+  'Komponentenname]',
+  '',
+  '',
+  '',
+  '',
+  '',
+  'und -rückgabewerte]',
+  '',
+  '',
+  ''
+] [ 10, 0, 0, 0 ]
+In diesem Kapitel sind zwei Bilder des \textit{DoxEvaluators} abgedruckt, welche die zwei möglichen Ausgaben des Programms zeigen (Dokumentationsqualität ausreichend und nicht ausreichend):
+\begin{figure}[htbp!]
+[ '    \\caption{Foto vom Tool: Dokumentationsqualität ausreichend}' ]
+0
+\label{fig:passed}
+\end{figure}
+\begin{figure}[htbp!]
+[ '    \\caption{Foto vom Tool: Dokumentationsqualität zu schlecht}' ]
+0
+\label{fig:absolute}
+\end{figure}
+\end{comment}
+
+\end{appendices}
+
+
+
+
+\input{Misc/Testimony}
+input
+masterthesis/Misc/Testimony
+\chapter*{Erklärung zur selbstständigen Abfassung der Masterarbeit}
+[ '' ] [ 5, 0, 0, 0 ]
+
+Ich versichere, dass ich die eingereichte Masterarbeit selbstständig und ohne unerlaubte Hilfe verfasst habe. Anderer als der von mir angegebenen Hilfsmittel und Schriften habe ich mich nicht bedient. Alle wörtlich oder sinngemäß den Schriften anderer Autoren entnommenen Stellen habe ich kenntlich gemacht. \\
+
+
+\bigskip
+\bigskip
+\bigskip
+\bigskip
+\noindent
+Osnabrück \today\\
+
+\bigskip
+\bigskip
+\bigskip
+\bigskip
+\noindent
+Timo Schoemaker
+\end{document}
+
+

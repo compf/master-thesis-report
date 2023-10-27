@@ -32,12 +32,12 @@ An example of a data clump is shown in listing \ref{lst:math_stuff_java}
 			[caption={Some operations on vectors},
 			label={lst:math_stuff_java},
 			captionpos=b,language=java, basicstyle=\footnotesize, tabsize=2, showstringspaces=false,  numbers=left]
-			{figures/chapter3/MathStuff.java}
+			{figures/chapter2/dataClump/MathStuff.java}
 		\end{figure}
 
 
 
-Listing \ref{lst:math_stuff_java} contains three method that execute some vector operations (calculation of length, sum of coordinates, and the maximum coordinate). T
+Listing \ref{lst:math_stuff_java} contains three method that execute some vector operations (calculation of length, sum of coordinates, and the maximum coordinate). 
 
 
 It can be seen that  the snippet contains a method parameter data clump since the variables \textit{x}, \textit{y}, and  \textit{z} occur thrice.  These variables might be called \textbf{data clump items}
@@ -51,7 +51,7 @@ Fowler suggests three steps to refactor a data clump
 \end{enumerate}
 
 
-To illustrate the suggested data clump refactoring process, listing \ref{lst:math_usaer_java} shows how the methods in \ref{lst:math_stuff_java} can be used. 
+To illustrate the suggested data clump refactoring process, listing \ref{lst:math_user_java} shows how the methods in \ref{lst:math_stuff_java} can be used. 
 
 
   \begin{figure} [htbp!]
@@ -59,20 +59,20 @@ To illustrate the suggested data clump refactoring process, listing \ref{lst:mat
 			[caption={Some operations on vectors},
 			label={lst:math_user_java},
 			captionpos=b,language=java, basicstyle=\footnotesize, tabsize=2, showstringspaces=false,  numbers=left]
-			{figures/chapter3/MathUser.java}
+			{figures/chapter2/dataClump/MathUser.java}
 	\end{figure}
 
-In the first step, a new class can be extracted which contains all data clump items as field. It should also contain setters and getters to access the fields in an encapsulated manner. The class should be named so that its purpose is clear. Listing \ref{lst:coordinate_java} shows how such a class may look like. 
+In the first step, a new class can be extracted which contains all data clump items as fields. It should also contain setters and getters to access the fields in an encapsulated manner. The class should be named so that its purpose is clear. Listing \ref{lst:coordinate_java} shows how such a class may look like. 
 
   \begin{figure} [htbp!]
 			\lstinputlisting
 			[caption={ Resulting Coordinate class},
 			label={lst:coordinate_java},
 			captionpos=b,language=java, basicstyle=\footnotesize, tabsize=2, showstringspaces=false,  numbers=left]
-			{figures/chapter3/Coordinate.java}
+			{figures/chapter2/dataClump/Coordinate.java}
 		\end{figure}
 
-
+In the second step, a parameter object is introduced that replaces the three previous data clump items in each of the three method of the \textit{MathStuff} class so that the signature only contains one parameter of type \textit{Coordinate}.
 
 
 \section{ChatGPT}

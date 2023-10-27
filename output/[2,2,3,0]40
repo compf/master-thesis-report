@@ -1,0 +1,7 @@
+Algorithmen aus der Ökonomie
+
+Als Alternative zu den klassischen Algorithmen wurden Verfahren aus den Wirtschaftswissenschaften vorgestellt, die eine bessere Aggregierung der Einzelergebnisse ermöglichen sollen. Diese Verfahren werden in der Ökonomie benutzt, um die Ungleichheit von Einkommen mathematisch darzustellen. So besitzen in den meisten Staaten viele Menschen nur wenig Einkommen und nur einige Menschen ein sehr hohes Einkommen. Auch auf Softwareprojekten lässt sich diese Erfahrung übertragen, da es beispielsweise nur wenige Methoden mit sehr vielen Codezeilen geben wird, aber dafür sehr viele Methoden mit einer relativ kleinen Anzahl an Zeilen. Beispiele für diese Algorithmen sind Gini, Theil oder Atkinson. Einige implementierte Metriken  basierend auf die Anzahl der 
+
+Allerdings beschreiben diese Algorithmen nur, ob die Ergebnisse der Metriken ungleich verteilt sind und nicht, wie gut die Ergebnisse sind. Ein Projekt, bei dem alle Metriken schlechte Resultate liefern, würde dann ein ähnliches Gesamtergebnis liefern als ein Projekt, welches überall gut bewertet wird 
+
+Daher werden diese Algorithmen vom Tool in der ausgelieferten Fassung nicht implementiert. Sie können aber in Verbindung mit anderen Aggregationsalgorithmen interessant sein, um mehr über eventuelle Ungleichheiten bei der Dokumentation zu erfahren.

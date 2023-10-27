@@ -1,0 +1,6 @@
+Analysierte Projekte
+Die folgende Auflistung zeigt die gewählten Projekte für die Evaluation. Die Quellen verweisen auf das Verzeichnis in GitHub, das von den drei Tools analysiert werden soll.  In runden Klammern dahinter befinden sich die  (auf Zehntausenderstelle gerundeten) 
+
+ArgoUML und Eclipse wurden in betrachtet werden soll, da das gesamte Eclipse-Projekt zu umfassend ist. Log4J wurde in betrachtet.
+
+Bei allen Projekten traten zunächst Parsing-Fehler auf. Dies lag allerdings in den meisten Fällen daran, dass auskommentierte Methoden noch ein Javadoc-Präfix hatten. Dies kann vom 

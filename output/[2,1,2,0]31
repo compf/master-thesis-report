@@ -1,0 +1,12 @@
+Metriken, welche die Abdeckung überprüfen
+Eine grundsätzliche Möglichkeit zur Bewertung der Dokumentationsqualität ist es, die Abdeckung der Dokumentation zu prüfen. Dabei werden aus einer  Teilmenge aller Komponenten alle dokumentierten Komponenten mit dem maximalen Wert 100 bewertet und alle undokumentierten Komponenten mit 0 bewertet.  Diese Metriken werden in der wissenschaftlichen Literatur auch als  ANYJ oder bezeichnet 
+
+Bei der Wahl der Teilmenge gibt es zwei naheliegenden Möglichkeiten. Bei der ersten Möglichkeit werden alle Komponenten überprüft, sodass die Teilmenge gleich der Gesamtmenge der Komponenten ist. Für eine gute Bewertung wird somit verlangt, dass möglichst jede Komponente dokumentiert wird. Bei der zweiten Möglichkeit werden nur die öffentlichen Komponenten untersucht und alle nicht öffentlichen Komponenten so behandelt, als ob sie nicht existieren würden. Dies hat den Vorteil, dass nur Komponenten untersucht werden, die wahrscheinlich von anderen Komponenten verwendet werden und somit besser verstanden werden müssen 
+
+
+Durch diese Metriken kann geprüft werden, ob ausreichend viele Komponenten dokumentiert sind. Allerdings überprüfen diese Metriken nur, ob die Komponente dokumentiert ist oder nicht. Ein leerer, sinnloser oder sachfremder Kommentar würde dennoch mit 100 Punkten bewertet werden. Falls alle Komponenten untersucht werden, kann außerdem das Problem auftreten, dass einige Komponenten nur in einem kleinen Bereich des Programms verwendet werden, sodass sie für die Dokumentationsqualität weniger relevant sein können.
+
+Als Erweiterung der Abdeckungsmetriken kann bei Methoden überprüft werden, ob auch ihre Parameter und der Rückgabewert dokumentiert sind. Dies ist sinnvoll, da diese auch Teil der Methode sind und zum Verständnis der Methode beitragen 
+
+Bei der Abdeckung der Dokumentation von Methoden könnte auch die Länge der Methode berücksichtigt werden, was aber in der Literatur nicht erwähnt wird. Dabei wird jede Methode mit ihrem der dokumentierten Methoden innerhalb einer Klasse wird durch die Summe der aller Methoden der Klasse geteilt. Dies hat den Vorteil, dass undokumentierte Getter und Setter, die nur wenige Codezeilen haben, das Ergebnis nicht so stark beeinflussen, aber trotzdem berücksichtigt werden.
+
