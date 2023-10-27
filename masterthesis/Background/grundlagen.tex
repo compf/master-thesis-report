@@ -43,12 +43,11 @@ Listing \ref{lst:math_stuff_java} contains three method that execute some vector
 It can be seen that  the snippet contains a method parameter data clump since the variables \textit{x}, \textit{y}, and  \textit{z} occur thrice.  These variables might be called \textbf{data clump items}
   
 \subsection{Refactoring data clumps}
-Fowler suggests three steps to refactor a data clump
-\begin{enumerate}
-    \item \textbf{Extract Class} Create a class with fields for each data clump item
-    \item \textbf{Introduce Parameter Object} Change signature of the methods so that instead of the individual data clump items, the newly created class is used. 
-    \item \textbf{Preserve Whole Object} Refactor the source code so that whereever the refactored method in step 2 is used, a new object of the class in step 1 is created and provided instead of the individual data clump items.
-\end{enumerate}
+Fowler suggests two  steps to refactor a data clump:
+
+In the  \textbf{Extract-Class}-step, a class with fields for each data clump item is extracted. A class for this purpose might already exists  so that it can be re-used.
+
+In the second step, \textbf{Preserve Whole Object} or \textbf{Introduce Parameter Object} migth be applied. This means that the signature of the method is changed so that the data clump items are replaced by the extracted class and all references to the method are changed accordingly.
 
 
 To illustrate the suggested data clump refactoring process, listing \ref{lst:math_user_java} shows how the methods in \ref{lst:math_stuff_java} can be used. 
@@ -72,8 +71,22 @@ In the first step, a new class can be extracted which contains all data clump it
 			{figures/chapter2/dataClump/Coordinate.java}
 		\end{figure}
 
-In the second step, a parameter object is introduced that replaces the three previous data clump items in each of the three method of the \textit{MathStuff} class so that the signature only contains one parameter of type \textit{Coordinate}.
+In the second step, a parameter object is introduced that replaces the three previous data clump items in each of the three method of the \textit{MathStuff} class so that the signature only contains one parameter of type \textit{Coordinate}. Also the calls in \textit{MathUSage} are refactored to reflect that change ( listing \ref{lst:math_stuff_refactored_java} and \ref{lst:math_user_refactored_java}). 
 
+  \begin{figure} [htbp!]
+			\lstinputlisting
+			[caption={ Resulting Coordinate class},
+			label={lst:math_stuff_refactored_java},
+			captionpos=b,language=java, basicstyle=\footnotesize, tabsize=2, showstringspaces=false,  numbers=left]
+			{figures/chapter2/dataClump/MathStuffRefactored.java}
+		\end{figure}
+  \begin{figure} [htbp!]
+			\lstinputlisting
+			[caption={ Resulting Coordinate class},
+			label={lst:math_user_refactored_java},
+			captionpos=b,language=java, basicstyle=\footnotesize, tabsize=2, showstringspaces=false,  numbers=left]
+			{figures/chapter2/dataClump/MathStuffRefactored.java}
+		\end{figure}
 
 \section{ChatGPT}
 
@@ -84,3 +97,7 @@ A query can be a question or a prompt directing ChatGPT to answer a question or 
 The usage of ChatGPT is nevertheless somewhat restricted. For instance, content that may be regarded as hate speech or that may be used for illegal purposes will be supressed.
 
 Another important feature of ChatGPT is the ability to store conversations. A conservation is a collection of queries and linked responses that have been sent to ChatGPT. Using conversations, a user can refer to a previous query or response in a later query. For instance, if ChatGPT made a mistake or interpreted a query in a wrong way, a user can send another request that can point out the mistake or give more context, thereby helping ChatGPT to auto correct itself. 
+
+
+\section{Related Research}
+This is the related research.
