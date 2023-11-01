@@ -3253,7 +3253,21 @@
   url = {https://www.semanticscholar.org/paper/c6956685bd22ae6dd983cd3087ba8313c235cf96},
   abstract = {Current approaches to detecting bad smells in code are mainly based on software metrics. We suggest that these methods lack precision in detecting bad smells, and we propose a code pattern-based approach to detecting bad smells. However before such a pattern-based approach can be implemented, Fowler's original definitions of bad smells need to be made more precise. Currently Fowler's definitions are too informal to implement in a pattern-searching tool. In this paper we use an expert panel to evaluate our enhanced definitions for five of Fowler's bad smells. We use a questionnaire to survey four experts' opinions of our bad smell definitions. Our results show that the experts basically agree with our enhanced definitions of the message chains, middle man and speculative generality bad smells. However, there are strong disagreements on our definitions of the data clumps and switch statements bad smells. We present enhanced definitions on the basis of these expert opinions.}
 }
-
+@inproceedings{BaumgartnerAP23,
+  title = {Live Code Smell Detection of Data Clumps in an Integrated Development Environment},
+  author = {Nils Baumgartner and Firas Adleh and Elke Pulvermüller},
+  year = {2023},
+  doi = {10.5220/0011727500003464},
+  url = {https://doi.org/10.5220/0011727500003464},
+  researchr = {https://researchr.org/publication/BaumgartnerAP23},
+  cites = {0},
+  citedby = {0},
+  pages = {64-76},
+  booktitle = {Proceedings of the 18th International Conference on Evaluation of Novel Approaches to Software Engineering, ENASE 2023, Prague, Czech Republic, April 24-25, 2023},
+  editor = {Hermann Kaindl and Mike Mannion and Leszek A. Maciaszek},
+  publisher = {SCITEPRESS},
+  isbn = {978-989-758-647-7},
+}
 @article{zhangPrioritisingRefactoringUsing2011,
   title = {Prioritising {{Refactoring Using Code Bad Smells}}},
   author = {Zhang, Min and Baddoo, Nathan and Wernick, P. and Hall, T.},
@@ -3287,4 +3301,42 @@
 	date         = 2019,
 	lccn         = 2018950015,
 	priority     = {prio1}
+}
+
+
+@ARTICLE{5680918,
+  author={Liu, Hui and Ma, Zhiyi and Shao, Weizhong and Niu, Zhendong},
+  journal={IEEE Transactions on Software Engineering}, 
+  title={Schedule of Bad Smell Detection and Resolution: A New Way to Save Effort}, 
+  year={2012},
+  volume={38},
+  number={1},
+  pages={220-235},
+  doi={10.1109/TSE.2011.9}}
+
+@INPROCEEDINGS{5076631,
+  author={Tempero, Ewan},
+  booktitle={2009 Australian Software Engineering Conference}, 
+  title={How Fields are Used in Java: An Empirical Study}, 
+  year={2009},
+  volume={},
+  number={},
+  pages={91-100},
+  doi={10.1109/ASWEC.2009.19}}
+
+@inproceedings{10.1145/1352678.1352681,
+author = {Denker, Marcus and G\^{\i}rba, Tudor and Lienhard, Adrian and Nierstrasz, Oscar and Renggli, Lukas and Zumkehr, Pascal},
+title = {Encapsulating and Exploiting Change with Changeboxes},
+year = {2007},
+isbn = {9781605580845},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/1352678.1352681},
+doi = {10.1145/1352678.1352681},
+abstract = {Real world software systems change continuously to meet new demands. Most programming languages and development environments, however, are more concerned with limiting the effects of change rather than enabling and exploiting change. Various techniques and technologies to exploit change have been developed over the years, but there exists no common support for these approaches. We propose Changeboxes as a general-purpose mechanism for encapsulating change as a first-class entity in a running software system. Changeboxes support multiple, concurrent and possibly inconsistent views of software artifacts within the same running system. Since Changeboxes are first-class, they can be manipulated to control the scope of change in a running system. Furthermore, Changeboxes capture the semantics of change. Changeboxes can be used, for example, to encapsulate refactorings, or to replay or analyze the history of changes. In this paper we introduce Changeboxes by means of a prototype implementation. We illustrate the benefits that Changeboxes offer for evolving software systems, and we present the results of a preliminary performance evaluation that assesses the costs associated with Changeboxes while suggesting possible strategies for improvement.},
+booktitle = {Proceedings of the 2007 International Conference on Dynamic Languages: In Conjunction with the 15th International Smalltalk Joint Conference 2007},
+pages = {25–49},
+numpages = {25},
+location = {Lugano, Switzerland},
+series = {ICDL '07}
 }
