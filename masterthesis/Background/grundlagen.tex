@@ -1,6 +1,6 @@
 In this chapter, the background of data clumps will be discussed. A formal definition of data clumps will be presented (\ref{sec:data_clumps_def}. ChatGPT will be discussed in section \ref{sec:chatgpt}. Also, there will be a discussion of the data clump type context format. 
 
-\section{Data clumps}\label{sec:sec:data_clump_def}
+\section{Data clumps}\label{sec:data_clump_def}
 The term \enquote{Data Clump} was coined by Martin Fowler as one possible code smell that can occur in source code. He describes data clumps as follows:
 
 \begin{displayquote}
@@ -92,7 +92,7 @@ In the second step, a parameter object is introduced that replaces the three pre
 
 ChatGPT \cite{ChatGPT_url} is a \ac{LM} developed by OpenAI and released in November 2022. As a \ac{LM}, ChatGPT can interpret queries submitted by users and return a appropriate response. 
 
-A query can be a question or a prompt directing ChatGPT to answer a question or provide some output. The range of topics ChatGPT can helkp with is basically not limited. For instance, ChatGPT can help with topics in math, history, politics, or coding. ChatGPT can also understand programming language and therefore, help developers to code. Since September 2023, ChatGPT can also process images \cite{ChatGPT_image}. However, it must be noted that ChatGPT may not always provide accurate responses since it is, in the end, just a language model without knowledge about the inherent meanings of its responses. 
+A query can be a question or a prompt directing ChatGPT to answer a question or provide some output. The range of topics ChatGPT can help with is basically not limited. For instance, ChatGPT can help with topics in math, history, politics, or coding. ChatGPT can also understand programming language and therefore, help developers to code. Since September 2023, ChatGPT can also process images \cite{ChatGPT_image}. However, it must be noted that ChatGPT may not always provide accurate responses since it is, in the end, just a language model without knowledge about the inherent meanings of its responses. 
 
 The usage of ChatGPT is nevertheless somewhat restricted. For instance, content that may be regarded as hate speech or that may be used for illegal purposes will be suppressed.
 
@@ -103,3 +103,7 @@ Another important feature of ChatGPT is the ability to store conversations. A co
 The problem of data clump detection and refactoring is addressed in multiple papers. 
 Baumgartner et al.  developed a live code smell detection plugin for IntelliJ that is able to detect, report and refactor data clumps without having a major performance impact. The tool however is semi-automatic which means that the developer must still actively approve the data clump refactoring and suggest a suitable class name for the extracted class. \cite{BaumgartnerAP23}
 
+As outlined in section \ref{sec:data_clump_def}, the definition of data clump by Fowler \cite{fowler2019refactoring} is somewhat ambiguous because no clear criteria to determine data clumps is established. Zang et al. \cite{zhangImprovingPrecisionFowler2008} creates a more algorithmic approach to determine whether a data clump exists. This approach is also explained in section \ref{sec:data_clump_def}. The authors also provide more precise definitions of other code smells  like \enquote{message chains}, or \enquote{speculative generality}. By interviewing four software development experts about the code smell definitions the authors developed, they find that their new data clump definition receives relatively more disagreement than other definitions which the authors explains are the results of not covering edge cases in the definitions. 
+
+
+Hall et al. analyzed the impact of code smells (including data clump) on the occurrence of faults in three open source software projects. They find that data clumps have a mixed correlation to faults because in two of the three projects analyzed, the correlation of data clumps per \ac{LOC} to detected faults is negative for two projects and  positive for one project. This rejects their hypothesis that data clump have no effect on faults and the authors suggest that the application domain and the development context need to be considered before time-consuming refactoring   data clumps since their impact is not predictable.  \cite{hallCodeSmellsHave2014}
