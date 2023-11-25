@@ -3,78 +3,78 @@
 \renewcommand{\clearpage}{}
 \chapter{Concept}\label{chapter_conception}
 \endgroup
-This chapter deals with the concept of the program. It provides information about the processing pipeline (\ref{sec:pipeline} and how the different parts of that pipelines can be modeled in a way that allows easy extension. 
+This chapter deals with the concept of the program. It provides information about the processing pipeline (\ref{sec:pipeline} and how the different parts of that pipeline can be modeled in a way that allows easy extension. 
 
 
 \hfill
 \section{Pipeline}\label{sec:pipeline}
-In order to find and refactor data clumps automatically, a particular sequence of steps \textbf{(pipeline)} has to be respected. Most steps of this sequence are required to be in a specific order because they rely on information extracted in a previous step, or the quality of the results (which might be needed by subsequent steps) would get worse. In the following subsections, these steps will be outlined:
+In order to find and refactor data clumps automatically, a particular sequence of steps \textbf{(pipeline)} has to be respected. Most steps of this sequence must be in a specific order because they rely on information extracted in a previous step, or the quality of the results (which might be needed by subsequent steps) would worsen. In the following subsections, these steps will be outlined:
 \subsubsection{Code obtaining}
-Data clumps can only be found if access to the source code is given. This requires that the source code is available in some location and the location is known.
+Data clumps can only be found if access to the source code is given. This requires that the source code is available in some location and that the location is known.
 
-In most cases, this trivial since a developer needing to find and fix data clumps should know where the source code is located.
+In most cases, this is trivial since a developer needing to find and fix data clumps should know where the source code is located.
 
-However, the might be more complex cases. For instance, the source code could be located on a \ac{VCS} or must be downloaded elsewhere so that the newest changes can be considered. Therefore it is useful to define a specific step for obtaining the source code before executing the rest of the pipeline. 
+However, there might be more complex cases. For instance, the source code could be located on a \ac{VCS} or must be downloaded elsewhere so that the newest changes can be considered. Therefore, defining a specific step for obtaining the source code before executing the rest of the pipeline is useful. 
 \subsubsection{Detecting data clumps}\label{subsec:chap3_data_clump_detection}
-It is easily agreeable that data clumps can only be fixed if they have been found previously. Therefore, one of the first steps of the pipeline must be the detection of data clumps. 
+It is easily agreeable that data clumps can only be fixed if found previously. Therefore, one of the first steps of the pipeline must be the detection of data clumps. 
 
 The data clump detection process itself can be further divided into sub-steps.
 \subsubsection{Filtering}\label{subsub:filtering_files}
-First of all, all files of the programming language need to be detected. Usually, there are specific file extensions (e.g. \textit{.java}) for a source code file which simplifies the finding of files. It also for software project to have a root folder that contains all source code files. Therefore, one can recursively iterate through all files and directories of a given root folder that have a matching extension. 
+First of all, all files of the programming language need to be detected. Usually, there are specific file extensions (e.g., \textit{.java}) for a source code file, simplifying the finding of files. It is also common for software projects to have a root folder that contains all source code files. Therefore, one can recursively iterate through all files and directories of a given root folder with a matching extension. 
 
-However, not every source code file might be analyzed for data clumps. For instance, parts of the projects must not be refactored, or a refactorization would be too time-consuming. As outlined in chapter \ref{sec:introduction}, the cost for detection of data clumps might be too high. Therefore, filtering rules might be necessary to reduce the size of the relevant files for the subsequent steps.  
+However, not every source code file might be analyzed for data clumps. For instance, parts of the projects must not be refactored, or a refactorization would be too time-consuming. As outlined in chapter \ref{sec:introduction}, the cost of detecting data clumps might need to be lowered. Therefore, filtering rules might be necessary to reduce the size of the relevant files for the subsequent steps.  
 
 \subsubsection{Extraction of AST}
-Then,  the source code needs to be simplified as comments, the method bodies, and other language parts are not relevant for detecting data clumps. This could be achieved by extracting a subset of the \ac{AST} from the source code which includes all the relevant information to identify data clumps.
+Then,  the source code needs to be simplified as comments, the method bodies, and other language parts are irrelevant for detecting data clumps. This could be achieved by extracting a subset of the \ac{AST} from the source code, which includes all the relevant information to identify data clumps.
 \subsubsection{Similarity detection}
 
-The next step is about finding pairs of method parameters and pairs of fields that are identical or at least similar. For this, the identifier and the  data type can be compared. Unequal variable names might not rule out a similarity between two variables. For instance, typos may happen, or synonyms may be used. Also, the type might be different. For instance, the data type \textit{double} can be seen as a superset of the datatype \textit{int} because every 32-bit integer can be converted to a \textit{double}.
+The next step is finding pairs of method parameters and pairs of identical or at least similar fields. For this, the identifier and the data type can be compared. Unequal variable names might not rule out a similarity between two variables. For instance, typos may happen, or synonyms may be used. Also, the type might be different. For instance, the data type \textit{double} can be seen as a superset of the datatype \textit{int} because every 32-bit integer can be converted to a \textit{double}.
 
 From this, a graph can be constructed that visualizes the relationship of the several variables. A node represents a parameter or field value, while an edge exists if and only if a relationship between two variables is detected. 
 
 \subsubsection{Data clump detection}
-After similar variables have been detected, it must be determined whether a cluster of variables that are deemed similar is in fact a data clump. Here, the rules from section \ref{sec:data_clump_def} can be used. However, defining one's own rules can lead to better results, so flexibility is important, too. 
+After similar variables have been detected, it must be determined whether a cluster of variables that are deemed similar is, in fact, a data clump. Here, the rules from section \ref{sec:data_clump_def} can be used. However, defining one's own rules can lead to better results, so flexibility is essential, too. 
 
 \subsubsection{Data clump filtering or prioritization} \label{subsub:filtering_data_clumps}
-In section \ref{subsub:filtering_files}, a filtering by files is performed. However, even if many data clumps were detected, they do not need always to be refactored. One can decide to ignore certain data clumps and refactor them later or even never. 
+In section \ref{subsub:filtering_files}, a filtering by files is performed. However, even if many data clumps were detected, they do not always need to be refactored. One can decide to ignore certain data clumps and refactor them later or even never. 
 
-There can be many reasons for this approach. For instance, parts of the source code that are infrequently updated might be too risky for refactoring since any automatic tool might cause bugs or invalid code that is hard to fix because the developers are not familiar with this part of the source code. On the contrary, a part of the source code that is updated more frequently might be in an intermittent state so that refactoring is currently not recommendable. Also, as noted in section  \ref{subsub:filtering_files}, if a service like ChatGPT is used, the cost of transferring many source code files with data clumps might be too high. 
+There can be many reasons for this approach. For instance, parts of the source code that are infrequently updated might be too risky for refactoring since any automatic tool might cause bugs or invalid code that is hard to fix because the developers are unfamiliar with this part of the source code. On the contrary, a part of the source code that is updated more frequently might be in an intermittent state, so that refactoring is currently not recommendable. Also, as noted in section  \ref{subsub:filtering_files}, if a service like ChatGPT is used, the cost of transferring many source code files with data clumps might be too high. 
 
-In case of field data clumps, we also have to consider the worst-case, namely that  at least one of the data clump fields is public. This is considered bad design as fields should always be encapsulated by getters and setters \cite{5680918}. Nevertheless, it is still prevalent \cite{5076631}.
+In the case of field data clumps, we also have to consider the worst case, namely that at least one of the data clump fields is public. This is considered bad design as fields should always be encapsulated by getters and setters \cite{5680918}. Nevertheless, it is still prevalent \cite{5076631}.
 
-A subsequent refactoring of these fields is more difficult because they might be used by external programs or libraries which are beyond control of the developer, which might induce bugs or non-compilable software 
+A subsequent refactoring of these fields is more complicated than that of less accessible fields because they might be used by external programs or libraries that are beyond the control of the developer, which might induce bugs or non-compilable software. 
 
-One can argue that refactoring should never affect the public interface since the issues mentioned above can occur \cite{10.1145/1352678.1352681}.
+One can argue that refactoring should never affect the public interface since the abovementioned issues can occur \cite{10.1145/1352678.1352681}.
 
-On the other hand, one can argue that those changes are still important because they can improve readability and the source code may be in early stages so that such breaking changes are still feasible. 
+On the other hand, one can argue that those changes are still significant because they can improve readability, and the source code may be in the early stages to make such breaking changes feasible. 
 
-Therefore, it can be suggested to filter out certain data clumps that are considered not worthy of refactoring.
+Therefore, filtering out certain data clumps considered not worthy of refactoring can be suggested.
 
 \subsubsection{Name finding}\label{subsec:chap3_data_clump_name_finding}
 The next step of the pipeline is to find a suitable identifier of the extracted class.
 
-There are some criteria for this identifier. It should be a valid name in the respective programming language so that, in general, only alphanumerical characters may be chosen. It should not be  in conflict with other identifiers as it may lead to bugs or compiler errors, and it should be readable and, as best as feasible, represent the fields of the class.
+There are some criteria for this identifier. It should be a valid name in the respective programming language so that, in general, only alphanumerical characters may be chosen. It should not conflict with other identifiers as it may lead to bugs or compiler errors, and it should be readable and, as best as feasible, represent the fields of the class.
 
-Hence, the name finding is a complex process that requires domain knowledge and creativity if the resulting name is to be accepted. 
-Since English is the predominant language of of identifiers, it will be assumed that only English identifiers will be used. 
+Hence, the name finding is a complex process requiring domain knowledge and creativity if the resulting name is accepted. 
+Since English is the predominant language of identifiers, it will be assumed that only English identifiers will be used. 
 
 
 \subsubsection{Class Extraction}\label{subsec:chap3_data_class_extraction})
-After a class name has been found, a respective class can be added to the source code. This class will be used as a replacement  for the data clump variables or parameters. 
+After a class name has been found, a respective class can be added to the source code. This class will be used as a replacement for the data clump variables or parameters. 
 
-In contrast to the previous step of the pipeline, this process can be automated more straightforwardly because it does not require creativity, and a general template can be used, that is:
+In contrast to the previous step of the pipeline, this process can be automated more straightforwardly because it does not require creativity and a general template can be used, that is:
 \begin{itemize}
     \item Create a private field for each variable of the data clump
     \item Create a public getter for each variable of the data clump. This getter may be named get\textit{Var} where \textit{Var} is replaced by the capitalized name of the variable. The method returns the value of the respective field
     \item Similarly, a setter set\textit{Var} may be created that has no return type, accepts a new value as a parameter, and sets the respective field. 
-    \item A constructor may be created that initializes the fields with provided values or with default values. 
+    \item A constructor that initializes the fields with provided or default values may be created. 
 \end{itemize}
 
-Additionally, methods for converting a object to a string or creating a hash code may be useful, but these methods are usually not required for the refactoring of data clumps. 
+Additionally, methods for converting an object to a string or creating a hash code may be useful, but these methods are usually optional for refactoring data clumps. 
 
 
 \subsubsection{Refactoring}
-After a class has been extracted, the next step is to refactor the source code to remove the data clumps. Here, again, we need to differentiate between method parameter data clumps as this has implications on the access scope. 
+After extracting a class, the next step is to refactor the source code to remove the data clumps. Here, again, we need to differentiate between method parameter data clumps as this impacts the access scope. 
 
 In case of a field data clump, the following transformations need to be applied.
 
@@ -87,60 +87,60 @@ In case of a field data clump, the following transformations need to be applied.
 
 
 
-In case of a method data clump, the general approach is similar to the case of field data clumps. The data clump items are replaced by an object of the extracted class, and all references to the data clump items are updated as well. Here, the object of the extracted class is not a getter because it is only locally defined. Additionally, the calls to the refactored method must be updated. Instead of providing the arguments for the data clump items directly to the method, an intermediate object can be created that is filled with those values and this object is provided to the method. 
+In the case of a method data clump, the general approach is similar to the case of field data clumps. An object of the extracted class replaces the data clump items, and all references to the data clump items are also updated. Here, the object of the extracted class is not a getter because it is only locally defined. Additionally, the calls to the refactored method must be updated. Instead of providing the arguments for the data clump items directly to the method, an intermediate object can be created that is filled with those values, and this object is provided to the method. 
 
 
 \section{Context}
-In section \ref{sec:pipeline}, the several steps of the data clump pipeline are outlined. However, these steps do not include how the information generated by each step is stored, and how this information might be used by successive steps.
+In section \ref{sec:pipeline}, the several steps of the data clump pipeline are outlined. However, these steps do not include how the information generated by each step is stored and how successive steps might use this information.
 
-Therefore, a concept to store intermediate information needs be to developed. Such information might be called \textbf{context}.
+Therefore, a concept to store intermediate information needs to be developed. Such information might be called \textbf{context}.
 
-The context is a storage that is filled throughout the data clump refactoring pipeline. For instance, it might be stored in memory or in a database if the size of the context is too large. Each step in the data clump refactoring pipeline can access the context and obtain such information as it may deem necessary for its use
+The context is a storage filled throughout the data clump refactoring pipeline. For instance, it might be stored in memory or a database if the context size is too large. Each step in the data clump refactoring pipeline can access the context and obtain such information as it may deem necessary for its use.
 
-Such context can only work if the context data is in a specific format which is can be generated by one step and might be correctly interpreted by each successive step. 
+Such context can only work if the context data is in a specific format, which can be generated by one step and might be correctly interpreted by each successive step. 
 
 In the following, the context created or updated after each step will be explained:
 
 \subsubsection{Code obtaining}
-The context after obtaining the source code of the project to analyze is  usually the path to the project after it. In most cases, the project is defined in such a manner that there is a single base directory under which all files and directories of the project are located.
+The context after obtaining the source code of the project to analyze is usually the path to the project after it. In most cases, the project is defined in such a manner that there is a single base directory under which all files and directories of the project are located.
 
-Alternatively, one could store the list of all relevant file paths of the project. This requires more storage but makes it easier for filtering out files.
+Alternatively, one could store the list of all relevant file paths of the project. This requires more storage but makes it easier to filter out files.
 
 \subsubsection{Filtering}
-After filtering the files, the context can be a new path with all files that are considered relevant which requires a deletion or moving file system operation. If a list of files is used, all irrelevant file paths can be deleted which might be faster.
+After filtering the files, the context can be a new path with all files considered relevant, requiring a deletion or moving file system operation. If a list of files is used, all irrelevant file paths can be deleted, which might be faster.
 
 \subsubsection{Extraction of AST}
 \subsubsection{Data clump detection and filtering}
 
-To store the detected data clump, the format described in section \ref{sec:data_clump_format} can be used. While this format is relatively new, it contains all relevant information for storing data clump information and is extendable. However, other there are reasons for other data formats. For instance,  the data clump type context format might be too detailed which can lead to storage or performance issues. 
+The format described in section \ref{sec:data_clump_format} can be used to store the detected data clump. While this format is relatively new, it contains all relevant information for storing data clump information and is extendable. However, there are other reasons for other data formats. For instance,  the data clump type context format might be too detailed, which can lead to storage or performance issues. 
 
 \subsubsection{Name finding}
 To store the determined names per found data clump, a dictionary can be used that maps a unique data clump to a name. For large instances, this could be done via a database. 
 
-Since  there could be multiple name suggestions for a given data clump, mutiple names might bet stored so that a correct name may be chosen later.
+Since there could be multiple name suggestions for a given data clump, multiple names might be stored so that a correct name may be chosen later.
 
 \subsubsection{Class extraction}
 
-After a class extraction step, the created class can be stored somewhere so that it can be considered part of the project. The exact location can have a major impact on the readability of the source code as the location of files in a software project can help understanding the project. 
+After a class extraction step, the created class can be stored somewhere to be considered part of the project. The exact location can significantly impact the readability of the source code, as the location of files in a software project can help in understanding the project. 
 
-For instance, the class could be located where the data clump is originally found. This can lead to arbitrariness  as the exact order of where and when data clumps are detected might not be fixed. 
+For instance, the class could be where the data clump is initially found. This can lead to arbitrariness as the exact order of where and when data clumps are detected might not be predetermined. 
 
-Alternatively, specific locations can be used to store all extracted class. This however, can also hinder readability as the extracted classes have no connections to the places where they are used.  
+Alternatively, specific locations can be used to store all extracted classes. This, however, can also hinder readability as the extracted classes have no connections to the places where they are used.  
 
 \begin{comment}
 
 \section{Pipeline execution example}
 Listing \ref{lst:math_stuff_java} will be used as the foundation to describe a detailed approach for fixing data clumps.
 
-Looking at the parameters \textit{x}, \textit{y}, and \textit{z}, there are multiple suggestions for a class name. The most trivial one is a simple concatenation  (e.g. \textit{XYZ} or \textit{X\_Y\_Z}). However, this name is often not suitable as it can be hard to read and to understand its meaning.
+Looking at the parameters \textit{x}, \textit{y}, and \textit{z}, there are multiple suggestions for a class name. The most trivial one is a simple concatenation  (e.g., \textit{XYZ} or \textit{X\_Y\_Z}). However, this name is often not suitable as it can be hard to read and to understand its meaning.
 
 A more suitable approach requires domain knowledge. It is common knowledge that the terms \textit{x}, \textit{y}, and \textit{z} are terms used in math to describe coordinates. Using this information, a fitting name could be \textit{Coordinate}. Simple methods would not have discovered this name as artificial or human intelligence is required. 
 
 
 
-Since a suitable class name has been found, the following class can be created with the information obtained previously. 
+Since a suitable class name has been found, the following class can be created using previously obtained information. 
 
-Listing \ref{lst:coordinate_java} shows an example implementation of a coordinate class. This class contains fields, getters, and setters, for all method parameters. There is also a constructor for initialization. This respects Fowler's opinion that the extracted class should not be a mere data class but a functional class that can be easily extended and modified.
+Listing \ref{lst:coordinate_java} shows an example implementation of a coordinate class. This class contains fields, getters, and setters for all method parameters. There is also a constructor for initialization. This respects Fowler's opinion that the extracted class should not be a mere data class but a functional class that can be easily extended and modified.
 
 
 \end{comment}

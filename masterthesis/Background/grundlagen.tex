@@ -1,4 +1,4 @@
-In this chapter, the background of data clumps will be discussed. A formal definition of data clumps will be presented (\ref{sec:data_clump_def}). ChatGPT will be discussed in section \ref{sec:chatgpt}. Also, there will be a discussion of the data clump type context format. 
+In this chapter, the background of data clumps will be discussed. A formal definition of data clumps will be presented (\ref{sec:data_clump_def}). ChatGPT will be discussed in section \ref{sec:chatgpt}. Also, the data clump type context format will be discussed. 
 
 \section{Data clumps}\label{sec:data_clump_def}
 The term \enquote{Data Clump} was coined by Martin Fowler as one possible code smell that can occur in source code. He describes data clumps as follows:
@@ -10,16 +10,16 @@ places: fields in a couple of classes, parameters in many
 method signatures. \cite{fowler2019refactoring} 
 \end{displayquote}
 
-This definition is somewhat imprecise. It is not specified whether three or four data items are necessary. Also, \enquote{a couple of classes} and \enquote{in many method signatures} do not define concrete numbers. The author suggests to check whether the removal of one data clump item would have a major effect on the coherence of the code
+This definition is somewhat imprecise. It is not specified whether three or four data items are necessary. Also, \enquote{a couple of classes} and \enquote{in many method signatures} do not define concrete numbers. The author suggests checking whether the removal of one data clump item would have a significant effect on the coherence of the code.
 
-A more precise and algorithmic definition of \enquote{data clumps} is provided by \cite{zhangImprovingPrecisionFowler2008}. According to them, a data clump  can be defined on the field or method-parameter levels. 
+A more precise and algorithmic definition of \enquote{data clumps} is provided by \cite{zhangImprovingPrecisionFowler2008}. They say a data clump  can be defined on the field or method-parameter levels. 
 To be a method parameter data clump, a group of at least three variables must appear in multiple methods. Those variables must be duplicated, meaning they share the same name and data type. However, the inner order of the group does not need to be the same. 
 
 These conditions often need to be more relaxed. For instance, methods can be inherited and overridden so that a group of parameters may appear in each derived class, thereby fulfilling the definition of a method parameter data clump. Since (except for the identifiers of the parameters) an overriding method must be the same as the overridden method, they are not considered data clumps.
 
-To be a field data clump, similar conditions apply. There must be at least three fields that appear in more than one class and the names and data types of the variables must the same, while the inner order may be different. Since in most programming language, a field can have an additional access modifier (e.g. \textit{private}, \textit{static} etc. ), the access modifier should also be included to determine whether two groups of variables are identical and hence a data clump.  
+For field data clumps, similar conditions apply. There must be at least three fields that appear in more than one class, and the names and data types of the variables must be the same, while the inner order may be different. Since in most programming languages, a field can have an additional access modifier (e.g., \textit{private}, \textit{static} etc. ), the access modifier should also be included to determine whether two groups of variables are identical and hence a data clump.  
 
-The definition might also need to be more relaxed for both method and field data clumps. Two variables, that have the same name but a compatible type in at least one direction  (e.g. \textit{int} and  \textit{double}), would be disregarded as a data clump according to the formalized definition, although some would regard them a data clump.
+The definition might also need to be more relaxed for both method and field data clumps. Two variables that have the same name but a compatible type in at least one direction  (e.g., \textit{int} and  \textit{double}), would be disregarded as a data clump according to the formalized definition. However, some would regard them as a data clump.
 
 Also, modification of a variable's identifier might not change its meaning. For instance, typos can happen, or synonyms can be used so that an automatic algorithm might not discover the connection between two variables but requires knowledge of the semantics of the source code. \cite{zhangImprovingPrecisionFowler2008}
 
@@ -37,7 +37,7 @@ An example of a data clump is shown in listing \ref{lst:math_stuff_java}
 
 
 
-Listing \ref{lst:math_stuff_java} contains three method that execute some vector operations (calculation of length, sum of coordinates, and the maximum coordinate). 
+Listing \ref{lst:math_stuff_java} contains three methods that execute some vector operations (calculation of length, sum of coordinates, and the maximum coordinate). 
 
 
 It can be seen that  the snippet contains a method parameter data clump since the variables \textit{x}, \textit{y}, and  \textit{z} occur thrice.  These variables might be called \textbf{data clump items}
@@ -45,9 +45,9 @@ It can be seen that  the snippet contains a method parameter data clump since th
 \subsection{Refactoring data clumps}
 Fowler suggests two  steps to refactor a data clump:
 
-In the  \textbf{Extract-Class}-step, a class with fields for each data clump item is extracted. A class for this purpose might already exists so that it can be re-used.
+In the  \textbf{Extract-Class}-step, a class with fields for each data clump item is extracted. A class for this purpose might already exist so that it can be re-used.
 
-In the second step, \textbf{Preserve Whole Object} or \textbf{Introduce Parameter Object} migth be applied. This means that the signature of the method is changed so that the data clump items are replaced by the extracted class and all references to the method are changed accordingly.
+In the second step, \textbf{Preserve Whole Object} or \textbf{Introduce Parameter Object} might be applied. This means that the signature of the method is changed so that the extracted class replaces the data clump items, and all references to the method are changed accordingly.
 
 
 To illustrate the suggested data clump refactoring process, listing \ref{lst:math_user_java} shows how the methods in \ref{lst:math_stuff_java} can be used. 
@@ -61,7 +61,7 @@ To illustrate the suggested data clump refactoring process, listing \ref{lst:mat
 			{figures/chapter2/dataClump/MathUser.java}
 	\end{figure}
 
-In the first step, a new class can be extracted which contains all data clump items as fields. It should also contain setters and getters to access the fields in an encapsulated manner. The class should be named so that its purpose is clear. Listing \ref{lst:coordinate_java} shows how such a class may look like. 
+In the first step, a new class can be extracted, which contains all data clump items as fields. It should also contain setters and getters to access the fields in an encapsulated manner. The class should be named so that its purpose is clear. Listing \ref{lst:coordinate_java} shows how such a class may look like. 
 
   \begin{figure} [htbp!]
 			\lstinputlisting
@@ -71,7 +71,7 @@ In the first step, a new class can be extracted which contains all data clump it
 			{figures/chapter2/dataClump/Coordinate.java}
 		\end{figure}
 
-In the second step, a parameter object is introduced that replaces the three previous data clump items in each of the three method of the \textit{MathStuff} class so that the signature only contains one parameter of type \textit{Coordinate}. Also the calls in \textit{MathUSage} are refactored to reflect that change ( listing \ref{lst:math_stuff_refactored_java} and \ref{lst:math_user_refactored_java}). 
+In the second step, a parameter object is introduced that replaces the three previous data clump items in each of the three methods of the \textit{MathStuff} class so that the signature only contains one parameter of type \textit{Coordinate}. Also, the calls in \textit{MathUsage} are refactored to reflect that change ( listing \ref{lst:math_stuff_refactored_java} and \ref{lst:math_user_refactored_java}). 
 
   \begin{figure} [htbp!]
 			\lstinputlisting
@@ -92,28 +92,28 @@ In the second step, a parameter object is introduced that replaces the three pre
 
 The \textbf{Data clumps Type Context} \cite{dataclump_type_context} is developed by Baumgartner et al. to establish a standard for reporting data clumps.
 
-The format consists of three layers. In the outer layer, general project information is defined. For instance, the programming language or the location of the project.
+The format consists of three layers. In the outer layer, general project information is defined—for instance, the programming language or the location of the project.
 
 In an inner layer, each detected data clump is described as a link between multiple method parameters or fields and another method parameters or fields. 
 
-In the most inner layer, each data clump item is linked to another data clump item and information like the data type and identifier are described. 
+In the inner layer, each data clump item is linked to another data clump item, and information like the data type and identifier are described. 
 
 \section{ChatGPT}\label{sec:chatgpt}
 
-ChatGPT \cite{ChatGPT_url} is a \ac{LLM} developed by OpenAI and released in November 2022. As a \ac{LLM}, ChatGPT can interpret queries submitted by users and return a appropriate response. 
+ChatGPT \cite{ChatGPT_url} is a \ac{LLM} developed by OpenAI and released in November 2022. As a \ac{LLM}, ChatGPT can interpret user queries and return an appropriate response. 
 
-A query can be a question or a prompt directing ChatGPT to answer a question or provide some output. The range of topics ChatGPT can help with is basically not limited. For instance, ChatGPT can help with topics in math, history, politics, or coding. ChatGPT can also understand programming language and therefore, help developers to code. Since September 2023, ChatGPT can also process images \cite{ChatGPT_image}. However, it must be noted that ChatGPT may not always provide accurate responses since it is, in the end, just a language model without knowledge about the inherent meanings of its responses. 
+A query can be a question or a prompt directing ChatGPT to answer a question or provide some output. The range of topics ChatGPT can help with is basically unlimited. For instance, ChatGPT can help with math, history, politics, or coding topics. ChatGPT can also understand programming language and therefore, help developers to code. Since September 2023, ChatGPT can also process images \cite{ChatGPT_image}. However, it must be noted that ChatGPT may not always provide accurate responses since it is, in the end, just a language model without knowledge about the inherent meanings of its responses. 
 
-The usage of ChatGPT is nevertheless somewhat restricted. For instance, content that may be regarded as hate speech or that may be used for illegal purposes will be suppressed.
+The usage of ChatGPT is nevertheless somewhat restricted. For instance, content regarded as hate speech or used for illegal purposes will be suppressed.
 
-Another important feature of ChatGPT is the ability to store conversations. A conversation is a collection of queries and linked responses that have been sent to ChatGPT. Using conversations, a user can refer to a previous query or response in a later query. For instance, if ChatGPT made a mistake or interprets a query in a wrong way, a user can send another request that icsconnected to the previous request and can point out the mistake or give more context, thereby helping ChatGPT to auto correct itself. 
+Another essential feature of ChatGPT is the ability to store conversations. A conversation is a collection of queries and linked responses sent to ChatGPT. Using conversations, a user can refer to a previous query or response in a later query. For instance, if ChatGPT makes a mistake or misinterprets a query, a user can send another request connected to the previous request and point out the mistake or give more context, helping ChatGPT auto-correct itself. 
 
 
 \section{Related Research}
 The problem of data clump detection and refactoring is addressed in multiple papers. 
-Baumgartner et al.  developed a live code smell detection plugin for IntelliJ that is able to detect, report and refactor data clumps without having a major performance impact. The tool however is semi-automatic which means that the developer must still actively approve the data clump refactoring and suggest a suitable class name for the extracted class. \cite{BaumgartnerAP23}
+Baumgartner et al.  developed a live code smell detection plugin for IntelliJ that can detect, report, and refactor data clumps without significantly impacting performance. However, the tool is semi-automatic, meaning the developer must still actively approve the data clump refactoring and suggest a suitable class name for the extracted class. \cite{BaumgartnerAP23}
 
-As outlined in section \ref{sec:data_clump_def}, the definition of data clump by Fowler \cite{fowler2019refactoring} is somewhat ambiguous because no clear criteria to determine data clumps is established. Zang et al. \cite{zhangImprovingPrecisionFowler2008} creates a more algorithmic approach to determine whether a data clump exists. This approach is also explained in section \ref{sec:data_clump_def}. The authors also provide more precise definitions of other code smells  like \enquote{message chains}, or \enquote{speculative generality}. By interviewing four software development experts about the code smell definitions the authors developed, they find that their new data clump definition receives relatively more disagreement than other definitions which the authors explains are the results of not covering edge cases in the definitions. 
+As outlined in section \ref{sec:data_clump_def}, the definition of data clump by Fowler \cite{fowler2019refactoring} is somewhat ambiguous because no clear criteria to determine data clumps is established. Zang et al. \cite{zhangImprovingPrecisionFowler2008} creates a more algorithmic approach to determine whether a data clump exists. This approach is also explained in section \ref{sec:data_clump_def}. The authors also provide more precise definitions of other code smells like \enquote{message chains} or \enquote{speculative generality}. By interviewing four software development experts about the code smell definitions the authors developed, they find that their new data clump definition receives relatively more disagreement than other definitions, which the authors explain are the results of not covering edge cases in the definitions. 
 
 
-Hall et al. analyzed the impact of code smells (including data clump) on the occurrence of faults in three open source software projects. They find that data clumps have a mixed correlation to faults because in two of the three projects analyzed, the correlation of data clumps per \ac{LOC} to detected faults is negative for two projects and  positive for one project. This rejects their hypothesis that data clump have no effect on faults and the authors suggest that the application domain and the development context need to be considered before time-consuming refactoring   data clumps since their impact is not predictable.  \cite{hallCodeSmellsHave2014}
+Hall et al. analyzed the impact of code smells (including data clump) on the occurrence of faults in three open-source software projects. They find that data clumps have a mixed correlation to faults because, in two of the three projects analyzed, the correlation of data clumps per \ac{LOC} to detected faults is negative for two projects and positive for one project. This rejects their hypothesis that data clumps do not affect faults, and the authors suggest that the application domain and the development context need to be considered before the time-consuming refactoring of data clumps since their impact is not predictable.  \cite{hallCodeSmellsHave2014}

@@ -6,31 +6,32 @@
 \endgroup
 
 \section{Large language model usage}
-A major part of this master thesis is to include \ac{LLM} such as ChatGPT in the data clump refactoring pipeline. 
+A significant part of this master thesis is to include \ac{LLM} such as ChatGPT in the data clump refactoring pipeline. 
 
-To allow the use of a \ac{LLM}, some considerations needs to be made. This includes \enquote{prompt engineering}, \enquote{input engineering}\enquote{usage reduction}, and   \enquote{output parsing}. These steps will be outlined in the following:
+To allow the use of a \ac{LLM}, some considerations need to be made. This includes \enquote{prompt engineering}, \enquote{input engineering}\enquote{usage reduction}, and   \enquote{output parsing}. These steps will be outlined in the following:
 
 \subsection{Prompt engineering}\label{sec:prompt_engineering}
 
 
-In order to use a \ac{LLM} more effectively, the prompts and queries need to be modeled in a specific manner so that they are interpreted correctly. While deviating from these manners may still produce correct result, it nevertheless increases the risk of wrong results. The following tipps were derived from the OpenAI documentation \cite{ChatGPT_url} and hence apply only to ChatGPT. Generally speaking however, many recommendation will work for other \ac{LLM} too because they will help to make the prompt more clearly and prevent misunderstanding:
+In order to use a \ac{LLM} more effectively, the prompts and queries need to be modeled in a specific manner so that they are interpreted correctly. While deviating from these manners may still produce correct results, it nevertheless increases the risk of wrong results. The following tips were derived from the OpenAI documentation \cite{ChatGPT_url} and hence apply only to ChatGPT. Generally speaking. However, many recommendations will work for other \ac{LLM} too because they will help to make the prompt more clearly and prevent misunderstanding:
 
 \subsubsection{Separate instruction and input}
 Many queries to \ac{LLM} include an instruction and an input. For instance, a query to find and refactor data clumps could  provide the source code containing the possible data clumps \textbf{(input}. The instruction could be the query \enquote{Find and refactor all data clumps in this source code}. 
 
-OpenAI recommends that the instructions and the input should be separated as distinctive as possible. It suggests enclosing the input in a block of \textit{"""} or \textit{\#\#\#} to clearly mark what the input and what the instruction.
+OpenAI recommends that the instructions and input be separated as distinctive as possible. It suggests enclosing the input in a block of \textit{"""} or \textit{\#\#\#} to mark what the input and what the instruction is clearly.
 
 \subsubsection{Provide detailed context and how the model should respond}
 
-When generating a reply to a query, a language model will use all available context to process the query and generate an output which satisfy the user's need. This means that every bit of relevant information can help the language model to generate a better response.
+When generating a reply to a query, a language model will use the available context to process the query and generate an output that satisfies the user's need. This means that every bit of relevant information can help the language model to generate a better response.
 
-On the contrary, providing irrelevant information can increase the chance of wrong responses so that the creator of a query must always consider what to include in a query and what not. 
+On the contrary, providing irrelevant information can increase the chance of wrong responses, so the creator of a query must always consider what to include in a query and what not. 
 
-In the context of data clump refactoring, the query should include the content of the source code and the programming language. However, files that cannot have data clumps (e.g configuration files) should not be included.
+In the context of data clump refactoring, the query should include the content of the source code and the programming language. However, files that cannot have data clumps (e.g., configuration files) should not be included.
 
-An instruction for refactoring data clumps should state that only the refactored source code files should be returned without providing explanatory texts or other information as they can hinder the parsing of the output. 
+An instruction for refactoring data clumps should state that only the refactored source code files should be returned without providing explanatory texts or other information, as they can hinder the parsing of the output. 
 
 \subsection{Cost reduction}
 
-Many \ac{LLM} are not for free but must be paid based on usage or other factors. Even if a \ac{LLM} is free, there are many restrictions for the data to be processed by the model so that special care needs to be taken to reduce the data size as good as possible.  By following the steps in section \ref{sec:prompt_engineering}, the cost might already be reduced. Nevertheless, there are other factors that will be outlined:
+Many \ac{LLM} are not for free but must be paid based on usage or other factors. Even if a \ac{LLM} is free, there are many restrictions for the data to be processed by the model, so special care needs to be taken to reduce the data size as well as possible.  The cost might already be reduced by following the steps in section \ref{sec:prompt_engineering}. Nevertheless, there are other factors that will be outlined:
+
 
