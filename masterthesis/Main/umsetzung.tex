@@ -10,6 +10,8 @@ A significant part of this master thesis is to include \ac{LLM} such as ChatGPT 
 
 To allow the use of a \ac{LLM}, some considerations need to be made. This includes \enquote{prompt engineering}, \enquote{input engineering}\enquote{usage reduction}, and   \enquote{output parsing}. These steps will be outlined in the following:
 
+
+
 \subsection{Prompt engineering}\label{sec:prompt_engineering}
 
 
@@ -34,4 +36,41 @@ An instruction for refactoring data clumps should state that only the refactored
 
 Many \ac{LLM} are not for free but must be paid based on usage or other factors. Even if a \ac{LLM} is free, there are many restrictions for the data to be processed by the model, so special care needs to be taken to reduce the data size as well as possible.  The cost might already be reduced by following the steps in section \ref{sec:prompt_engineering}. Nevertheless, there are other factors that will be outlined:
 
+
+\section{Implementation of steps}
+While in section \ref{sec:pipeline} a general approach to find and refactor data clumps is given, the concrete implementation with the various tools is left out. In the following subsections, the implementations with the tools are described. In the case of \textit{code obtaining}, \textit{filtering}, only basic approaches are used so that they will not be detailed further. 
+
+\subsection{Data clump detection}
+Detecting data clumps is a significant part of the pipeline. The tools used for this pipeline step are \textit{DataClumpDoctor}, \textit{ChatGPT} and \textit{IntelliJ}.
+\subsubsection{Data clump doctor}
+
+The  \textit{Data Clump Doctor} is NodeJS command line tool developed by Nils Baumgartner in preparation of this master thesis. It employs \textit{PMD} to find all classes, methods, and fields in a Java project to generate an \ac{AST}. This syntax tree is saved as a \ac{JSON}. 
+
+In a second step, the generated \ac{AST} can be loaded again to find data clumps. This multi-step approach results in better performance since the detection of data clump requires many nested for-loops so that any reduction of data size has a measurable effect on the performance.
+
+All detected data clumps are reported in the format specified in section \ref{sec:data_clump_format}.
+
+Since the general tool is developed in Typescript, the \textit{Data Clump Doctor} can easily be integrated.
+
+\subsubsection{ChatGPT}
+ChatGPT is another approach to detect data clumps as it can process code easily and report data clumps in any format the user wants. It also supportsy many programming languages that other tools do not provide.
+
+However, ChatGPT has a limited context size, so that processing large projects is  either too costly or simply not possible.
+
+Additionally, giving ChatGPT the right instructions to find data clumps can be challenging. While ChatGPT can define and find some data clumps without further context, it is better to give it a precise definition to work with. The following definition leads to good result, however it cannot be guaranteed that this will work forever:
+
+
+A data clump exists
+\begin{enumerate}
+   
+   \item if at least three fields also exists in another class
+   \item if at least three fields also exists as method parameters in some method
+    \item if two methods have at least three common parameters
+\end{enumerate}
+
+
+\subsubsection{IntelliJ}
+The Program Structure Interface provided by IntelliJ is an \ac{API} to analyze projects that can be loaded by IntelliJ. As a result, the various classes, methods etc. can be obtained which allows for the detection of data clumps. Like the ChatGPT approach, it can be easily extended to refactor the data clumps.
+
+In order to use this API, an instance of IntelliJ must be started. To reduce loading times and improve the performance, IntelliJ can be started in a headless mode so that no GUI is initialized. Nevertheless, IntelliJ requires many resources and much overhead so that  the initialization  needs some time. 
 
