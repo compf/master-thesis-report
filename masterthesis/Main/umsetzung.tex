@@ -18,7 +18,7 @@ To allow the use of a \ac{LLM}, some considerations need to be made. This includ
 In order to use a \ac{LLM} more effectively, the prompts and queries need to be modeled in a specific manner so that they are interpreted correctly. While deviating from these manners may still produce correct results, it nevertheless increases the risk of wrong results. The following tips were derived from the OpenAI documentation \cite{ChatGPT_url} and hence apply only to ChatGPT. Generally speaking. However, many recommendations will work for other \ac{LLM} too because they will help to make the prompt more clearly and prevent misunderstanding:
 
 \subsubsection{Separate instruction and input}
-Many queries to \ac{LLM} include an instruction and an input. For instance, a query to find and refactor data clumps could  provide the source code containing the possible data clumps \textbf{(input}. The instruction could be the query \enquote{Find and refactor all data clumps in this source code}. 
+Many queries to \ac{LLM} include an instruction and an input. For instance, a query to find and refactor data clumps could  provide the source code containing the possible data clumps \textbf{(input)}. The instruction could be the query \enquote{Find and refactor all data clumps in this source code}. 
 
 OpenAI recommends that the instructions and input be separated as distinctive as possible. It suggests enclosing the input in a block of \textit{"""} or \textit{\#\#\#} to mark what the input and what the instruction is clearly.
 

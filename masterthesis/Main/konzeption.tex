@@ -59,7 +59,7 @@ Hence, the name finding is a complex process requiring domain knowledge and crea
 Since English is the predominant language of identifiers, it will be assumed that only English identifiers will be used. 
 
 
-\subsubsection{Class Extraction}\label{subsec:chap3_data_class_extraction})
+\subsubsection{Class Extraction}\label{subsec:chap3_data_class_extraction}
 After a class name has been found, a respective class can be added to the source code. This class will be used as a replacement for the data clump variables or parameters. 
 
 In contrast to the previous step of the pipeline, this process can be automated more straightforwardly because it does not require creativity and a general template can be used, that is:
@@ -88,6 +88,16 @@ In case of a field data clump, the following transformations need to be applied.
 
 
 In the case of a method data clump, the general approach is similar to the case of field data clumps. An object of the extracted class replaces the data clump items, and all references to the data clump items are also updated. Here, the object of the extracted class is not a getter because it is only locally defined. Additionally, the calls to the refactored method must be updated. Instead of providing the arguments for the data clump items directly to the method, an intermediate object can be created that is filled with those values, and this object is provided to the method. 
+
+\subsection{Validation}
+
+At the conclusion of the refactoring process, it is not certain that everything is perfect. This applies to manual refactoring and also automatic refactoring. For instance, there might be an undetected error, the refactoring to ambiguous method signatures, some reference are not up-to-date etc.
+
+As a result, it is critical to test the project after refactoring so make sure that all requirements are still fulfilled.
+
+Many build systems like \textit{Gradle} or \textit{Maven} support simple commands to run all unit tests and build the project in a consistent manner.  Therefore, one can run such a command and check the exit code or output to determine whether the project compiles and passes unit tests.
+
+Disadvantageously, this may only be effective if the project is correctly configured with a build system. This might not always be the case, and it is not trivial to construct an interface for a general build solution. 
 
 
 \section{Context}
