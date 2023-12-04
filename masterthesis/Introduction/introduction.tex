@@ -1,4 +1,50 @@
 \label{sec:introduction}
+Code smells are a major issue  in modern software development as they tend to induce bugs and increase costs in the future \cite{mealyEvaluatingSoftwareRefactoring2006}.
+
+One example of code smells is data clumps \cite{BaumgartnerAP23}. These can be defined as a group of variables that are used in multiple parts of a software project \cite{fowler2019refactoring}. For instance, if the variables \textit{x}, \textit{y}, and \textit{z} are used multiple times in the source code, they could be interpreted as an Euclidean point or vector. Therefore, one could extract  a class \textit{Vector3d} containing the fields x, y, and z. 
+
+This refactoring approach reduces the code side, makes the code more readable, and simplifies further changes to the source code \cite{data_clumps_refactoring_guru} \cite{join_data_items}. 
+
+There are many approaches to detecting code smells (e.g. SonarCloud,  PMD, Checkstyle) that can be integrated into the development process but these do not automatically fix them  \cite{vidalApproachPrioritizeCode2016}. 
+Since developers are often distracted with implementing new features, fixing bugs, or doing similar tasks, the refactoring of code smells gets pushed back so that many code smells (even if detected) remain unfixed.  \cite{10.1145/2393596.2393655}.
+
+
+One approach to solve this issue is to automatically fix certain code smells that are easy to define so that human intervention is minimized. This automation can be regularly applied, allowing code smells to be gradually addressed without distracting developers from their primary tasks but profiting from cleaner code. 
+However,  automatic refactoring  is more difficult than a simple detection because it requires changes to the source code that have the potential to induce bugs or even make the software project unable to build \cite{9796303}. Hence, the tools used must be carefully assessed. 
+
+The data clump example mentioned above is one of those code smells that can be clearly defined. For instance, one can propose that a group of more than three variables that also appear in more than three different parts of the source code constitutes a data clump \cite{zhangImprovingPrecisionFowler2008}.
+
+
+
+
+However, a successful re-factorization of data clumps requires several steps. This includes renaming of identifiers, removing symbols, and extracting a class. Also a class name for the extracted class (e.g. \textit{Vector3}) must be determined. To minimize human intervention, a suitable identifier of the class must be found that accurately describes the purpose of these variables and their connection. Hence, domain knowledge and some creativity are necessary to fully perform the refactoring process.
+
+As a result, additional tools (such as ChatGPT \cite{ChatGPT_url}) are needed to fully automate the refactoring pipeline while minimizing the need for manual changes. 
+
+
+\section{Objective}
+
+
+The goal of this master thesis is to develop a tool that  combines ChatGPT and other refactoring tools  to automatically detect and refactor data clumps in software projects. The program  shall at least support the Java programming language but shall be extendable to  other programming languages. The tool shall also  be able to filter out some files and data clumps by several criteria to reduce resources and costs. 
+
+The methodology of this master thesis will be evaluated by sending  pull requests about discovered data clumps and a refactoring proposal to several public GitHub repositories and analyzing whether the pull request is accepted, rejected, or amended.   
+
+\section{Approach}
+
+A major part of the master thesis will deal with how to use and integrate ChatGPT into the refactoring pipeline. 
+ChatGPT is an AI language model developed by OpenAI that uses a Generative Pre-trained Transformer (GPT) model to process textual input data (i.e. natural language or source code). Users can provide queries, questions, or other textual material to ChatGPT and the model responds with a textual reply attempting to satisfy the user's request \cite{yetistirenEvaluatingCodeQuality2023}. It also employs a conversation feature so that previous requests and replies can be referred to by future requests and responses \cite{sobania2023analysis}.
+
+Since ChatGPT can also process source code \cite{sadik2023analysis}\cite{guo2023exploring}, one goal of this master thesis is to test to what extent it can help developers find data clumps and refactor them. Different extents of ChatGPT inclusion will be tested  
+
+With a minimal ChatGPT inclusion approach,  data clumps will be found using traditional approaches and ChatGPT will be provided with a list of data clump variables and asked to suggest a suitable name for the extracted class, while the refactoring process will be executed using other refactoring tools.
+
+
+Conversely, it will be tested whether ChatGPT can execute the refactoring itself by providing the whole source code of a software project and providing specific queries to find the data clumps, refactor them, and output the refactored source code. \cite{White2023ChatGPTPP}.
+
+Each task of the data clump detection and refactoring pipeline will be assigned to one tool, and the intermediate results of one tool will be used later for the succeeding tasks in the pipeline.
+
+The goal is to find a ChatGPT usage that finds most data clumps, while ensuring that they are refactored correctly. Also possible costs for the usage of ChatGPT and other resources will be considered \cite{xia2023conversation}. \cite{4ef0b456377aafb68884e643779dffb36b8e7cc1}.
+
 \begin{comment}
 Ein wichtiger Bestandteil der Softwareentwicklung von heute ist die Softwaredokumentation. Dies liegt unter anderem daran, dass die Größe von Softwareprojekten steigt, sodass die Entwickler schnell den Überblick über das Projekt verlieren können und daher zusätzliche Informationen neben dem Code benötigen \cite[S.~1]{StaticAnalysis:AnIntroduction:TheFundamentalChallengeofSoftwareEngineeringisOneofComplexity.}. Nichtsdestotrotz wird die Softwaredokumentation von Entwicklern oft vernachlässigt \cite[S.~83]{Qualityanalysisofsourcecodecomments}.  Die Gründe für schlechte Dokumentation sind vielfältig. Das Schreiben der Dokumentation wird oft als mühevoll empfunden und erfordert Fähigkeiten, die ein Programmierer nicht zwangsläufig besitzt \cite[S.~70]{AutomaticQualityAssessmentofSourceCodeComments:TheJavadocMiner} \cite[S.~593]{Softwareengineeringandsoftwaredocumentation:aunifiedlongcourse}.  
 

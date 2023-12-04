@@ -2905,17 +2905,7 @@
   abstract = {On GitHub, projects use bots to automate predefined and repetitive tasks related to issues and pull requests. Our research investigates the adoption of the stale bot, which helps maintainers triaging abandoned issues and pull requests. We analyzed the bots' configuration settings and their modifications over time. These settings define the time for tagging issues and pull request as stale and closing them. We collected data from 765 OSS projects hosted on GitHub. Our results indicate that most of the studied projects made no more than three modifications in the configurations file, issues tagged as bug reports are exempt from being considered stale, while the same occurs with pull requests that need some input to be processed.}
 }
 
-@article{wesselShouldStaleShould2019a,
-  title = {Should {{I Stale}} or {{Should I Close}}? {{An Analysis}} of a {{Bot That Closes Abandoned Issues}} and {{Pull Requests}}},
-  author = {Wessel, M. and Steinmacher, Igor and Wiese, I. and Gerosa, M.},
-  date = {2019},
-  journaltitle = {2019 IEEE/ACM 1st International Workshop on Bots in Software Engineering (BotSE)},
-  volume = {null},
-  pages = {38--42},
-  doi = {10.1109/BotSE.2019.00018},
-  url = {https://www.semanticscholar.org/paper/e39ae375a305c9cf3924006d0c506f0529748d56},
-  abstract = {On GitHub, projects use bots to automate predefined and repetitive tasks related to issues and pull requests. Our research investigates the adoption of the stale bot, which helps maintainers triaging abandoned issues and pull requests. We analyzed the bots' configuration settings and their modifications over time. These settings define the time for tagging issues and pull request as stale and closing them. We collected data from 765 OSS projects hosted on GitHub. Our results indicate that most of the studied projects made no more than three modifications in the configurations file, issues tagged as bug reports are exempt from being considered stale, while the same occurs with pull requests that need some input to be processed.}
-}
+
 
 @article{wesselWhatExpectCode2020,
   title = {What to {{Expect}} from {{Code Review Bots}} on {{GitHub}}?: {{A Survey}} with {{OSS Maintainers}}},
@@ -3345,4 +3335,101 @@ pages = {25–49},
 numpages = {25},
 location = {Lugano, Switzerland},
 series = {ICDL '07}
+}
+@article{White2023ChatGPTPP,
+  title={ChatGPT Prompt Patterns for Improving Code Quality, Refactoring, Requirements Elicitation, and Software Design},
+  author={Jules White and Sam Hays and Quchen Fu and Jesse Spencer-Smith and Douglas C. Schmidt},
+  journal={ArXiv},
+  year={2023},
+  volume={abs/2303.07839},
+  url={https://api.semanticscholar.org/CorpusID:257505363}
+}
+@misc{cao2023study,
+      title={A study on Prompt Design, Advantages and Limitations of ChatGPT for Deep Learning Program Repair}, 
+      author={Jialun Cao and Meiziniu Li and Ming Wen and Shing-chi Cheung},
+      year={2023},
+      eprint={2304.08191},
+      archivePrefix={arXiv},
+      primaryClass={cs.SE}
+}
+@www{data_clumps_refactoring_guru,
+	title        = {Data Clumps},
+	url          = {https://refactoring.guru/smells/data-clumps},
+	urldate      = {2023-09-26},
+	priority     = {prio1}
+}
+@www{join_data_items,
+	title        = {Join data items that want to go together – code smells series},
+	url          = {https://blog.jetbrains.com/dotnet/2018/07/02/join-data-items-want-go-together-code-smells-series/},
+	urldate      = {2023-09-26},
+	priority     = {prio1}
+}
+@inproceedings{10.1145/2393596.2393655,
+	title        = {A Field Study of Refactoring Challenges and Benefits},
+	author       = {Kim, Miryung and Zimmermann, Thomas and Nagappan, Nachiappan},
+	year         = 2012,
+	booktitle    = {Proceedings of the ACM SIGSOFT 20th International Symposium on the Foundations of Software Engineering},
+	location     = {Cary, North Carolina},
+	publisher    = {Association for Computing Machinery},
+	address      = {New York, NY, USA},
+	series       = {FSE '12},
+	doi          = {10.1145/2393596.2393655},
+	isbn         = 9781450316149,
+	abstract     = {It is widely believed that refactoring improves software quality and developer productivity. However, few empirical studies quantitatively assess refactoring benefits or investigate developers' perception towards these benefits. This paper presents a field study of refactoring benefits and challenges at Microsoft through three complementary study methods: a survey, semi-structured interviews with professional software engineers, and quantitative analysis of version history data. Our survey finds that the refactoring definition in practice is not confined to a rigorous definition of semantics-preserving code transformations and that developers perceive that refactoring involves substantial cost and risks. We also report on interviews with a designated refactoring team that has led a multi-year, centralized effort on refactoring Windows. The quantitative analysis of Windows 7 version history finds that the binary modules refactored by this team experienced significant reduction in the number of inter-module dependencies and post-release defects, indicating a visible benefit of refactoring.},
+	articleno    = 50,
+	numpages     = 11,
+	keywords     = {defects, empirical study, refactoring, software evolution, churn, component dependencies}
+}
+@inproceedings{9796303,
+	title        = {Is Refactoring Always a Good Egg? Exploring the Interconnection Between Bugs and Refactorings},
+	author       = {Bagheri, Amirreza and Hegedűs, Péter},
+	year         = 2022,
+	booktitle    = {2022 IEEE/ACM 19th International Conference on Mining Software Repositories (MSR)},
+	volume       = {},
+	number       = {},
+	pages        = {117--121},
+	doi          = {10.1145/3524842.3528034}
+}
+@misc{sobania2023analysis,
+	title        = {An Analysis of the Automatic Bug Fixing Performance of ChatGPT},
+	author       = {Dominik Sobania and Martin Briesch and Carol Hanna and Justyna Petke},
+	year         = 2023,
+	eprint       = {2301.08653},
+	archiveprefix = {arXiv},
+	primaryclass = {cs.SE}
+}
+@misc{sadik2023analysis,
+	title        = {Analysis of ChatGPT on Source Code},
+	author       = {Ahmed R. Sadik and Antonello Ceravola and Frank Joublin and Jibesh Patra},
+	year         = 2023,
+	eprint       = {2306.00597},
+	archiveprefix = {arXiv},
+	primaryclass = {cs.SE}
+}
+@misc{guo2023exploring,
+	title        = {Exploring the Potential of ChatGPT in Automated Code Refinement: An Empirical Study},
+	author       = {Qi Guo and Junming Cao and Xiaofei Xie and Shangqing Liu and Xiaohong Li and Bihuan Chen and Xin Peng},
+	year         = 2023,
+	eprint       = {2309.08221},
+	archiveprefix = {arXiv},
+	primaryclass = {cs.SE}
+}
+@misc{xia2023conversation,
+	title        = {Keep the Conversation Going: Fixing 162 out of 337 bugs for \$0.42 each using ChatGPT},
+	author       = {Chunqiu Steven Xia and Lingming Zhang},
+	year         = 2023,
+	eprint       = {2304.00385},
+	archiveprefix = {arXiv},
+	primaryclass = {cs.SE}
+}
+@article{4ef0b456377aafb68884e643779dffb36b8e7cc1,
+	title        = {C-3PR: A Bot for Fixing Static Analysis Violations via Pull Requests},
+	author       = {Antonio Carvalho and W. Luz and Diego Marcilio and R. Bonifácio and G. Pinto and E. D. Canedo},
+	year         = 2020,
+	journal      = {2020 IEEE 27th International Conference on Software Analysis, Evolution and Reengineering (SANER)},
+	volume       = {null},
+	pages        = {161--171},
+	doi          = {10.1109/SANER48275.2020.9054842},
+	url          = {https://www.semanticscholar.org/paper/4ef0b456377aafb68884e643779dffb36b8e7cc1},
+	abstract     = {Static analysis tools are frequently used to detect common programming mistakes or bad practices. Yet, the existing literature reports that these tools are still underused in the industry, which is partly due to (1) the frequent high number of false positives generated, (2) the lack of automated repairing solutions, and (3) the possible mismatches between tools and workflows of development teams. In this study we explored the question: “How could a bot-based approach allow seamless integration of static analysis tools into developers' workflows?” To this end we introduce C-3PR, an event-based bot infrastructure that automatically proposes fixes to static analysis violations through pull requests (PRs). We have been using C-3PR in an industrial setting for a period of eight months. To evaluate C-3PR usefulness, we monitored its operation in response to 2179 commits to the code base of the tracked projects. The bot autonomously executed 201346 analyses, yielding 610 pull requests. Among them, 346 (57\%) were merged into the projects' code bases. We observed that, on average, these PRs are evaluated faster than general-purpose PRs (2.58 and 5.78 business days, respectively). Accepted transformations take even shorter time (1.56 days). Among the reasons for rejection, bugs in C-3PR and in the tools it uses are the most common ones. PRs that require the resolution of a merge conflict are almost always rejected as well. We also conducted a focus group to assess how C-3PR affected the development workflow. We observed that developers perceived C-3PR as efficient, reliable, and useful. For instance, the participants mentioned that, given the chance, they would keep using C-3PR. Our findings bring new evidence that a bot-based infrastructure could mitigate some challenges that hinder the wide adoption of static analysis tools.}
 }
