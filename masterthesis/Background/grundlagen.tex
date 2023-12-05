@@ -146,3 +146,29 @@ Cao et al. \cite{cao2023study} focus on using ChatGPT for fixing deep learning p
 
 
 
+\section{Language Server Protocol}
+The \ac{LSP}  \cite{lsp_website} is a protocol developed by Microsoft to create a language-independent interface for code-related operations. 
+The \ac{LSP}  describes a server and a client who communicate to each other using the JSON-Remote-Remote-Process-Call protocol \cite{json_rpc}. 
+
+In general, the client can be anything that works with source code but has no detailed knowledge of a specific programming language. For instance, an \ac{IDE}, an editor or a refactoring tool can be described as a client.
+
+The client starts a server based on a programming language. The server has a inherent knowledge of one ore more programming languages and can provide source-code-related functionality. For instance, the server can rename a variable, find the usages of a method, or inform the client about compiler errors. 
+
+Initially, client and server some information to set-up. This includes the path to the project that the server should load and information about what functionality each of them support. These functionalities are named \textit{Capabilities}. For example, the server can announce that it supports renaming variables while the client show error messages. Hence, server and client can interact in a manner such that no unsupported messages are transferred.
+
+Figure \ref{fig:lsp_usage} illustrates how the \ac{LSP} works in practice after the initialization process. 
+\begin{figure}
+    \centering
+    \includegraphics{figures/chapter2/language-server-sequence.png}
+    \caption{Example usage of the Language Server Protocol}
+    \label{fig:lsp_usage}
+    \cite{lsp_website}
+\end{figure}
+
+After the server has successfully started by the client, a user can open a document (e.g. source code file). The request to open the document is submitted to the server. From now one, the server may not rely on the file system since that might be not the current version of the opened document. 
+
+The client can now inform the server about some changes (e.g. adding a new method). The server can in the meantime inform the client about syntactical errors which the client might show to the user of the client.
+
+Afterwards, the client requests the definition of a method or variable, and the server returns a response with the requested data.
+
+In the end, the client can save the document and notify the server that the document was closed which means that the physical file of the document represents the current version of teh document again. 

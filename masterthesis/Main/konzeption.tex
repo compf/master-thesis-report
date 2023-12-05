@@ -8,7 +8,13 @@ This chapter deals with the concept of the program. It provides information abou
 
 \hfill
 \section{Pipeline}\label{sec:pipeline}
-In order to find and refactor data clumps automatically, a particular sequence of steps \textbf{(pipeline)} has to be respected. Most steps of this sequence must be in a specific order because they rely on information extracted in a previous step, or the quality of the results (which might be needed by subsequent steps) would worsen. In the following subsections, these steps will be outlined:
+In order to find and refactor data clumps automatically, a particular sequence of steps \textbf{(pipeline)} has to be respected. Most steps of this sequence must be in a specific order because they rely on information extracted in a previous step, or the quality of the results (which might be needed by subsequent steps) would worsen.
+
+Each step of the pipeline is performed by a  \textbf{Handler}. A handler might handle one or more steps. These steps can be successive or non-successive. Each handler has information about what steps of the pipeline it supports and  a handler can be registered to a pipeline step if it supports the particular step. 
+
+Some parts of the pipeline are mandator because the purpose of finding and refactoring data clumps would be defeated if these steps would not be executed. For instance, obtaining the source code of the project to analyze, finding data clumps, finding a suitable name, and the refactoring can be regarded as mandatory
+
+In the following subsections, these steps will be outlined:
 \subsubsection{Code obtaining}
 Data clumps can only be found if access to the source code is given. This requires that the source code is available in some location and that the location is known.
 
