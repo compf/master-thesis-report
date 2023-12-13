@@ -1,0 +1,46 @@
+<mxfile host="app.diagrams.net" modified="2023-12-13T16:08:55.018Z" agent="Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:120.0) Gecko/20100101 Firefox/120.0" etag="wBfFdHr_L_R5ddjH52ip" version="22.1.8" type="device">
+  <diagram name="Page-1" id="bIQvJ6ZvUiTsyH6c5Mu-">
+    <mxGraphModel dx="461" dy="294" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="KtrdU6_BZdeSyDw4ZnZM-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="KtrdU6_BZdeSyDw4ZnZM-1" target="KtrdU6_BZdeSyDw4ZnZM-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="KtrdU6_BZdeSyDw4ZnZM-8" value="DataClumpDoctor" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="KtrdU6_BZdeSyDw4ZnZM-7">
+          <mxGeometry x="-0.02" y="-1" relative="1" as="geometry">
+            <mxPoint y="-11" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="KtrdU6_BZdeSyDw4ZnZM-1" value="Project path" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="30" y="190" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="KtrdU6_BZdeSyDw4ZnZM-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="KtrdU6_BZdeSyDw4ZnZM-2" target="KtrdU6_BZdeSyDw4ZnZM-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="KtrdU6_BZdeSyDw4ZnZM-10" value="ChatGPT" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="KtrdU6_BZdeSyDw4ZnZM-9">
+          <mxGeometry x="0.0067" relative="1" as="geometry">
+            <mxPoint y="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="KtrdU6_BZdeSyDw4ZnZM-2" value="Detected Data clumps" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="250" y="190" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="KtrdU6_BZdeSyDw4ZnZM-12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="KtrdU6_BZdeSyDw4ZnZM-3" target="KtrdU6_BZdeSyDw4ZnZM-6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="KtrdU6_BZdeSyDw4ZnZM-13" value="IntelliJ" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="KtrdU6_BZdeSyDw4ZnZM-12">
+          <mxGeometry x="-0.235" y="-2" relative="1" as="geometry">
+            <mxPoint y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="KtrdU6_BZdeSyDw4ZnZM-3" value="Suggested names" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="430" y="190" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="KtrdU6_BZdeSyDw4ZnZM-6" value="Refactored code" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="630" y="190" width="120" height="60" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

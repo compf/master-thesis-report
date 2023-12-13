@@ -32,9 +32,20 @@ In the context of data clump refactoring, the query should include the content o
 
 An instruction for refactoring data clumps should state that only the refactored source code files should be returned without providing explanatory texts or other information, as they can hinder the parsing of the output. 
 
+\begin{comment}
 \subsection{Cost reduction}
 
 Many \ac{LLM} are not for free but must be paid based on usage or other factors. Even if a \ac{LLM} is free, there are many restrictions for the data to be processed by the model, so special care needs to be taken to reduce the data size as well as possible.  The cost might already be reduced by following the steps in section \ref{sec:prompt_engineering}. Nevertheless, there are other factors that will be outlined:
+\end{comment}
+\subsection{Prompt engineering for ChatGPT}
+
+As outlined in  section\ref{sec:llm_challenges}, using \ac{LLM} can result in some challenges for refactoring code. Therefore, experiments are needed to test which input can lead to good results for finding or refactoring data clumps or both. These experiments should not be seen as a replacement for the full evaluation discussed in chapter \ref{chapter:eval}, but a mandatory prerequisite to save costs since the full evaluations needs to be performed on a larger set of projects.
+
+The input project is a modified version of the source code discussed in \ref{sec:data_clump_def} which is fairly small but include at least three data clumps. 
+
+In this section, the results of some of these experiments will be discussed.  As repeatedly noted, these experiments are not always reproducible and therefore are only to some extent helpful.
+\subsubsection{Finding data clumps without giving detailed instructions}
+
 
 
 \section{Implementation of steps}
@@ -53,7 +64,7 @@ All detected data clumps are reported in the format specified in section \ref{se
 Since the general tool is developed in Typescript, the \textit{Data Clump Doctor} can easily be integrated.
 
 \subsubsection{ChatGPT}
-ChatGPT is another approach to detect data clumps as it can process code easily and report data clumps in any format the user wants. It also supportsy many programming languages that other tools do not provide.
+ChatGPT is another approach to detect data clumps as it can process code easily and report data clumps in any format the user wants. It also supports many programming languages that other tools do not provide.
 
 However, ChatGPT has a limited context size, so that processing large projects is  either too costly or simply not possible.
 

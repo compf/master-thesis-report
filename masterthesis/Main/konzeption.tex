@@ -10,9 +10,28 @@ This chapter deals with the concept of the program. It provides information abou
 \section{Pipeline}\label{sec:pipeline}
 In order to find and refactor data clumps automatically, a particular sequence of steps \textbf{(pipeline)} has to be respected. Most steps of this sequence must be in a specific order because they rely on information extracted in a previous step, or the quality of the results (which might be needed by subsequent steps) would worsen.
 
-Each step of the pipeline is performed by a  \textbf{Handler}. A handler might handle one or more steps. These steps can be successive or non-successive. Each handler has information about what steps of the pipeline it supports and  a handler can be registered to a pipeline step if it supports the particular step. 
+Each step of the pipeline is performed by a  \textbf{Handler}. A handler might handle one or more steps.  Each handler has information about what steps of the pipeline it supports and  a handler can be registered to a pipeline step if it supports the particular step.  
 
-Some parts of the pipeline are mandator because the purpose of finding and refactoring data clumps would be defeated if these steps would not be executed. For instance, obtaining the source code of the project to analyze, finding data clumps, finding a suitable name, and the refactoring can be regarded as mandatory
+Since a service-based approach is used, a handler can be as a gateway to a different program or service that performs the specific functionality. 
+\begin{figure}
+    \centering
+    \includesvg[inkscapelatex=false,scale=0.9]{figures/chapter3/solver_gateway_service.svg}
+    \caption{Visualization of communication to services for one pipeline step}
+    \label{fig:solver_gateway_service_overview}
+\end{figure}
+
+Figure \ref{fig:solver_gateway_service_overview} illustrates how the service-based approach works for one step:
+
+\begin{enumerate}
+    \item The probram devloped in this master thesis executes one step (e.g. finding a suitable class name)
+    \item The gateway registered to that step is used. It is provided with the current context containing the results from previous steps.
+    \item The gateway starts or employs a specific service. This service might be dependent on the current step or might be constant. The gateway knows how to start or use the service and sends all relevant information to the service (e.g. via files, network streams etc.) 
+    \item The service processes the requests submitted by the gateway. For instance, ChatGPt can suggest a suitable class name. The service might be outside of the control of the developer. For instance, it might be programmed in a different programming language or the source code might not be available. At some point it will create a response and send it back to the gateway. 
+    \item The gateway reads the response and processed it. It then creates a new context based on the previous context and the response from the service. 
+    \item The new context is returned to the program and can be used for successive steps (e.~g. the suggested name can be used for creating a respective class) 
+\end{enumerate}
+
+Some parts of the pipeline are mandatory because the purpose of finding and refactoring data clumps would be defeated if these steps would not be executed. For instance, obtaining the source code of the project to analyze, finding data clumps, finding a suitable name, and the refactoring can be regarded as mandatory
 
 In the following subsections, these steps will be outlined:
 \subsubsection{Code obtaining}
@@ -28,13 +47,13 @@ The data clump detection process itself can be further divided into sub-steps.
 \subsubsection{Filtering}\label{subsub:filtering_files}
 First of all, all files of the programming language need to be detected. Usually, there are specific file extensions (e.g., \textit{.java}) for a source code file, simplifying the finding of files. It is also common for software projects to have a root folder that contains all source code files. Therefore, one can recursively iterate through all files and directories of a given root folder with a matching extension. 
 
-However, not every source code file might be analyzed for data clumps. For instance, parts of the projects must not be refactored, or a refactorization would be too time-consuming. As outlined in chapter \ref{sec:introduction}, the cost of detecting data clumps might need to be lowered. Therefore, filtering rules might be necessary to reduce the size of the relevant files for the subsequent steps.  
+However, not every source code file might be analyzed for data clumps. For instance, parts of the projects must not be refactored, or a re-factorization would be too time-consuming. As outlined in chapter \ref{sec:introduction}, the cost of detecting data clumps might need to be lowered. Therefore, filtering rules might be necessary to reduce the size of the relevant files for the subsequent steps.  
 
 \subsubsection{Extraction of AST}
 Then,  the source code needs to be simplified as comments, the method bodies, and other language parts are irrelevant for detecting data clumps. This could be achieved by extracting a subset of the \ac{AST} from the source code, which includes all the relevant information to identify data clumps.
 \subsubsection{Similarity detection}
 
-The next step is finding pairs of method parameters and pairs of identical or at least similar fields. For this, the identifier and the data type can be compared. Unequal variable names might not rule out a similarity between two variables. For instance, typos may happen, or synonyms may be used. Also, the type might be different. For instance, the data type \textit{double} can be seen as a superset of the datatype \textit{int} because every 32-bit integer can be converted to a \textit{double}.
+The next step is finding pairs of method parameters and pairs of identical or at least similar fields. For this, the identifier and the data type can be compared. Unequal variable names might not rule out a similarity between two variables. For instance, typos may happen, or synonyms may be used. Also, the type might be different. For instance, the data type \textit{double} can be seen as a super-set of the datatype \textit{int} because every 32-bit integer can be converted to a \textit{double}.
 
 From this, a graph can be constructed that visualizes the relationship of the several variables. A node represents a parameter or field value, while an edge exists if and only if a relationship between two variables is detected. 
 
@@ -97,7 +116,7 @@ In the case of a method data clump, the general approach is similar to the case 
 
 \subsection{Validation}
 
-At the conclusion of the refactoring process, it is not certain that everything is perfect. This applies to manual refactoring and also automatic refactoring. For instance, there might be an undetected error, the refactoring to ambiguous method signatures, some reference are not up-to-date etc.
+At the conclusion of the refactoring process, it is not certain that everything is perfect. This applies to manual refactoring and also automatic refactoring. For instance, there might be an undetected error, the refactoring leads to ambiguous method signatures, some reference are not up-to-date etc.
 
 As a result, it is critical to test the project after refactoring so make sure that all requirements are still fulfilled.
 
@@ -111,7 +130,22 @@ In section \ref{sec:pipeline}, the several steps of the data clump pipeline are 
 
 Therefore, a concept to store intermediate information needs to be developed. Such information might be called \textbf{context}.
 
-The context is a storage filled throughout the data clump refactoring pipeline. For instance, it might be stored in memory or a database if the context size is too large. Each step in the data clump refactoring pipeline can access the context and obtain such information as it may deem necessary for its use.
+The context is a storage filled throughout the data clump refactoring pipeline. For instance, it might be stored in memory or a database if the context size is too large.
+
+Each step in the data clump refactoring pipeline can access the context and obtain such information as it may deem necessary for its use. A step may or may not update the context. For instance, if a service performs multiple step consecutively, it might not be able to store some information. To give a more concrete example, if a service can find data clumps and refactor them automatically, it might not be able to store the locations of each data clump so that respective context cannot be created. 
+
+\begin{figure}
+    \centering
+    \includesvg[inkscapelatex=false,scale=0.9]{figures/chapter3/context_pipeline.svg}
+    \caption{Visualization of context pipeline}
+    \label{fig:context_pipeline}
+\end{figure}
+
+The context can be represented as a linked list. Each node of the list represents a part of the context. Figure \ref{fig:context_pipeline} illustrates how the context can be  represented.
+
+Here, in the beginning, only the location of the project to analyze is stored, which is mandatory. The pipeline step executing the \textit{DataClumpDoctor} can use this context and append a new context. A name finding service like ChatGPT can then append a context with the names of the extracted classes. At the end, a service like IntelliJ can do the refactoring.
+
+To check whether a given pipeline is indeed executable, each step handler must describe how the context is updated when the the step is executed. Each step can also specify whether a specific type of context must exist. For instance, a step may require that the names of the extracted class of each data clump must be stored in the context.  
 
 Such context can only work if the context data is in a specific format, which can be generated by one step and might be correctly interpreted by each successive step. 
 
@@ -120,7 +154,7 @@ In the following, the context created or updated after each step will be explain
 \subsubsection{Code obtaining}
 The context after obtaining the source code of the project to analyze is usually the path to the project after it. In most cases, the project is defined in such a manner that there is a single base directory under which all files and directories of the project are located.
 
-Alternatively, one could store the list of all relevant file paths of the project. This requires more storage but makes it easier to filter out files.
+Alternatively, one could store the list of all relevant file paths of the project. This requires more storage but makes it easier to filter out files. 
 
 \subsubsection{Filtering}
 After filtering the files, the context can be a new path with all files considered relevant, requiring a deletion or moving file system operation. If a list of files is used, all irrelevant file paths can be deleted, which might be faster.
