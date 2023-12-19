@@ -108,6 +108,19 @@ The usage of ChatGPT is nevertheless somewhat restricted. For instance, content 
 
 Another essential feature of ChatGPT is the ability to store conversations. A conversation is a collection of queries and linked responses sent to ChatGPT. Using conversations, a user can refer to a previous query or response in a later query. For instance, if ChatGPT makes a mistake or misinterprets a query, a user can send another request connected to the previous request and point out the mistake or give more context, helping ChatGPT auto-correct itself. 
 
+ChatGPT can be used via a browser or via an API. Using ChatGPT via the browser is free although restricted. A paid version is available that is faster and uses an improved model that supports the beforementioned image generation and other features not relevant for this master thesis.  Using the API requires a payment based on used token. A token is approximately a word but a detailed definition of a token is difficult to specify. 
+
+Figure \ref{fig:chatgpt_browser} illustrate how ChatGPT can be used in the browser.
+\begin{figure}
+    \centering
+\includegraphics[width=\columnwidth]{figures/chapter2/chatgpt_browser.png}
+    \caption{ChatGPT in the browser}
+    \label{fig:chatgpt_browser}
+
+    In the main panel that encompasses the most area of the figure, a chat is visualized. This is the the chat with the ChatGPT model. The queries are headlined with \textbf{You} and the responses with \textbf{ChatGPT}. In this example, ChatGPT is asked to create a hello world program with gradle. As a response, the model returned code blocks which the user can simply copy and use. Also descriptions are provided to explain the context and usage of the code.
+
+    On the right side, all conversation with ChatGPT are listed. For instance, there is a conversation about \enquote{IntelliJ PSI Modification Fix}. A user can have multiple independent conversations where each has it own context. 
+\end{figure}
 \subsection{Challenges on using Large Language Models}\label{sec:llm_challenges}
 
 While LLM bring many advantages  and possibilities, using \ac{LLM}  successfully can be challenging. 
@@ -172,3 +185,4 @@ The client can now inform the server about some changes (e.g. adding a new metho
 Afterwards, the client requests the definition of a method or variable, and the server returns a response with the requested data.
 
 In the end, the client can save the document and notify the server that the document was closed which means that the physical file of the document represents the current version of the document again. 
+

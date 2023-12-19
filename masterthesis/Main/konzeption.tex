@@ -12,7 +12,7 @@ In order to find and refactor data clumps automatically, a particular sequence o
 
 Each step of the pipeline is performed by a  \textbf{Handler}. A handler might handle one or more steps.  Each handler has information about what steps of the pipeline it supports and  a handler can be registered to a pipeline step if it supports the particular step.  
 
-Since a service-based approach is used, a handler can be as a gateway to a different program or service that performs the specific functionality. 
+Since a service-based approach is used, a handler can be seen as a gateway to a different program or service that performs the specific functionality.  The handler and the respective service are tightly coupled. While a handler could deal with multiple services, it is not required by the design, and requires special care. Nevertheless, it recommendable to write the handler as abstract as possible.
 \begin{figure}
     \centering
     \includesvg[inkscapelatex=false,scale=0.9]{figures/chapter3/solver_gateway_service.svg}
@@ -23,7 +23,7 @@ Since a service-based approach is used, a handler can be as a gateway to a diffe
 Figure \ref{fig:solver_gateway_service_overview} illustrates how the service-based approach works for one step:
 
 \begin{enumerate}
-    \item The probram devloped in this master thesis executes one step (e.g. finding a suitable class name)
+    \item The program developed in this master thesis executes one step (e.g. finding a suitable class name)
     \item The gateway registered to that step is used. It is provided with the current context containing the results from previous steps.
     \item The gateway starts or employs a specific service. This service might be dependent on the current step or might be constant. The gateway knows how to start or use the service and sends all relevant information to the service (e.g. via files, network streams etc.) 
     \item The service processes the requests submitted by the gateway. For instance, ChatGPt can suggest a suitable class name. The service might be outside of the control of the developer. For instance, it might be programmed in a different programming language or the source code might not be available. At some point it will create a response and send it back to the gateway. 
@@ -69,7 +69,7 @@ In the case of field data clumps, we also have to consider the worst case, namel
 
 A subsequent refactoring of these fields is more complicated than that of less accessible fields because they might be used by external programs or libraries that are beyond the control of the developer, which might induce bugs or non-compilable software. 
 
-One can argue that refactoring should never affect the public interface since the abovementioned issues can occur \cite{10.1145/1352678.1352681}.
+One can argue that refactoring should never affect the public interface since the above-mentioned issues can occur \cite{10.1145/1352678.1352681}.
 
 On the other hand, one can argue that those changes are still significant because they can improve readability, and the source code may be in the early stages to make such breaking changes feasible. 
 
@@ -167,7 +167,7 @@ The format described in section \ref{sec:data_clump_format} can be used to store
 \subsubsection{Name finding}
 To store the determined names per found data clump, a dictionary can be used that maps a unique data clump to a name. For large instances, this could be done via a database. 
 
-Since there could be multiple name suggestions for a given data clump, multiple names might be stored so that a correct name may be chosen later.
+Since there could be multiple name suggestions for a given data clump, multiple names might be stored so that a correct name may be chosen later. However, this is not part of the modeled pipeline as the benefits do not outweigh the increased complexity.
 
 \subsubsection{Class extraction}
 
@@ -175,7 +175,14 @@ After a class extraction step, the created class can be stored somewhere to be c
 
 For instance, the class could be where the data clump is initially found. This can lead to arbitrariness as the exact order of where and when data clumps are detected might not be predetermined. 
 
-Alternatively, specific locations can be used to store all extracted classes. This, however, can also hinder readability as the extracted classes have no connections to the places where they are used.  
+Alternatively, specific locations can be used to store all extracted classes. This, however, can also hinder readability as the extracted classes have no connections to the places where they are used. 
+
+As an alternative, the complete class body could be stored instead of saving it directly to a file. This might advantageous if the class content should be formatted, refactored or otherwise modified in order to be valid. This also would deflect the responsibility of the class location from the class extractor step. 
+
+One might also argue that choosing the extracted class location should be separate step. 
+However, too many steps can be counterproductive as they increase the complexity and causes the individual steps to have too few responsibility.
+
+Therefore, the class location is determined by the extractor which also saves the class content and stores the data in its context. 
 
 \begin{comment}
 

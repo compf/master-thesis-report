@@ -32,6 +32,8 @@ In the context of data clump refactoring, the query should include the content o
 
 An instruction for refactoring data clumps should state that only the refactored source code files should be returned without providing explanatory texts or other information, as they can hinder the parsing of the output. 
 
+When using the \enquote{gpt-4-1106-preview} or \enquote{gpt-3.5-turbo-1106} model of the OpenAI-\ac{API}, developers can force the model to response in \ac{JSON}. hence, the output can be made more predictable and easier to control. A request using this mode must include the term \enquote{\ac{JSON}}. It should however be noted, that the precise structure of the \ac{JSON} returned may still differ from the request. 
+
 \begin{comment}
 \subsection{Cost reduction}
 
@@ -41,19 +43,42 @@ Many \ac{LLM} are not for free but must be paid based on usage or other factors.
 
 As outlined in  section\ref{sec:llm_challenges}, using \ac{LLM} can result in some challenges for refactoring code. Therefore, experiments are needed to test which input can lead to good results for finding or refactoring data clumps or both. These experiments should not be seen as a replacement for the full evaluation discussed in chapter \ref{chapter:eval}, but a mandatory prerequisite to save costs since the full evaluations needs to be performed on a larger set of projects.
 
-The input project is a modified version of the source code discussed in \ref{sec:data_clump_def} which is fairly small but include at least three data clumps. 
+The input project is a modified version of the source code discussed in \ref{sec:data_clump_def} which is fairly small but include at least three data clumps. Table \ref{tbl:javaTest_data_clumps} lists all data clumps exists in this project. The names in the \textit{From} or \textit{To} column are in the format \textit{className.methodName} or \textit{className} depending on whether it is a field-to-field \textit{(f2f} or parameter-to-parameter \textit{(p2p)} data clump
 
-In this section, the results of some of these experiments will be discussed.  As repeatedly noted, these experiments are not always reproducible and therefore are only to some extent helpful.
+\begin{table}[]
+    \centering
+    \begin{tabular}{c|c|c|c|c}
+         Id &From & To & Type & Data clump variables  \\\hline
+         1 & MathStuff.printLength & MathStuff.printSum & p2p & x,y,z\\\hline
+        2 & MathStuff.printSum & MathSum.printMax & p2p & x,y,z\\\hline
+        3 & MathStuff.printLength & MathSum.printMax & p2p & x,y,z\\\hline
+        4 & MathStuff & MathUser & f2f & sign, mantissa, exponent\\\hline
+        5 & Library & MathUser & f2f & sign, mantissa, exponent\\\hline
+        6 & MathStuff & Library & f2f & sign, mantissa, exponent\\\hline
+    \end{tabular}
+    \caption{All data clumps in the test projects}
+    \label{tbl:javaTest_data_clumps}
+\end{table}
+
+In this section, the results of some of these experiments will be discussed.  As repeatedly noted, these experiments are not always reproducible and therefore are only to some extent helpful. In all cases, ChatGPT is asked to output in \ac{JSON} to have a consistent format
 \subsubsection{Finding data clumps without giving detailed instructions}
 
+At first, it is useful whether ChatGPT can find data clumps without giving a specific definition. This means it is not asked to differentiate between parameters-to-parameters data clumps and field-to-field data clump, and the output format specifies the two endpoints (e.~g. \textit{from} or \textit{to}) of a data clump as \textit{item1} and \textit{item2}.
+
+Nevertheless, the results are fairly good. ChatGPT ignores the inheritance between \textit{MathStuff} and \textit{BetterMathStuff} and does not output a data clump for each method in \textit{MathStuff}
+
+
+\subsubsection{Providing examples of data clumps to ChatGPT}
+
+Another approach for including ChatGPT for data clump refactoring is example-based. Multiple examples of data clumps and how they can be refactored are presented to ChatGPT. In order to avoid any bias, each type of data clump is equally represented and field identifiers or parameters field identifiers are unique across the whole example. This results in a larger request size and thusly more costs
 
 
 \section{Implementation of steps}
 While in section \ref{sec:pipeline} a general approach to find and refactor data clumps is given, the concrete implementation with the various tools is left out. In the following subsections, the implementations with the tools are described. In the case of \textit{code obtaining}, \textit{filtering}, only basic approaches are used so that they will not be detailed further. 
 
-\subsection{Data clump detection}
+
 Detecting data clumps is a significant part of the pipeline. The tools used for this pipeline step are \textit{DataClumpDoctor}, \textit{ChatGPT} and \textit{IntelliJ}.
-\subsubsection{Data clump doctor}
+\subsection{Data clump doctor}
 
 The  \textit{Data Clump Doctor} is NodeJS command line tool developed by Nils Baumgartner in preparation of this master thesis. It employs \textit{PMD} to find all classes, methods, and fields in a Java project to generate an \ac{AST}. This syntax tree is saved as a \ac{JSON}. 
 
@@ -63,7 +88,7 @@ All detected data clumps are reported in the format specified in section \ref{se
 
 Since the general tool is developed in Typescript, the \textit{Data Clump Doctor} can easily be integrated.
 
-\subsubsection{ChatGPT}
+\subsection{ChatGPT}
 ChatGPT is another approach to detect data clumps as it can process code easily and report data clumps in any format the user wants. It also supports many programming languages that other tools do not provide.
 
 However, ChatGPT has a limited context size, so that processing large projects is  either too costly or simply not possible.
@@ -80,8 +105,10 @@ A data clump exists
 \end{enumerate}
 
 
-\subsubsection{IntelliJ}
+\subsection{IntelliJ}
 The Program Structure Interface provided by IntelliJ is an \ac{API} to analyze projects that can be loaded by IntelliJ. As a result, the various classes, methods etc. can be obtained which allows for the detection of data clumps. Like the ChatGPT approach, it can be easily extended to refactor the data clumps.
 
-In order to use this API, an instance of IntelliJ must be started. To reduce loading times and improve the performance, IntelliJ can be started in a headless mode so that no GUI is initialized. Nevertheless, IntelliJ requires many resources and much overhead so that  the initialization  needs some time. 
+In order to use this API, an instance of IntelliJ must be started. To reduce loading times and improve the performance, IntelliJ can be started in a headless mode so that no GUI is initialized. Nevertheless, IntelliJ requires many resources and much overhead so that  the initialization  needs some time.
+
+Another problem during the development of the tool is the issue of correctly loading projects. While a project that has no IntelliJ meta data files can be loaded, finding references of a method or field can lead to undefined behavior. Sometimes all references are correctly found, sometimes only a subset of the references are found, and sometimes no even no references are detected. The reasons for this are difficult to determine and the documentation is scarce, so the the PSI approach seems to be only suitable for projects created via IntelliJ or correctly initialized by IntelliJ with the required meta data. 
 
