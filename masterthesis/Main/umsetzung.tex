@@ -24,7 +24,7 @@ OpenAI recommends that the instructions and input be separated as distinctive as
 
 \subsubsection{Provide detailed context and how the model should respond}
 
-When generating a reply to a query, a language model will use the available context to process the query and generate an output that satisfies the user's need. This means that every bit of relevant information can help the language model to generate a better response.
+When generating a reply to a query, a language model will use the available context to process the query and generate an output that attempts satisfy the user's need. This means that every bit of relevant information can help the language model to generate a better response.
 
 On the contrary, providing irrelevant information can increase the chance of wrong responses, so the creator of a query must always consider what to include in a query and what not. 
 
@@ -39,11 +39,22 @@ When using the \enquote{gpt-4-1106-preview} or \enquote{gpt-3.5-turbo-1106} mode
 
 Many \ac{LLM} are not for free but must be paid based on usage or other factors. Even if a \ac{LLM} is free, there are many restrictions for the data to be processed by the model, so special care needs to be taken to reduce the data size as well as possible.  The cost might already be reduced by following the steps in section \ref{sec:prompt_engineering}. Nevertheless, there are other factors that will be outlined:
 \end{comment}
-\subsection{Prompt engineering for ChatGPT}
+
+\subsubsection{Chain-of-Thought Prompting}
+
+Another approach to improve the results from \ac{LLM} like ChatGPT is to separate a query into interconnected sub queries that lead to a chain of thought. This can be compared to human thinking process because a human alone tries not to solve a problem at once but breaks it downs into simpler problem that are still connected to but easier to solve. \cite{Wei2022ChainOT}
+
+For instance, a query to find and refactor data clumps can be separate into a detection query and a refactoring query. These sub-queries can be further divided into a query for each file or for all files in a single directory. As a result, not one a single query needs but multiple queries. 
+
+This is useful if a human is reviewing the output from a \ac{LLM} since obvious errors can be spotted more easily if the task is divided into multiple  step. However, it is more challenging for an automated tool since it cannot find errors in the same way. 
+
+Furthermore, one should consider that each queries requires further overhead so that the performance might be impacted more negatively. 
+
+\subsection{Experimental prompt engineering for ChatGPT}
 
 As outlined in  section\ref{sec:llm_challenges}, using \ac{LLM} can result in some challenges for refactoring code. Therefore, experiments are needed to test which input can lead to good results for finding or refactoring data clumps or both. These experiments should not be seen as a replacement for the full evaluation discussed in chapter \ref{chapter:eval}, but a mandatory prerequisite to save costs since the full evaluations needs to be performed on a larger set of projects.
 
-The input project is a modified version of the source code discussed in \ref{sec:data_clump_def} which is fairly small but include at least three data clumps. Table \ref{tbl:javaTest_data_clumps} lists all data clumps exists in this project. The names in the \textit{From} or \textit{To} column are in the format \textit{className.methodName} or \textit{className} depending on whether it is a field-to-field \textit{(f2f} or parameter-to-parameter \textit{(p2p)} data clump
+The input project is a modified version of the source code discussed in \ref{sec:data_clump_def} which is fairly small but include at least three data clumps. Table \ref{tbl:javaTest_data_clumps} lists all data clumps which exists in this project. The names in the \textit{From} or \textit{To} column are in the format \textit{className.methodName} or \textit{className} depending on whether it is a field-to-field \textit{(f2f} or parameter-to-parameter \textit{(p2p)} data clump
 
 \begin{table}[]
     \centering
@@ -60,7 +71,9 @@ The input project is a modified version of the source code discussed in \ref{sec
     \label{tbl:javaTest_data_clumps}
 \end{table}
 
-In this section, the results of some of these experiments will be discussed.  As repeatedly noted, these experiments are not always reproducible and therefore are only to some extent helpful. In all cases, ChatGPT is asked to output in \ac{JSON} to have a consistent format
+In this section, the results of some of these experiments will be discussed.  As repeatedly noted, these experiments are not always reproducible and therefore are only to some extent helpful. In all cases, ChatGPT is asked to output in \ac{JSON} to have a consistent format.
+
+
 \subsubsection{Finding data clumps without giving detailed instructions}
 
 At first, it is useful whether ChatGPT can find data clumps without giving a specific definition. This means it is not asked to differentiate between parameters-to-parameters data clumps and field-to-field data clump, and the output format specifies the two endpoints (e.~g. \textit{from} or \textit{to}) of a data clump as \textit{item1} and \textit{item2}.
@@ -77,7 +90,6 @@ Another approach for including ChatGPT for data clump refactoring is example-bas
 While in section \ref{sec:pipeline} a general approach to find and refactor data clumps is given, the concrete implementation with the various tools is left out. In the following subsections, the implementations with the tools are described. In the case of \textit{code obtaining}, \textit{filtering}, only basic approaches are used so that they will not be detailed further. 
 
 
-Detecting data clumps is a significant part of the pipeline. The tools used for this pipeline step are \textit{DataClumpDoctor}, \textit{ChatGPT} and \textit{IntelliJ}.
 \subsection{Data clump doctor}
 
 The  \textit{Data Clump Doctor} is NodeJS command line tool developed by Nils Baumgartner in preparation of this master thesis. It employs \textit{PMD} to find all classes, methods, and fields in a Java project to generate an \ac{AST}. This syntax tree is saved as a \ac{JSON}. 
@@ -88,6 +100,7 @@ All detected data clumps are reported in the format specified in section \ref{se
 
 Since the general tool is developed in Typescript, the \textit{Data Clump Doctor} can easily be integrated.
 
+\begin{comment}
 \subsection{ChatGPT}
 ChatGPT is another approach to detect data clumps as it can process code easily and report data clumps in any format the user wants. It also supports many programming languages that other tools do not provide.
 
@@ -103,12 +116,12 @@ A data clump exists
    \item if at least three fields also exists as method parameters in some method
     \item if two methods have at least three common parameters
 \end{enumerate}
-
+\end{comment}
 
 \subsection{IntelliJ}
 The Program Structure Interface provided by IntelliJ is an \ac{API} to analyze projects that can be loaded by IntelliJ. As a result, the various classes, methods etc. can be obtained which allows for the detection of data clumps. Like the ChatGPT approach, it can be easily extended to refactor the data clumps.
 
 In order to use this API, an instance of IntelliJ must be started. To reduce loading times and improve the performance, IntelliJ can be started in a headless mode so that no GUI is initialized. Nevertheless, IntelliJ requires many resources and much overhead so that  the initialization  needs some time.
 
-Another problem during the development of the tool is the issue of correctly loading projects. While a project that has no IntelliJ meta data files can be loaded, finding references of a method or field can lead to undefined behavior. Sometimes all references are correctly found, sometimes only a subset of the references are found, and sometimes no even no references are detected. The reasons for this are difficult to determine and the documentation is scarce, so the the PSI approach seems to be only suitable for projects created via IntelliJ or correctly initialized by IntelliJ with the required meta data. 
+Another problem during the development of the tool is the issue of correctly loading projects. While a project that has no IntelliJ meta data files can be loaded, finding references of a method or field can lead to undefined behavior. Sometimes all references are correctly found, sometimes only a subset of the references are found, and sometimes no even no references are detected. The reasons for this are difficult to determine and the documentation is scarce, so the the PSI approach seems to be only suitable for projects created via IntelliJ or correctly initialized by IntelliJ with the required meta data. Gradle and maven projects are therefore not suitable for the full refactoring step. 
 
