@@ -76,14 +76,14 @@ In this section, the results of some of these experiments will be discussed.  As
 
 \subsubsection{Finding data clumps without giving detailed instructions}
 
-At first, it is useful whether ChatGPT can find data clumps without giving a specific definition. This means it is not asked to differentiate between parameters-to-parameters data clumps and field-to-field data clump, and the output format specifies the two endpoints (e.~g. \textit{from} or \textit{to}) of a data clump as \textit{item1} and \textit{item2}.
+At first, it is useful whether ChatGPT can find data clumps without giving a specific definition. This means ChatGPT needs to deduce the definition of a data clump from its trained models which might not be the same as the definition used in section \ref{sec:data_clump_def}.
 
 Nevertheless, the results are fairly good. ChatGPT ignores the inheritance between \textit{MathStuff} and \textit{BetterMathStuff} and does not output a data clump for each method in \textit{MathStuff}
 
 
 \subsubsection{Providing examples of data clumps to ChatGPT}
 
-Another approach for including ChatGPT for data clump refactoring is example-based. Multiple examples of data clumps and how they can be refactored are presented to ChatGPT. In order to avoid any bias, each type of data clump is equally represented and field identifiers or parameters field identifiers are unique across the whole example. This results in a larger request size and thusly more costs
+Another approach for including ChatGPT for data clump refactoring is example-based. Multiple examples of data clumps and how they can be refactored are presented to ChatGPT. In order to avoid any bias, each type of data clump is equally represented and field identifiers or parameters field identifiers are unique across the whole example. This results in a larger request size and thusly more costs. Nevertheless, if larger projects were to be used the size of the examples becomes negligible so that this approach has its reasons. The examples provided to ChatGPT can be found in the digital appendix under the path \enquote{data\_clump\_examples.java} 
 
 
 \section{Implementation of steps}
