@@ -1,4 +1,7 @@
 In this chapter, the background of data clumps will be discussed. A formal definition of data clumps will be presented (\ref{sec:data_clump_def}). ChatGPT will be discussed in section \ref{sec:chatgpt}. Also, the data clump type context format will be discussed. 
+\section{Code smells}
+
+The term \enquote{Code smell} is a term suggested by Kent Beck in \cite{fowler2019refactoring} for source code that may need refactoring. If the refactoring is not performed timely, the costs of maintenance of the source code and the software project can be higher and the efficiency of implementing changes is reduced. Some examples of code smells include unclear variables names, large classes, large method, missing documentation or code duplicates. Another possible code smell are data clumps. 
 
 \section{Data clumps}\label{sec:data_clump_def}
 The term \enquote{Data Clump} was coined by Martin Fowler as one possible code smell that can occur in source code. He describes data clumps as follows:
@@ -88,15 +91,38 @@ In the second step, a parameter object is introduced that replaces the three pre
 			{figures/chapter2/dataClump/MathStuffRefactored.java}
 		\end{figure}
 
-\section{ Data clumps Type Context }\label{sec:data_clump_format}
+\subsection{ Data clumps Type Context }\label{sec:data_clump_format}
 
 The \textbf{Data clumps Type Context} \cite{dataclump_type_context} is developed by Baumgartner et al. to establish a standard for reporting data clumps.
 
-The format consists of three layers. In the outer layer, general project information is defined—for instance, the programming language or the location of the project.
+An example of the Data clump type context can be seen in listing \ref{lst:data_clump_type_context_example}. Only a subset of the formate will be discussed here because of space reasons.
 
-In an inner layer, each detected data clump is described as a link between multiple method parameters or fields and another method parameters or fields. 
+  \begin{figure} [htbp!]
+			\lstinputlisting
+			[caption={ Resulting Coordinate class},
+			label={lst:data_clump_type_context_example},
+			captionpos=b,language=java, basicstyle=\footnotesize, tabsize=2, showstringspaces=false,  numbers=left]
+			{figures/chapter2/data_clump_type_context_example.json}
+		\end{figure}
 
-In the inner layer, each data clump item is linked to another data clump item, and information like the data type and identifier are described. 
+The format consists of three layers. In the outer layer which is left out here, general project information is defined: For instance, the programming language or the location of the project. Also the number of methods, classes, and the number of detected data clumps can be obtained in this general part. 
+
+In the next layer, each detected data clump is mapped with a unique key (l. 4).
+
+The detected data clumps are described as a link between two files. These files might be identical if the data clumps are located in the same file. Here one has to differ between the \enquote{from-part} and the \enquote{to-part} which represent the two nodes in the data clump graph. For instance \enquote{from\_file\_path} indicates the location of the one part of the data clump, while \enquote{to\_file\_path} provides the path to the opposite end. 
+
+A similar principle is apllied to the classes in which a data clump is located. Because a class name might not be unique, not only the names of the two classes but also unique ientifier of those classes are provided (l. 9-10 and 14-15).
+
+The information about the methods of the data clump )l. 11, 12, 16, 17) is optional. if one part of the data clump is a field-to-field data clump, no method is involved so the respective part would be \textit{null}.
+
+The field \enquote{probability} can be used by probabilistic data clump detection tools to indicate the probability that the detected data clump is indeed a data clump. For purposes of this master thesis, it will be ignored. 
+
+In lines 19-42, each variable that is part of the data clump is  described. Here only one variable is listed although for a data clump there must be at least three variables. As for the data clump itself, the individual variables are separated into  a \enquote{from-part} and a \enquote{to-part}. The former is implicitly defined (l.~20-25, 38-42), while the latter has a specifically named sub object \enquote{to\_variable} (l. 27-37). For each variable, the name (l. 22 and l. 28)) and the data type (l.~23 and l. 29) is provided. As for the general data clump, a probability is given whether the variable is indeed part of a data clump (l. 24). As mentioned above, this information will be ignored.  Additionally modifiers like \enquote{private}, \enquote{final} etc. are also stored. 
+
+In order to find the variable in the source code, detailed location information is needed. In source code, the line number (l.~32 and l.~39) and the column number (l.~33 and l.~40) is required . To avoid any ambiguity, the end position of the variable is saved too. Both numbers are one-index-based meaning that the first line is 1 and the first column is also 1. 
+
+
+
 
 \section{ChatGPT}\label{sec:chatgpt}
 
@@ -200,8 +226,42 @@ There also security issues with using  \ac{LLM} like ChatGPT. If a model is aske
 Furthermore, it is not out of the question that a malicious attacker might change the query or the reply of a \ac{LLM}. Therefore, using such a model might be a feasible way to hack systems or create damage which is difficult to detect and prevent.
 
 Lastly, also costs and capacity considerations needs to be observed. For large projects, a \ac{LLM} might be too costly because  the costs are often based on the input size. Therefore, the use of large language models should be adequately prepared so that as much costs as possible can be saved.  
+\subsection{Consideration while using large language models}
+In order to use a \ac{LLM} more effectively, the prompts and queries need to be modeled in a specific manner so that they are interpreted correctly. While deviating from these manners may still produce correct results, it nevertheless increases the risk of wrong results. The following tips were derived from the OpenAI documentation \cite{ChatGPT_url} and hence apply only to ChatGPT. Generally speaking. However, many recommendations will work for other \ac{LLM} too because they will help to make the prompt more clearly and prevent misunderstanding:
 
-\section{Language Server Protocol}
+\subsubsection{Separate instruction and input}
+Many queries to \ac{LLM} include an instruction and an input. For instance, a query to find and refactor data clumps could  provide the source code containing the possible data clumps \textbf{(input)}. The instruction could be the query \enquote{Find and refactor all data clumps in this source code}. 
+
+OpenAI recommends that the instructions and input be separated as distinctive as possible. It suggests enclosing the input in a block of \textit{"""} or \textit{\#\#\#} to mark what the input and what the instruction is clearly.
+
+\subsubsection{Provide detailed context and how the model should respond}
+
+When generating a reply to a query, a language model will use the available context to process the query and generate an output that attempts satisfy the user's need. This means that every bit of relevant information can help the language model to generate a better response.
+
+On the contrary, providing irrelevant information can increase the chance of wrong responses, so the creator of a query must always consider what to include in a query and what not. 
+
+In the context of data clump refactoring, the query should include the content of the source code and the programming language. However, files that cannot have data clumps (e.g., configuration files) should not be included.
+
+An instruction for refactoring data clumps should state that only the refactored source code files should be returned without providing explanatory texts or other information, as they can hinder the parsing of the output. 
+
+When using the \enquote{gpt-4-1106-preview} or \enquote{gpt-3.5-turbo-1106} model of the OpenAI-\ac{API}, developers can force the model to response in \ac{JSON}. hence, the output can be made more predictable and easier to control. A request using this mode must include the term \enquote{\ac{JSON}}. It should however be noted, that the precise structure of the \ac{JSON} returned may still differ from the request. 
+
+\begin{comment}
+\subsection{Cost reduction}
+
+Many \ac{LLM} are not for free but must be paid based on usage or other factors. Even if a \ac{LLM} is free, there are many restrictions for the data to be processed by the model, so special care needs to be taken to reduce the data size as well as possible.  The cost might already be reduced by following the steps in section \ref{sec:prompt_engineering}. Nevertheless, there are other factors that will be outlined:
+\end{comment}
+
+\subsubsection{Chain-of-Thought Prompting}\label{sec:chain of thought}
+
+Another approach to improve the results from \ac{LLM} like ChatGPT is to separate a query into interconnected sub queries that lead to a chain of thought. This can be compared to human thinking process because a human alone tries not to solve a problem at once but breaks it downs into simpler problem that are still connected to but easier to solve. \cite{Wei2022ChainOT}
+
+For instance, a query to find and refactor data clumps can be separate into a detection query and a refactoring query. These sub-queries can be further divided into a query for each file or for all files in a single directory. As a result, not one a single query needs but multiple queries. 
+
+This is useful if a human is reviewing the output from a \ac{LLM} since obvious errors can be spotted more easily if the task is divided into multiple  step. However, it is more challenging for an automated tool since it cannot find errors in the same way. 
+
+Furthermore, one should consider that each queries requires further overhead so that the performance might be impacted more negatively. 
+\section{Language Server Protocol} \label{sec:lsp}
 The \ac{LSP}  \cite{lsp_website} is a protocol developed by Microsoft to create a language-independent interface for code-related operations. 
 The \ac{LSP}  describes a server and a client who communicate to each other using the JSON-Remote-Process-Call protocol \cite{json_rpc}. 
 
