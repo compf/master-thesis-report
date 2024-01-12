@@ -1,0 +1,82 @@
+<mxfile host="app.diagrams.net" modified="2024-01-08T23:32:21.662Z" agent="Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:121.0) Gecko/20100101 Firefox/121.0" etag="buS2GWcG_JoOm8HDBSLQ" version="22.1.17" type="device">
+  <diagram name="Page-1" id="QB7dx3PHPkh61sSlfvAQ">
+    <mxGraphModel dx="1153" dy="765" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="Ddr_qRebvY5FsQ9rl9eG-3" value="Here all data clumps in MathStuff.java" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="120" y="70" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="Ddr_qRebvY5FsQ9rl9eG-19" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="Ddr_qRebvY5FsQ9rl9eG-4" target="Ddr_qRebvY5FsQ9rl9eG-18">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Ddr_qRebvY5FsQ9rl9eG-4" value="What are all data clumps in Math.Stuff.java" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="120" y="290" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Ddr_qRebvY5FsQ9rl9eG-5" value="" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="270" y="480" as="sourcePoint" />
+            <mxPoint x="270" y="140" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Ddr_qRebvY5FsQ9rl9eG-6" value="Can you find more data clumps in MathStuff.java" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="410" y="310" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Ddr_qRebvY5FsQ9rl9eG-7" value="To determine if there are more data clumps in &quot;MathStuff.java,&quot; I would need to analyze the code. If you can provide the code from &quot;MathStuff.java,&quot; I can review it to identify any data clumps" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="340" y="70" width="280" height="210" as="geometry" />
+        </mxCell>
+        <mxCell id="Ddr_qRebvY5FsQ9rl9eG-8" value="" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="680" y="490" as="sourcePoint" />
+            <mxPoint x="680" y="140" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Ddr_qRebvY5FsQ9rl9eG-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.421;entryY=0.99;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="Ddr_qRebvY5FsQ9rl9eG-6" target="Ddr_qRebvY5FsQ9rl9eG-7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Ddr_qRebvY5FsQ9rl9eG-24" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" edge="1" parent="1" source="Ddr_qRebvY5FsQ9rl9eG-11" target="Ddr_qRebvY5FsQ9rl9eG-21">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Ddr_qRebvY5FsQ9rl9eG-11" value="Can you find more data clumps in MathStuff.java" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="750" y="340" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Ddr_qRebvY5FsQ9rl9eG-16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="Ddr_qRebvY5FsQ9rl9eG-12" target="Ddr_qRebvY5FsQ9rl9eG-13">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Ddr_qRebvY5FsQ9rl9eG-12" value="Here all data clumps in MathStuff.java" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="740" y="130" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="Ddr_qRebvY5FsQ9rl9eG-29" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="Ddr_qRebvY5FsQ9rl9eG-13" target="Ddr_qRebvY5FsQ9rl9eG-14">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Ddr_qRebvY5FsQ9rl9eG-13" value="Can you find more data clumps in MathStuff.java" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="740" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Ddr_qRebvY5FsQ9rl9eG-14" value="Herei is another data clump" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="940" y="30" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="Ddr_qRebvY5FsQ9rl9eG-20" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" edge="1" parent="1" source="Ddr_qRebvY5FsQ9rl9eG-18" target="Ddr_qRebvY5FsQ9rl9eG-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Ddr_qRebvY5FsQ9rl9eG-18" value="Content of MathStuff.java" style="rounded=0;whiteSpace=wrap;html=1;fontStyle=2" vertex="1" parent="1">
+          <mxGeometry x="100" y="190" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Ddr_qRebvY5FsQ9rl9eG-21" value="Content of MathStuff.java" style="rounded=0;whiteSpace=wrap;html=1;fontStyle=2" vertex="1" parent="1">
+          <mxGeometry x="730" y="250" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Ddr_qRebvY5FsQ9rl9eG-22" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.558;entryY=1.025;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="Ddr_qRebvY5FsQ9rl9eG-21" target="Ddr_qRebvY5FsQ9rl9eG-12">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Ddr_qRebvY5FsQ9rl9eG-27" value="Request 1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="140" y="410" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="Ddr_qRebvY5FsQ9rl9eG-28" value="Request 2" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="440" y="410" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="Ddr_qRebvY5FsQ9rl9eG-30" value="Request 3" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="780" y="410" width="60" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -122,8 +122,6 @@ In lines 19-42, each variable that is part of the data clump is  described. Here
 In order to find the variable in the source code, detailed location information is needed. In source code, the line number (l.~32 and l.~39) and the column number (l.~33 and l.~40) is required . To avoid any ambiguity, the end position of the variable is saved too. Both numbers are one-index-based meaning that the first line is 1 and the first column is also 1. 
 
 
-
-
 \section{ChatGPT}\label{sec:chatgpt}
 
 ChatGPT \cite{ChatGPT_url} is a \ac{LLM} developed by OpenAI and released in November 2022. As a \ac{LLM}, ChatGPT can interpret user queries and return an appropriate response. 
@@ -173,7 +171,19 @@ Afterwards, the actual messages are provided (l. 6-24). Each message is a tuple 
 
 The role of a message indicates the source of a message. If the content of the messages comes from a user, the role should be \enquote{user} (l. 12). A reply for a query is defined as the role \enquote{assistant} (l. 16). The system role is a more specific role and can be used to include further context for ChatGPT without eliciting a response (l. 8)
 
-ChatGPT is stateless. This means that the token explained above is solely used for accounting purposes and not to store the queries reliably. As a result, if one wants to hold a conversations similar to the browser version,  not only all previous messages from the user must be sent to ChatGPT, but also all replies and the messages of the system role. This should be considered while using the OpenAI \ac{API} because the number of required tokens can strongly increase for longer conversations. 
+ChatGPT is stateless. This means that the token id explained above is solely used for accounting purposes and not to store the queries reliably. As a result, if one wants to hold a conversations similar to the browser version,  not only all previous messages from the user must be sent to ChatGPT, but also all replies and the messages of the system role. This should be considered while using the OpenAI \ac{API} because the number of required tokens can strongly increase for longer conversations.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\columnwidth]{figures/chapter2/chatgpt_stateless.png}
+    \caption{Visualization of statelessness of ChatGPT. Rectangles are queries by the user. Ellipses are replies by ChatGPT}
+    \label{fig:chatgpt_stateless}
+\end{figure}
+
+
+Figure \ref{fig:chatgpt_stateless} visualize this issue. Here, the user ask the ChatGPT API to find all data clump in a java file \textit{(request 1)}. ChatGPT respond with some data clumps. These might not be all data clumps so that a follow-up request might improve the results \cite{10062688}. Therefore, the user sends another request \textit{(request 2)} to instruct the model to find more data clumps. However ChatGPT responds with a general stating that it does not know the content of the file \enquote{MathStuff.java}. This is the result of the statelessness which requires that the user always send the whole context with each query. In \textit{request 3}, the context is provided so that ChatGPT acurately responds by finding another data clump.
+
+Since follow-up request make only sense if ChatGPT has already responded, the whole original request, the reply by ChatGPT, and any previous conversation must be provided which can have a large impact on costs and rate limits. 
 
 \subsubsection{Response}
 
@@ -246,6 +256,23 @@ An instruction for refactoring data clumps should state that only the refactored
 
 When using the \enquote{gpt-4-1106-preview} or \enquote{gpt-3.5-turbo-1106} model of the OpenAI-\ac{API}, developers can force the model to response in \ac{JSON}. hence, the output can be made more predictable and easier to control. A request using this mode must include the term \enquote{\ac{JSON}}. It should however be noted, that the precise structure of the \ac{JSON} returned may still differ from the request. 
 
+\subsubsection{Politeness is not necessary}
+
+Polite words like \enquote{please} or \enquote{thank you} are expected in human conversations. However, a  \ac{LLM} will ignore these words that are often referred to as \enquote{filler} words, or their effect will be marginal. Since costs are an important part of the usage of \ac{LLM}, these words are often unnecessary. \cite{bsharat2023principled}.
+
+\subsubsection{Avoid using prohibition but suggest alternatives}
+
+Providing prohibitions to a \ac{LLM} may sound like a valid approach to restrict certain outputs. However, they can degrade the quality of the results. For example, if a \ac{LLM} has found a solution that violates a prohibition, it does not know how to proceed. 
+
+In contrast, giving positive instructions, the \ac{LLM} can better determine how the user expects the output so that the quality is increased.
+
+For instance, instructing a \ac{LLM} to not write informally can result to worse outputs than an instruction to use formal language because formal language is better defined than the negation of informal language. \cite{prompt_engineering_jonathan}
+
+\subsubsection{Provide rewards or punishments to the LLM}
+
+While a \ac{LLM} is not a human, its result can be influenced by rewards or punishments. For instance, the authors in \cite{bsharat2023principled} claim that promising the model a monetary amount, can lead to better results. 
+
+Similarly, informing the model that certain results will be punished, can decrease the likelihood that these results will be returned. \cite{bsharat2023principled}
 \begin{comment}
 \subsection{Cost reduction}
 

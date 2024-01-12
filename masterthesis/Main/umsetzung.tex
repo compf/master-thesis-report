@@ -99,6 +99,9 @@ The issue  with follow-up prompts is how often should a prompt be repeated. Each
 \begin{description}
 \item[Full project follow-up] The whole project (all relevant files) is sent to  ChatGPT again with an instruction to find more data clumps. As a result, more data is sent per  request while the number of request can be reduced. As a  result, ChatGPt might find additional data clumps that it has not found during the previous prompts.
 \item [Tuple-based follow-up] A tuple of two files in the project (i.~e. the content of those files) is sent again to ChatGPT with the instruction to find more data clumps. If the goal is to data clumps between tuples of all files, $0.5*n*(n-1)$ file tuples need to uploaded so that many requests will needed. However, this can help ChatGPt to focus on a smaller part of the software project to analyze in order to find more data clumps.
+
+\subsection{Results of the experiments}
+
 \end{description}
 \section{Implementation of steps}
 While in section \ref{sec:pipeline} a general approach to find and refactor data clumps is given, the concrete implementation with the various tools is left out. In the following subsections, the implementations with the tools are described. In the case of \textit{code obtaining}, \textit{filtering}, only basic approaches are used so that they will not be detailed further. 

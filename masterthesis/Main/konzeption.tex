@@ -166,6 +166,12 @@ Alternatively, one could store the list of all relevant file paths of the projec
 \subsubsection{Filtering}
 After filtering the files, the context can be a new path with all files considered relevant, requiring a deletion or moving file system operation. If a list of files is used, all irrelevant file paths can be deleted, which might be faster.
 
+In most cases, however, the list of \textit{inclusion globs} and \textit{exclusion globs} are useful to be part of the filtering context. Globs are filenames that contain wildcard pattenr (e.~g. \textbf{*}). Each inclusion glob specifies which file must be included, and each exclusion glob specifies files that must be excluded. For instance, consider \textit{includeGlobs=[\enquote{*.java}]} and \textit{excludeGlobs=\enquote{*Main.java}}. In this case, all Java files are included, if however a file ends with \enquote{Main.java} it is excluded.
+
+With this approach, the filtering context does not filter the files itself but provides the relevant information to the next contexts. 
+
+Since the filtering context does not know the next context, it cannot know how filtering can be performed. Some data clump detection tools allow filtering, some cannot do this easily. The disadvantage of this approach needs to be stressed explicitly. The filtering context is a very primitive context. In most cases it only load only data from configuration files which might be counterintuitive. 
+
 \subsubsection{Extraction of AST}
 \subsubsection{Data clump detection and filtering}
 
@@ -192,13 +198,13 @@ However, too many steps can be counterproductive as they increase the complexity
 Therefore, the class location is determined by the extractor which also saves the class content and stores the data in its context. 
 
 
-\subsection{Refactoring}
+\subsubsection{Refactoring}
 The context for the refactoring step  can be empty. While in previous steps, information has been gathered and analyzed, the refactoring step does not produce new information but applies the obtained information to refactor data clumps. 
 
 One could argue that the context should contain information about the location of the refactored source code. This is only useful if the refactored source code should not be stored at the same location as the original source code.  However, the code obtaining step (see \ref{sec:code_obtaining}
 ) could handle this part by copying the project files to a specific location so this step is not necessary. 
 
-\subsection{Validation}
+\subsubsection{Validation}
 
 The validation step context requires at least information about whether the validation is successful (i.~e. no compiler errors occur and all unit tests pass). 
 
@@ -243,5 +249,43 @@ On the other hand, the \textit{one-step-approach} is easier to implement using t
 Moreover, configuration mistakes can be fixed more easily because in this approach, the software project will not be modified for some time (i.~e. data clumps will be detected or suitable names will be found). As a result, users of the tool are more likely to safely stop the tool if they discover a configuration mistakes. This might often occur in the very first moments after starting the tool.
 
 Additionally, this approach can use the cache more efficiently. Since one service is being used  over a longer period of time,  relevant data for the service can be cached better in contrast to switching the service frequently  As a result, the performance can be increased. 
+
+
+\section{Integration of Large Language Services}
+
+Since \ac{LLM} like ChatGPT are a major part of this master thesis, the issue of integrating \ac{LLM} is another part of the concept. The following problems must be addressed
+\begin{enumerate}
+    \item How should an interface to a \ac{LLM} look like?
+    \item How should the conversation with a \ac{LLM} be performed?
+    \item How are messages from and to the model structured?
+    \item Where should instructions be stored and processed so that they can be sent to a \ac{LLM}
+\end{enumerate}
+Issue 1 and 2 will be addressed in section \ref{sec:llm_interface}. The issue 2 3 will be discussed in section \ref{sec:llm_msg_structure}. Lastly, issue 4 will be dealt with in section \ref{llm_msg_storage}.
+\subsubsection{An interface for large language models}\label{sec:llm_interface}
+
+Since the market for large language model is constantly expanding in just a few years, designing a interface for the communication is challenging. As a result, only the core functionality can be modeled by an interface in order to keep compatibility and ease extendability. 
+
+An interface to a \ac{LLM} should support providing messages. These messages are provided by the user and can be a instruction (see  section \ref{llm_msg_storage}), data or any other relevant information.
+
+Providing a message does not mean that the message is processed by the \ac{LLM} but is kept until further instruction. Thus, a user can prepare multiple messages before sending them to the model.
+
+If the user decides to send the messages to the mode, another operation can be used. This operations send the accumulated message to the large language model and waits for the response, so that the operation is synchronous. While an asynchronous approach would also be feasible, in most cases the data clump detection and refactoring process cannot proceed without the relevant information from the model so that waiting is tolerable. 
+
+After sending and receiving the messages, the response from the model can be returned. Now the interface must deal with the messages it has accumulated. Since most models have no memory, the messages must be sent again if they are still relevant for future requests. However, storing and resending messages can cost more so that this should not be done always.
+
+Therefore, the caller of the sending operation has the possibility to clear the previous messages after the \ac{LLM} has responded or keep them, and can therefore decide what to do.
+
+\subsubsection{A message format for large language models} \label{sec:llm_msg_structure}
+The structure of the messages to an \ac{LLM} is another issue to handle. Each model has its own requirements on how a request must be sent to it and how it will respond so that a general message structure must be developed. However there are similarities. Each model differentiate between requests by the user and the responses and represent the messages in a chronological manner, the most recent message is the message with the highest index. 
+
+As a result, a simple message format can be an array of message object. Each message object is either an input or an output message. Input messages are generated by the user while output messages come from the model. A \ac{LLM} may have specific terms for input and output messages (e.~g. assistant and user), however using these simpler terms helps to generalize the problem.
+
+A message object may contain multiple messages as it uses a string array. This is useful if multiple messages have a connection and need to be sent at the same time. For instance, if a user wants to transfer the file contents of a project to a \ac{LLM}, he can transmit each file within a a single message object. This not only helps to improve the performance a little bit but allows for easier management of messages since messages are grouped by request. 
+
+\subsubsection{Storing instructions}\label{llm_msg_storage}
+
+Another issue that arises while using \ac{LLM} is the management of instructions.
+
+An instruction is a resource or artifact. Similarly to resources like textures, 3D-models, sound data, images etc., they should be separated from the code \cite{separate_code_data}. As a result, seperate text files for the instructions are better as they can be distributed and modified more easily, especially if the instruction prompt generation is done by other persons. 
 
 \hfill
