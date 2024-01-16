@@ -1,0 +1,32 @@
+{
+    "ProgrammingLanguageIdentifier": "Java",
+    "PipeLine": {
+        "CodeObtaining": {
+            "handler": "SimpleCodeObtainingStepHandler",
+            "args": {
+                "path":"javaTest"
+            }
+        },
+        "DataClumpDetection": {
+            "handler": "DetectAndRefactorWithLanguageModelStep",
+            "args": {
+                "handlers":[
+                    {
+                        "name":"SimpleInstructionHandler",
+                        "args":{
+                            "instructionPath":"chatGPT_templates/definitionBased/ast/instruction.template"                  
+                        }
+                    },         
+                    {
+                        "name":"PairOfFileContentHandler"           
+                    }
+                ]   
+            }
+        }
+    },
+    "Objects":{
+        "LanguageModelInterface":{"name":"ChatGPTInterface"}
+    }
+}
+       
+

@@ -23,7 +23,7 @@ Since a service-based approach is used, a handler can be seen as a gateway to a 
 Figure \ref{fig:solver_gateway_service_overview} illustrates how the service-based approach works for one step:
 
 \begin{enumerate}
-    \item The program developed in this master thesis executes one step (e.g. finding a suitable class name)
+    \item The program developed in this master thesis \textbf{main program} executes one step (e.g. finding a suitable class name)
     \item The gateway registered to that step is used. It is provided with the current context containing the results from previous steps.
     \item The gateway starts or employs a specific service. This service might be dependent on the current step or might be constant. The gateway knows how to start or use the service and sends all relevant information to the service (e.g. via files, network streams etc.) 
     \item The service processes the requests submitted by the gateway. For instance, ChatGPt can suggest a suitable class name. The service might be outside of the control of the developer. For instance, it might be programmed in a different programming language or the source code might not be available. At some point it will create a response and send it back to the gateway. 
@@ -31,9 +31,21 @@ Figure \ref{fig:solver_gateway_service_overview} illustrates how the service-bas
     \item The new context is returned to the program and can be used for successive steps (e.~g. the suggested name can be used for creating a respective class) 
 \end{enumerate}
 
+
+
 Some parts of the pipeline are mandatory because the purpose of finding and refactoring data clumps would be defeated if these steps would not be executed. For instance, obtaining the source code of the project to analyze, finding data clumps, finding a suitable name, and the refactoring can be regarded as mandatory.
 
+
+
 A handler can also check whether it can be run in the given situation. For instance, a code obtaining handler can determine whether the project location does in fact exist or a validation handler for \textit{Gradle} can check whether the project is indeed \textit{Gradle}-based.
+
+The program therefore acts as an orchestrator. It starts every service and controls them. The steps and services are temporally coupled. A step cannot be started unless all previous mandatory steps have successfully completed. In most cases, if a step was not successfully, further execution of the pipeline makes no sense so it can be aborted. 
+
+An alternative approach is called  choreography. Here each step would call the next step without using the central main program. 
+
+Both approaches have their advantages. In the choreography architecture, there is less coupling since a main program does not need to know which gateway handles with which step. Instead, each gateway need to know the next (and only the next) step. This can become challenging if steps are optional because the gateway does not know what service to call next. Additionally debugging, the process is more challenging as there is no central point that coordinates the pipeline.
+
+On the other hand, the orchestrator architecture is easier to control and debug. It easier to configure and to implement. Nevertheless, the coupling to each gateway is stronger because each gateway must be known by by the main program. Additionally, the main program is a single point of failure. If there is a problem with the main program, the data clump refactoring cannot proceed as every step requires coordination with the orchestrator. Also the overhead should be considered because the orchestrator will need to act multiple time to process responses and generate new requests for the next gateway. This becomes more important if services are not local but accessed using the internet or the local network which causes more overhead. \cite{orchestration_choreography}
 
 In the following subsections, these steps will be outlined:
 \subsubsection{Code obtaining}\label{sec:code_obtaining}
@@ -85,7 +97,12 @@ There are some criteria for this identifier. It should be a valid name in the re
 Hence, the name finding is a complex process requiring domain knowledge and creativity if the resulting name is accepted. 
 Since English is the predominant language of identifiers, it will be assumed that only English identifiers will be used. 
 
+\subsubsection{Reference finding}
+ Having detected a data clump, there is still information missing to refactor it. In particular, successful re-factorization requires that every method call, method definition, variable usage or variable definition that is connected to the data clump is updated in a later step. These so-called \textbf{references} need to be found so that they can be updated.
 
+Since the identifier of a the data clump variables (or method) is known, one could search for all occurrences of that identifier. This however is not enough because identifiers have a scope. A variable with the name \textit{var} can be declared as a field, as a parameter of a method or inside a block (e.~g. if-branch). All these names can refer to different variables although they have the same identifier. As a result, a textural replacement approach will not work always.
+
+Therefore additional tools will be needed to parse the source code and use the rules of the programming language to find where the data clump items are indeed used.
 \subsubsection{Class Extraction}\label{subsec:chap3_data_class_extraction}
 After a class name has been found, a respective class can be added to the source code. This class will be used as a replacement for the data clump variables or parameters. 
 
@@ -150,7 +167,11 @@ Each step in the data clump refactoring pipeline can access the context and obta
 
 The context can be represented as a linked list. Each node of the list represents a part of the context. Figure \ref{fig:context_pipeline} illustrates how the context can be  represented.
 
-Here, in the beginning, only the location of the project to analyze is stored, which is mandatory. The pipeline step executing the \textit{DataClumpDoctor} can use this context and append a new context. A name finding service like ChatGPT can then append a context with the names of the extracted classes. At the end, a service like IntelliJ can do the refactoring.
+Each context is an extension of a previous context. In the beginning, there is no context and the code obtaining context is created. If a gateway needs to access information from a specific context, it needs to traverse the linked list until it finds the needed information. While this can create overhead, the size of the linked list is bounded by the size of the pipeline so that the overhead is limited.  The overhead would only be relevant if the number of steps for refactoring data clumps would be substantially more, which is not to be expected. 
+
+In figure \ref{fig:context_pipeline}, in the beginning, only the location of the project to analyze is stored, which is mandatory. The pipeline step executing the \textit{DataClumpDoctor} can use this context and append a new context. A name finding service like ChatGPT can then append a context with the names of the extracted classes. At the end, a service like IntelliJ can do the refactoring.
+
+
 
 To check whether a given pipeline is indeed executable, each step handler must describe how the context is updated when the the step is executed. Each step can also specify whether a specific type of context must exist. For instance, a step may require that the names of the extracted class of each data clump must be stored in the context.  
 
@@ -286,6 +307,37 @@ A message object may contain multiple messages as it uses a string array. This i
 
 Another issue that arises while using \ac{LLM} is the management of instructions.
 
-An instruction is a resource or artifact. Similarly to resources like textures, 3D-models, sound data, images etc., they should be separated from the code \cite{separate_code_data}. As a result, seperate text files for the instructions are better as they can be distributed and modified more easily, especially if the instruction prompt generation is done by other persons. 
+An instruction is a resource or artifact. Similarly to resources like textures, 3D-models, sound data, images etc., they should be separated from the code \cite{separate_code_data}. As a result, separate text files for the instructions are better as they can be distributed and modified more easily, especially if the instruction prompt creation is done by other persons or entities.
+
+An instruction is often not a single resource but a composition of many resources or other data. For instance, if an instruction contains an code example, it is reasonable to split the code example into a different file to reduce the size of a single file. This  also allows easier modification of the example with an IDE because the combination of instruction text and source code would lead to compiler errors.
+
+As a result, an instruction resource may need to hold references to other files (e.~g. source code) or reference to other data.
+For the \ac{LLM}, the instruction should be complete such that it contains the whole instruction with the content of all referenced files and other information.
+
+As a result, two perspectives need to be taken into consideration. From a user perspective, an instruction file should be as modular as possible as explained above. From the perspective of a large language model, an instruction needs to be complete. 
+
+These two perspectives can be reconciled by a template model. The instruction file can be considered as a template. It does not contain the complete instruction that will be sent to a \ac{LLM} but a mixture of actual text and references.
+
+When loading the instruction, all references must be correctly mapped with the correct content so that it can be sent to the model and be correctly interpreted. 
+
+Listing \ref{lst:nstruction_template} illustrates an example instruction file which is also used in section \ref{sec:initial_experiments} The instruction prompts the model that code files will be provided (l.~1) and that all data clumps in those source code files need to be detected (l.~4). It also informs the model that examples of data clump will be provided (l. 6 and 11-12) and describes how the response by the \ac{LLM} should be structured (l~7-9). 
+
+However, the examples and output format are not directly specified in the instruction file but are referenced. For instance the text \enquote{$\{output\_format\}$} will not be sent to the model but replaced by the actual output format that is stored somewhere else. The same applies to the examples. Also the specific programming language (e.~g. Java) is not directly defined by the instruction but will added when the instruction is sent to a large language model.
+
+This allows for more flexibility since a single instruction files can be used for multiple programming languages and scenarios. However, it requires more configuration as outlined in section \ref{sec:config}
+\begin{lstlisting}[caption={Instruction file example}, label={lst:nstruction_template}, captionpos=b, numbers=left, ]
+I will provide you one or more ${programming_language}
+code files.
+Find all data clumps in the respective files.
+
+Examples of data clump are provided below.
+Use the following JSON format for the output:
+## JSON
+${output_format}
+
+## Examples
+${examples}
+\end{lstlisting}
+
 
 \hfill
