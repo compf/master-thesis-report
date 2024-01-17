@@ -1,5 +1,0 @@
-Similarity detection
-
-The next step is about finding pairs of method parameters and pairs of m´fields that are identical or at least similar.  For this, the identifier and the  data type  can be compared. Unequal variable names might not rule out a similarity between two variables. For instance, typos may happen or synonyms may be used. Also the type might be different. For instance, the data type  double can be seen as a super set of the datatype because every 32-bit integer can be converted tó a 
-
-From this, a graph can be constructed that visualizes the relationship of the several variables. A node represent a parameter or field value while an edge exists if and only if a relationship between two variables was detected.

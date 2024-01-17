@@ -4,7 +4,7 @@
   "description": "",
   "main": "split_files.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "split_files": "node split_files.js"
   },
   "keywords": [],
   "author": "",

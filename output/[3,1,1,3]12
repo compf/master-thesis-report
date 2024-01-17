@@ -1,2 +1,0 @@
-Extraction of AST
-Then,  the source code needs to be simplified as comments, the method bodies, and other language parts are not relevant for detecting data clumps. This could be achieved by extracting a subset of the 

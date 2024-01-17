@@ -1,5 +1,0 @@
-Median
-Der Median der Einzelresultate wird von der Klasse  MedianResultBuilder berechnet. Dabei werden die Einzelresultate nach dem bekannten Median-Algorithmus verarbeitet. Bei einer geraden Anzahl an Elementen wird der Median aus dem Mittelwert der zwei infrage kommenden Ergebnisse gebildet.
-
-Der Median berücksichtigt einzelne Ausreißer nicht und kann daher interessant sein, wenn ein allgemeines Bild von der Dokumentationsqualität erhalten werden soll. Es sollte aber beachtet werden, dass die Anwendung des Medians ein Sortiervorgang benötigt, der in den meisten Fällen eine Komplexität von $O(n*log(n))$ hat.  Zudem kann sich der Median stark ändern, wenn einzelne Komponenten hinzugefügt oder entfernt werden.
-

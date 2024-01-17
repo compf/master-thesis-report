@@ -1,6 +1,0 @@
-Class Extraction
-After a class name has been found, a respective class can be added to the source code. This class will be used as a replacement  for the data clump variables or parameters.
-
-In contrast to the previous step of the pipeline, this process can be automated more straightforwardly because it does not require creativity and a general template can be used, that is:
-
-Additionally, methods for converting a object to a string or creating a hash code may be useful, but these methods are usually not required for the refactoring of data clumps.

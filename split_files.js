@@ -9,6 +9,7 @@ var structuringLatexCommands = {
 
 };
 var contentLatexCommands = ["\\textbf", "\\textit", "\\enquote"];
+var tooComplexXommands = ["\\begin", "\\end"];
 function isStructuringLatexCommand(line) {
     return Object.keys(structuringLatexCommands).some(function (command) { return line.startsWith(command); });
 }
@@ -26,6 +27,7 @@ function removeContentLatexCommands(line) {
 }
 function removeUninterestingLatexCommands(line) {
     let buffer="";
+  
     for (var i = 0; i < line.length; i++) {
         if (line[i] == "\\") {
             while (  i <line.length&&line.charAt(i) != "}") {
@@ -35,7 +37,14 @@ function removeUninterestingLatexCommands(line) {
         }
         else {
             buffer+=line.charAt(i);
+           
         }
+    }
+    if(line.includes("cite")){
+        console.log("----")
+        console.log(line)
+        console.log(buffer)
+        console.log("----")
     }
     return buffer;
 }
@@ -55,13 +64,23 @@ function parseCaption(lines, i,buffer) {
     return i;
 }
 let counter=0;
+let ignorePredicate=(line)=>{return false;}
+let ignore=false;
 function readPart(lines, filename, level, version, index, title) {
     var buffer = [title];
 
-    var _loop_1 = function (i) {
+   for(let i=index;i<lines.length;i++){
         var line = lines[i].trim();
-        console.log(line)
-        if (isStructuringLatexCommand(line)) {
+        console.log("CURR LINE",line)
+        if(ignore){
+            if(ignorePredicate(line)){
+                ignore=false;
+            }
+            console.log("found end")
+           
+            continue;
+        }
+        else if (isStructuringLatexCommand(line)) {
             var newTitle = getBracketContent(line);
             var newLevel = structuringLatexCommands[Object.keys(structuringLatexCommands).filter(function (c) { return line.startsWith(c); })[0]];
             var newVersion = increaseVersionAt(version, newLevel);
@@ -87,22 +106,22 @@ function readPart(lines, filename, level, version, index, title) {
             var newVersion = Array.from(version);
             readPart(newLines, newFileName.replace("/", "-"), level, newVersion, 0, "");
         }
+        else if(line.startsWith("\\begin{")){
+            console.log("found begin")
+            ignore=true;
+            ignorePredicate=(line)=>{return line.startsWith("\\end{");}
+        }
         else if (line.startsWith("\\")) {
+            
         }
         else {
             line = removeContentLatexCommands(line);
             line=removeUninterestingLatexCommands(line);
             buffer.push(line);
         }
-        out_i_1 = i;
+       
     };
-    var out_i_1;
-    for (var i = index; i < lines.length; i++) {
-        var state_1 = _loop_1(i);
-        i = out_i_1;
-        if (typeof state_1 === "object")
-            return state_1.value;
-    }
+   
 }
 function increaseVersionAt(version, at) {
     var result = Array.from(version);

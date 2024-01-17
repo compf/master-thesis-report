@@ -1,4 +1,0 @@
-Bewertung der Ergebnisse
-Insgesamt zeigt die Evaluation der Geschwindigkeit, dass der mit 400~000 im Durchschnitt nur etwas mehr als einer Minute benötigt. Nichtsdestotrotz ignoriert diese Analyse, dass die Ausgabe von Ergebnissen über die Konsole hier nicht berücksichtigt wurde und nur eine einfache Metrik angewendet wurde. Bei einem Experiment mit aktivierter Ausgabe wurden ähnliche Ergebnisse produziert, insbesondere ist der 
-
-Für die schlechtere Laufzeit des   Außerdem ist zu beachten, dass der 

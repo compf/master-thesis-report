@@ -1,4 +1,0 @@
-Fehler in einzeiligen Kommentaren bei PMD
-Anders als der auch einzeilige Kommentare. Wenn ein einzeiliger Kommentar ein unzulässiges Wort enthält, so würde einen Fehler melden, aber der gefundenen Fehler wird überschätzt.
-
-

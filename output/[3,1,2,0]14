@@ -1,2 +1,0 @@
-Data clump detection
-After similar variables have been been detected, it must be determined whether a cluster of variables that are deemed similar, are in fact a data clump. Here, the rules from section 

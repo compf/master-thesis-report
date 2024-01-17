@@ -1,2 +1,0 @@
-Pipeline
-In order to find and refactor data clumps automatically, a certain sequence of steps has to be respected. Most steps of this sequence are required to be in a specific order because they rely information extracted in a previous step or the quality of the results (which might me needed by subsequent steps) would get worse. In the following subsections, these steps will be outlined:

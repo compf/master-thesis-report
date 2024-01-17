@@ -1,4 +1,0 @@
-Filtering
-First of all, all files of the programming language needs do detected. Usually, there are specific file extensions (e.g.  .java) for a source code file which simplifies the finding of files. It also for software project to have a root folder that contains all source code files. Therefore, one can recursively iterate through all files and directories of a given root folder that have a matching extension.
-
-However, not every source code file might be analyzed for data clumps. For instance, parts of the projects must not be refactored or a refactorization would be too time-consuming. As outlined in chapter 

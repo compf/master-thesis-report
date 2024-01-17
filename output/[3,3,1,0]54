@@ -1,6 +1,0 @@
-Durchführung der Geschwindigkeitsevaluation
-Zur Durchführung der Evaluation der Geschwindigkeit analysieren die drei Tools die in Kapitel und die Dokumentation von Methodenparameter überprüfen, während dies ignoriert. Bei jeder Analyse wird die Zeit gemessen, die vom Start eines Tools bis zu dessen Beendigung vergehen.
-
-Die Ausgabe jedes Tools wird auf  dev/null umgeleitet, sodass jegliche Ausgabe ignoriert wird. Dadurch können Schwankungen unberücksichtigt bleiben, die bei der Verwendung von Eingabe- und Ausgabegeräten auftreten. So sind die Ergebnisse näher an der tatsächlichen Verarbeitungsgeschwindigkeit.  Nachteilhaft an diesem Vorgehen ist, dass die Tools im Praxiseinsatz eine Ausgabe produzieren müssen, um überhaupt dem Entwickler helfen zu können, sodass dieser wichtige Aspekt hier ignoriert wird.
-
-Die Analyse jedes Projektes mit jedem Tool wird zehnmal durchgeführt, um Schwankungen durch Hintergrundprozesse oder andere Einflussfaktoren auszugleichen. Die Evaluation der Geschwindigkeit wird auf einem Laptop mit dem Prozessor  i7-1165G7 mit 16 GB Arbeitsspeicher durchgeführt. Dabei wurden alle Programme auf dem Computer geschlossen und die Berechnungen wurden ohne grafische Benutzeroberfläche durchgeführt, um Schwankungen in der Laufzeit zu minimieren.

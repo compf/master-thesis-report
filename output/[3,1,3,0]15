@@ -1,6 +1,0 @@
-Data clump filtering or prioritization
-In section 
-
-There can be many reasons for this approach. For instance, parts of the source code that are infrequently updated might be too risky for refactoring since any automatic tool might cause bugs or invalid code that is hard to fix because the developers are not familiar with this part of the source code. On the contrary, a part of the source code that is updated more frequently might be in an intermittent state so that refactoring is currently not recommendable. Also as noted in section  
-
-Therefore, it can be suggested to filter out certain data clumps that are considered not worthy of refactoring.

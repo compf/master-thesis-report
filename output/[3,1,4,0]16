@@ -1,8 +1,0 @@
-Name finding
-The next step of the pipeline is to find a suitable identifier of the extracted class.
-
-There are some criteria for this identifier. It should be a valid name in the respective programming language so that in general only alphanumerical characters may be chosen. It should not be  in conflict with other identifiers as it may lead to bugs or compiler errors, and it should be readable and as best as feasible represent the fields of the class.
-
-Hence, the name finding is a complex process that requires domain knowledge and creativity if the resulting name is to be accepted. .
-Since English is the predominate language of of identifiers, it will be assumed that only English identifiers will be used.
-

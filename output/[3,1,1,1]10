@@ -1,4 +1,0 @@
-Detecting data clumps
-It is easily agreeable that data clumps cannot be fixed unless they have been found previously. Therefore, one of the first step of the pipeline must be the detection of data clumps.
-
-The data clump detection process itself can be further divided into sub steps.
