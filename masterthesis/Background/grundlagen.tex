@@ -1,5 +1,5 @@
-In this chapter, the background of data clumps will be discussed. A formal definition of data clumps will be presented (\ref{sec:data_clump_def}). ChatGPT will be discussed in section \ref{sec:chatgpt}. Also, the data clump type context format will be discussed. 
-\section{Code smells}
+In this chapter, the background of data clumps will be discussed. A formal definition of code smells and  of data clumps will be presented ( sections \ref{sec:code_smell} and \ref{sec:data_clump_def}). ChatGPT will be discussed in section \ref{sec:chatgpt}. Also, the data clump type context format will be discussed in section \ref{sec:data_clump_format}. The Language Server Protocol which used by to refactor data clumps more easily is explained in section \ref{sec:lsp}. In the end, related research will be discussed (see section \ref{sec:related_research}). 
+\section{Code smells}\label{sec:code_smell}
 
 The term \enquote{Code smell} is a term suggested by Kent Beck in \cite{fowler2019refactoring} for source code that may need refactoring. If the refactoring is not performed timely, the costs of maintenance of the source code and the software project can be higher and the efficiency of implementing changes is reduced. Some examples of code smells include unclear variables names, large classes, large method, missing documentation or code duplicates. Another possible code smell are data clumps. 
 
@@ -317,7 +317,7 @@ In the end, the client can save the document and notify the server that the docu
 
 
 
-\section{Related Research}
+\section{Related Research}\label{sec:related_research}
 The problem of data clump detection and refactoring is addressed in multiple papers. Also the  use of large language models in software development is a fairly recent rearch topic. In this section, research to both topics will be outlined: 
 
 \subsection{Related to data clumps}

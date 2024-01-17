@@ -4,7 +4,7 @@
 \renewcommand{\clearpage}{}
 \chapter{Implementation}\label{chapter:implementation}
 \endgroup
-
+In this chapter, the theoretical thoughts of chapter \ref{chapter_conception} will be implemented. Firstly, in section \ref{sec:config}, the configuration of the tool is explained. After that experiments are performed in order to find out how ChatGPT can be integrated for data clump finding ( see section \ref{sec:prompt_engineering_impl}). In section \ref{sec:step_impl} an overview will be given which combination of tools can be used together to find and refactor data clumps and the limitation and strengths of each combination will be outlined. 
 \section{Configuration}\label{sec:config}
 An important aspect for the usability of the tool is the possibility to configure the tool for the user's need. 
 
@@ -132,14 +132,37 @@ As outlined in section \ref{sec:chain of thought},  one prompt might no be enoug
 Instead of expecting that a single request will detect all data clumps, another approach would be to repeat the same requests multiple times and aggregate the results. These follow-up prompts result in ChatGPT to re-analyze the code so that more data clumps can be found. 
 
 The issue  with follow-up prompts is how often should a prompt be repeated. Each prompt repeat requires that the conversation history to be sent again because ChatGPT is stateless. This leads to higher resource usage and costs. There are multiple approach to implement follow up.
+\begin{comment}
 \begin{description}
 \item[Full project follow-up] The whole project (all relevant files) is sent to  ChatGPT again with an instruction to find more data clumps. As a result, more data is sent per  request while the number of request can be reduced. As a  result, ChatGPt might find additional data clumps that it has not found during the previous prompts.
 \item [Tuple-based follow-up] A tuple of two files in the project (i.~e. the content of those files) is sent again to ChatGPT with the instruction to find more data clumps. If the goal is to data clumps between tuples of all files, $0.5*n*(n-1)$ file tuples need to uploaded so that many requests will needed. However, this can help ChatGPT to focus on a smaller part of the software project to analyze in order to find more data clumps.
+\end{description}
+\end{comment}
 
 \subsection{Results of the experiments}\label{sec:initial_experiments}
 
-\end{description}
-\section{Implementation of steps}
+The results of the experiments are now described. Each parameter configuration tested three times. While more repetitions would be better for more valid results, this is nevertheless a small experiment whose goal is to find good and bad ChatGPT configurations. 
+
+The following are the mein conclusion of the experiment:
+\begin{itemize}
+    \item GPT-4 leads to much better results than GPT-3
+    \item GPT-4 and GPT-
+    3 have better results if examples are provided instead of a data clump definition. However, the sensitivity of GPT-3 is better if definitions are used
+    \item A high temperature is better for GPT-3. A high temperature for GPT-4 leads to reduced specificity but increased sensitivity. 
+    \item While some results are very good(e-~g. 100 percent), the median and mean is often worse and seldom reach 50 percent. 
+    \item The impact of providing all files or pair of files is negligible. 
+\end{itemize}
+
+As already noted, the resulkts should be interpreted cautiously because the project size is small. Nevertheless, some observations can be made:
+
+\begin{itemize}
+    \item Use Examples for data clump as they seem to produce better results
+    \item Use a high temperature which allows for more creativity and apparent better results
+    \item If possible (given the higher costs) use GPT-4
+    \item Whether all files or pair of files should be transferred is difficult to say and the impact is difficult to determine. 
+\end{itemize}
+\label{sec:prompt_engineering_impl}
+\section{Implementation of steps}\label{sec:step_impl}
 While in section \ref{sec:pipeline} a general approach to find and refactor data clumps is given, the concrete implementation with the various tools is left out. In the following subsections, the implementations with the tools are described. In the case of \textit{code obtaining}, \textit{filtering}, only basic approaches are used so that they will not be detailed further. 
 
 
