@@ -26,26 +26,26 @@ Figure \ref{fig:solver_gateway_service_overview} illustrates how the service-bas
     \item The program developed in this master thesis \textbf{main program} executes one step (e.g. finding a suitable class name)
     \item The gateway registered to that step is used. It is provided with the current context containing the results from previous steps.
     \item The gateway starts or employs a specific service. This service might be dependent on the current step or might be constant. The gateway knows how to start or use the service and sends all relevant information to the service (e.g. via files, network streams etc.) 
-    \item The service processes the requests submitted by the gateway. For instance, ChatGPt can suggest a suitable class name. The service might be outside of the control of the developer. For instance, it might be programmed in a different programming language or the source code might not be available. At some point it will create a response and send it back to the gateway. 
+    \item The service processes the requests submitted by the gateway. For instance, ChatGPt can suggest a suitable class name. The service might be outside of the control of the developer. For example, it might be programmed in a different programming language or the source code might not be available. At some point it will create a response and send it back to the gateway. 
     \item The gateway reads the response and processed it. It then creates a new context based on the previous context and the response from the service. 
     \item The new context is returned to the program and can be used for successive steps (e.~g. the suggested name can be used for creating a respective class) 
 \end{enumerate}
 
 
 
-Some parts of the pipeline are mandatory because the purpose of finding and refactoring data clumps would be defeated if these steps would not be executed. For instance, obtaining the source code of the project to analyze, finding data clumps, finding a suitable name, and the refactoring can be regarded as mandatory.
+Some parts of the pipeline are mandatory because finding and refactoring data clumps would be defeated if these steps were not executed. For instance, obtaining the source code of the project to analyze, finding data clumps, finding a suitable name, and refactoring can be regarded as mandatory.
 
 
 
 A handler can also check whether it can be run in the given situation. For instance, a code obtaining handler can determine whether the project location does in fact exist or a validation handler for \textit{Gradle} can check whether the project is indeed \textit{Gradle}-based.
 
-The program therefore acts as an orchestrator. It starts every service and controls them. The steps and services are temporally coupled. A step cannot be started unless all previous mandatory steps have successfully completed. In most cases, if a step was not successfully, further execution of the pipeline makes no sense so it can be aborted. 
+The program, therefore, acts as an orchestrator. It starts every service and controls them. The steps and services are temporally coupled. A step cannot be started unless all previous mandatory steps have completed. In most cases, if a step was not successful, further execution of the pipeline makes no sense, so it can be aborted. 
 
-An alternative approach is called  choreography. Here each step would call the next step without using the central main program. 
+An alternative approach is called choreography. Here each step would call the next step without using the central main program. 
 
-Both approaches have their advantages. In the choreography architecture, there is less coupling since a main program does not need to know which gateway handles with which step. Instead, each gateway need to know the next (and only the next) step. This can become challenging if steps are optional because the gateway does not know what service to call next. Additionally debugging, the process is more challenging as there is no central point that coordinates the pipeline.
+Both approaches have their advantages. In the choreography architecture, there is less coupling since a main program does not need to know which gateway handles with which step. Instead, each gateway need to know the next (and only the next) step. This can become challenging if steps are optional because the gateway does not know what service to call next. Additionally, debugging the process is more challenging as there is no central point that coordinates the pipeline.
 
-On the other hand, the orchestrator architecture is easier to control and debug. It easier to configure and to implement. Nevertheless, the coupling to each gateway is stronger because each gateway must be known by by the main program. Additionally, the main program is a single point of failure. If there is a problem with the main program, the data clump refactoring cannot proceed as every step requires coordination with the orchestrator. Also the overhead should be considered because the orchestrator will need to act multiple time to process responses and generate new requests for the next gateway. This becomes more important if services are not local but accessed using the internet or the local network which causes more overhead. \cite{orchestration_choreography}
+On the other hand, the orchestrator architecture is easier to control and debug. It easier to configure and to implement. Nevertheless, the coupling to each gateway is stronger because each gateway must be known by by the main program. Additionally, the main program is a single point of failure. If there is a problem with the main program, the data clump refactoring cannot proceed as every step requires coordination with the orchestrator. Also the overhead should be considered because the orchestrator will need to act multiple time to process responses and generate new requests for the next gateway. This becomes more important if services are not local but are accessed using the internet or the local network, which causes more overhead. \cite{orchestration_choreography}
 
 In the following subsections, these steps will be outlined:
 \subsubsection{Code obtaining}\label{sec:code_obtaining}
@@ -59,7 +59,7 @@ It is easily agreeable that data clumps can only be fixed if found previously. T
 
 The data clump detection process itself can be further divided into sub-steps.
 \subsubsection{Filtering}\label{subsub:filtering_files}
-First of all, all files of the programming language need to be detected. Usually, there are specific file extensions (e.g., \textit{.java}) for a source code file, simplifying the finding of files. It is also common for software projects to have a root folder that contains all source code files. Therefore, one can recursively iterate through all files and directories of a given root folder with a matching extension. 
+First of all, all programming language files need to be detected. Usually, there are specific file extensions (e.g., \textit{.java}) for a source code file, simplifying the finding of files. It is also common for software projects to have a root folder that contains all source code files. Therefore, one can recursively iterate through all files and directories of a given root folder with a matching extension. 
 
 However, not every source code file might be analyzed for data clumps. For instance, parts of the projects must not be refactored, or a re-factorization would be too time-consuming. As outlined in chapter \ref{sec:introduction}, the cost of detecting data clumps might need to be lowered. Therefore, filtering rules might be necessary to reduce the size of the relevant files for the subsequent steps.  
 
@@ -79,11 +79,11 @@ In section \ref{subsub:filtering_files}, a filtering by files is performed. Howe
 
 There can be many reasons for this approach. For instance, parts of the source code that are infrequently updated might be too risky for refactoring since any automatic tool might cause bugs or invalid code that is hard to fix because the developers are unfamiliar with this part of the source code. On the contrary, a part of the source code that is updated more frequently might be in an intermittent state, so that refactoring is currently not recommendable. Also, as noted in section  \ref{subsub:filtering_files}, if a service like ChatGPT is used, the cost of transferring many source code files with data clumps might be too high. 
 
-In the case of field data clumps, we also have to consider the worst case, namely that at least one of the data clump fields is public. This is considered bad design as fields should always be encapsulated by getters and setters \cite{5680918}. Nevertheless, it is still prevalent \cite{5076631}.
+In the case of field data clumps, we also have to consider the worst case, namely that at least one of the data clump fields is public. This is regarded as a bad design as fields should always be encapsulated by getters and setters \cite{5680918}. Nevertheless, it is still prevalent \cite{5076631}.
 
 A subsequent refactoring of these fields is more complicated than that of less accessible fields because they might be used by external programs or libraries that are beyond the control of the developer, which might induce bugs or non-compilable software. 
 
-One can argue that refactoring should never affect the public interface since the above-mentioned issues can occur \cite{10.1145/1352678.1352681}.
+One can argue that refactoring should never affect the public interface since the issues as mentioned earlier can occur \cite{10.1145/1352678.1352681}.
 
 On the other hand, one can argue that those changes are still significant because they can improve readability, and the source code may be in the early stages to make such breaking changes feasible. 
 
@@ -100,9 +100,9 @@ Since English is the predominant language of identifiers, it will be assumed tha
 \subsubsection{Reference finding}
  Having detected a data clump, there is still information missing to refactor it. In particular, successful re-factorization requires that every method call, method definition, variable usage or variable definition that is connected to the data clump is updated in a later step. These so-called \textbf{references} need to be found so that they can be updated.
 
-Since the identifier of a the data clump variables (or method) is known, one could search for all occurrences of that identifier. This however is not enough because identifiers have a scope. A variable with the name \textit{var} can be declared as a field, as a parameter of a method or inside a block (e.~g. if-branch). All these names can refer to different variables although they have the same identifier. As a result, a textural replacement approach will not work always.
+Since the identifier of the data clump variables (or methods) is known, one could search for all occurrences of that identifier. This, however, is not enough because identifiers have a scope. A variable with the name \textit{var} can be declared as a field, as a parameter of a method or inside a block (e.~g. if-branch). All these names can refer to different variables although they have the same identifier. As a result, a textural replacement approach will not work consistently.
 
-Therefore additional tools will be needed to parse the source code and use the rules of the programming language to find where the data clump items are indeed used.
+Therefore, additional tools will be needed to parse the source code and use the rules of the programming language to find where the data clump items are indeed used.
 \subsubsection{Class Extraction}\label{subsec:chap3_data_class_extraction}
 After a class name has been found, a respective class can be added to the source code. This class will be used as a replacement for the data clump variables or parameters. 
 
@@ -145,9 +145,9 @@ Disadvantageously, this may only be effective if the project is correctly config
 
 \subsubsection{Evaluation}
 
-In the last step, one might evalaute the effectiveness and efficiency  of the data clump refactoring. For instance, one could execute the data clump detection process again to determine how many data clumps are fixed in comparison to the first iteration. 
+In the last step, one might evaluate the effectiveness and efficiency of the data clump refactoring. For instance, one could execute the data clump detection process again to determine how many data clumps are fixed in comparison to the first iteration. 
 
-Another metric for the evaluation could the running time. A huge running time of the refactoring can slow down the development process and cause the program not to be used again for future iterations. It could also be useful to anaylze the running time for each individual step so that handlers that require too much time or resources can be detected and later not be used. 
+Another metric for the evaluation could be the running time. A substantial running time of the refactoring can slow down the development process and cause the program not to be used again for future iterations. It could also be useful to anaylze the running time for each individual step so that handlers that require too much time or resources can be detected and later not be used. 
 
 \section{Context}\label{sec:context}
 In section \ref{sec:pipeline}, the several steps of the data clump pipeline are outlined. However, these steps do not include how the information generated by each step is stored and how successive steps might use this information.
@@ -173,7 +173,7 @@ In figure \ref{fig:context_pipeline}, in the beginning, only the location of the
 
 
 
-To check whether a given pipeline is indeed executable, each step handler must describe how the context is updated when the the step is executed. Each step can also specify whether a specific type of context must exist. For instance, a step may require that the names of the extracted class of each data clump must be stored in the context.  
+To check whether a given pipeline is indeed executable, each step handler must describe how the context is updated when the step is executed. Each step can also specify whether a specific type of context must exist. For instance, a step may require that the names of the extracted class of each data clump must be stored in the context.  
 
 Such context can only work if the context data is in a specific format, which can be generated by one step and might be correctly interpreted by each successive step. 
 
@@ -191,9 +191,11 @@ In most cases, however, the list of \textit{inclusion globs} and \textit{exclusi
 
 With this approach, the filtering context does not filter the files itself but provides the relevant information to the next contexts. 
 
-Since the filtering context does not know the next context, it cannot know how filtering can be performed. Some data clump detection tools allow filtering, some cannot do this easily. The disadvantage of this approach needs to be stressed explicitly. The filtering context is a very primitive context. In most cases it only load only data from configuration files which might be counterintuitive. 
+Since the filtering context does not know the next context, it cannot know how filtering can be performed. Some data clump detection tools allow filtering, some cannot do this easily. The disadvantage of this approach needs to be stressed explicitly. The filtering context is a very primitive context. In most cases, it only loads data from configuration files, which might be counter-intuitive. 
 
+\begin{comment}
 \subsubsection{Extraction of AST}
+\end{comment}
 \subsubsection{Data clump detection and filtering}
 
 The format described in section \ref{sec:data_clump_format} can be used to store the detected data clump. While this format is relatively new, it contains all relevant information for storing data clump information and is extendable. However, there are other reasons for other data formats. For instance,  the data clump type context format might be too detailed, which can lead to storage or performance issues. 
@@ -211,12 +213,12 @@ For instance, the class could be where the data clump is initially found. This c
 
 Alternatively, specific locations can be used to store all extracted classes. This, however, can also hinder readability as the extracted classes have no connections to the places where they are used. 
 
-As an alternative, the complete class body could be stored instead of saving it directly to a file. This might advantageous if the class content should be formatted, refactored or otherwise modified in order to be valid. This also would deflect the responsibility of the class location from the class extractor step. 
+As an alternative, the complete class body could be stored instead of saving it directly to a file. This might be advantageous if the class content should be formatted, refactored or otherwise modified in order to be valid. This also would deflect the responsibility of the class location from the class extractor step. 
 
-One might also argue that choosing the extracted class location should be separate step. 
-However, too many steps can be counterproductive as they increase the complexity and causes the individual steps to have too few responsibility.
+One might also argue that choosing the extracted class location should be a separate step. 
+However, too many steps can be counterproductive as they increase the complexity and cause the individual steps to have too few responsibilities.
 
-Therefore, the class location is determined by the extractor which also saves the class content and stores the data in its context. 
+Therefore, the extractor determines the class location, saves the class content, and stores the data in its context. 
 
 
 \subsubsection{Refactoring}
@@ -229,7 +231,7 @@ One could argue that the context should contain information about the location o
 
 The validation step context requires at least information about whether the validation is successful (i.~e. no compiler errors occur and all unit tests pass). 
 
-In case of a failed validation, one might need more information. For instance, it is helpful to know which unit test fails or on which line the code fails to compile. In many cases,, modern build tools like \textit{Gradle} already acquire these data so they can be easily obtained. 
+In case of a failed validation, one might need more information. For instance, it is helpful to know which unit test fails or on which line the code fails to compile. In many cases, modern build tools like \textit{Gradle} already acquire these data so they can be easily obtained. 
 \begin{comment}
 
 \section{Pipeline execution example}
@@ -253,19 +255,19 @@ Another issue to analyze is the pipeline execution order. This should not be con
 
 The former order deals with how the steps are executed with respect to each detected data clump. Two approaches are considered here:
 
-In the first approach, each data clump is   further processed immediately after detection. This means after a data clump has been detected, it is immediately given a suggested name, a class is extracted if necessary, and the refactoring is executed. In the following, this approach will be referred to as \textit{one-data-clump approach}
+In the first approach, each data clump is  further processed immediately after detection. This means after a data clump has been detected, it is immediately given a suggested name, a class is extracted if necessary, and the refactoring is executed. In the following, this approach will be referred to as \textit{one-data-clump approach}
 
 In the second approach, all data clumps are detected first. Then all, those data clumps are assigned a suitable name, and classes are extracted if necessary. At the end, each data clump is refactored. In the following, this approach will be referred to as \textit{one-step approach}
 
 As a result, in the \textit{one-data-clump approach}, a data clump is processed by one step of the pipeline and then by the next while in the \textit{one-step approach} the first step has to process all data clumps first before the data clumps can be processed by the succeeding steps.
 
-There are arguments for and against both approaches. However designing a system that support both approaches is challenging and out of scope for this master thesis so only one approach is used. 
+There are arguments for and against both approaches. However, designing a system that supports both approaches is challenging and out of scope for this master thesis, so only one approach is used. 
 
-The \textit{one-data-clump approach} leads to quicker intermediate results so that if the tool to be developed is stopped during execution, it is more likely that some data clump are fixed so that some progress is being made.
+The \textit{one-data-clump approach} leads to quicker intermediate results so that if the tool to be developed is stopped during execution, it is more likely that some data clumps are fixed so that some progress is being made.
 
-Additionally, this approach is better for load balancing. Since many services,  might be used for refactoring data clumps and one data clump is processed at a time, each service gets a longer break before being used again. This is  especially important for services like ChatGPT where many requests in a short time period can lead to outages or huge costs. 
+Additionally, this approach is better for load balancing. Since many services might be used for refactoring data clumps and one data clump is processed at a time, each service gets a longer break before being used again. This is  especially important for services like ChatGPT, where many requests in a short time period can lead to outages or huge costs. 
 
-On the other hand, the \textit{one-step-approach} is easier to implement using the tools already existing. For instance, the \textit{DataClumpDoctor} detects all data clumps at a time and therefore is more compatible with the \textit{one-step-approach}.
+On the other hand, the \textit{one-step approach} is easier to implement using the tools already existing. For instance, the \textit{DataClumpDoctor} detects all data clumps at a time and therefore is more compatible with the \textit{one-step approach}.
 
 Moreover, configuration mistakes can be fixed more easily because in this approach, the software project will not be modified for some time (i.~e. data clumps will be detected or suitable names will be found). As a result, users of the tool are more likely to safely stop the tool if they discover a configuration mistakes. This might often occur in the very first moments after starting the tool.
 
@@ -284,7 +286,7 @@ Since \ac{LLM} like ChatGPT are a major part of this master thesis, the issue of
 Issue 1 and 2 will be addressed in section \ref{sec:llm_interface}. The issue 2 3 will be discussed in section \ref{sec:llm_msg_structure}. Lastly, issue 4 will be dealt with in section \ref{llm_msg_storage}.
 \subsubsection{An interface for large language models}\label{sec:llm_interface}
 
-Since the market for large language model is constantly expanding in just a few years, designing a interface for the communication is challenging. As a result, only the core functionality can be modeled by an interface in order to keep compatibility and ease extendability. 
+Since the market for large language model is constantly expanding in just a few years, designing a interface for communication is challenging. As a result, only the core functionality can be modeled by an interface in order to keep compatibility and ease extendability. 
 
 An interface to a \ac{LLM} should support providing messages. These messages are provided by the user and can be a instruction (see  section \ref{llm_msg_storage}), data or any other relevant information.
 
@@ -297,7 +299,7 @@ After sending and receiving the messages, the response from the model can be ret
 Therefore, the caller of the sending operation has the possibility to clear the previous messages after the \ac{LLM} has responded or keep them, and can therefore decide what to do.
 
 \subsubsection{A message format for large language models} \label{sec:llm_msg_structure}
-The structure of the messages to an \ac{LLM} is another issue to handle. Each model has its own requirements on how a request must be sent to it and how it will respond so that a general message structure must be developed. However there are similarities. Each model differentiate between requests by the user and the responses and represent the messages in a chronological manner, the most recent message is the message with the highest index. 
+The structure of the messages to an \ac{LLM} is another issue to handle. Each model has its own requirements on how a request must be sent to it and how it will respond so that a general message structure must be developed. However there are similarities. Each model differentiates between requests by the user and the responses and represents the messages in a chronological manner, the most recent message is the message with the highest index. 
 
 As a result, a simple message format can be an array of message object. Each message object is either an input or an output message. Input messages are generated by the user while output messages come from the model. A \ac{LLM} may have specific terms for input and output messages (e.~g. assistant and user), however using these simpler terms helps to generalize the problem.
 
@@ -307,11 +309,11 @@ A message object may contain multiple messages as it uses a string array. This i
 
 Another issue that arises while using \ac{LLM} is the management of instructions.
 
-An instruction is a resource or artifact. Similarly to resources like textures, 3D-models, sound data, images etc., they should be separated from the code \cite{separate_code_data}. As a result, separate text files for the instructions are better as they can be distributed and modified more easily, especially if the instruction prompt creation is done by other persons or entities.
+An instruction is a resource or artifact. Similarly to resources like textures, 3D models, sound data, images etc., they should be separated from the code \cite{separate_code_data}. As a result, separate text files for the instructions are better as they can be distributed and modified more efficiently, especially if other persons or entities create the instruction prompt.
 
-An instruction is often not a single resource but a composition of many resources or other data. For instance, if an instruction contains an code example, it is reasonable to split the code example into a different file to reduce the size of a single file. This  also allows easier modification of the example with an IDE because the combination of instruction text and source code would lead to compiler errors.
+An instruction is often not a single resource but a composition of many resources or other data. For instance, if an instruction contains an code example, it is reasonable to split the code example into a different file to reduce the size of a single file. This  also allows easier modification of the example with an IDE because combining instruction text and source code would lead to compiler errors.
 
-As a result, an instruction resource may need to hold references to other files (e.~g. source code) or reference to other data.
+As a result, an instruction resource may need to hold references to other files (e.~g. source code) or references to other data.
 For the \ac{LLM}, the instruction should be complete such that it contains the whole instruction with the content of all referenced files and other information.
 
 As a result, two perspectives need to be taken into consideration. From a user perspective, an instruction file should be as modular as possible as explained above. From the perspective of a large language model, an instruction needs to be complete. 

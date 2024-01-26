@@ -70,22 +70,24 @@ In each experiment, different parameters of the input are adjusted. Each these p
 
 \begin{itemize}
     \item Instruction
+    \item Model
     \item Data format
     \item Data size
     \item Temperature
-    \item Follow-ups
 \end{itemize}
 
-\subsection{Instruction}\label{sec:llm_instruction}
-The instruction is a main part of a prompt to ChatGPT or other \ac{LLM}. I tells the  \ac{LLM} what to do and how to respond. As a result, varying the instruction is an important part of prompt engineering. 
+\subsubsection{Instruction}\label{sec:llm_instruction}
+The instruction is a main part of a prompt to ChatGPT or other \ac{LLM}. It tells the  \ac{LLM} what to do and how to respond. As a result, varying the instruction is an important part of prompt engineering. \newline
 
-\subsubsection{No definition approach}
-At first, it is useful whether ChatGPT can find data clumps without giving a specific definition. This means ChatGPT needs to deduce the definition of a data clump from its trained models which might not be the same as the definition used in section \ref{sec:data_clump_def}.
+
+
+Initially, it is useful whether ChatGPT can find data clumps without giving a specific definition. This means ChatGPT needs to deduce the definition of a data clump from its trained models which might not be the same as the definition used in section \ref{sec:data_clump_def}. For instance, data clumps are defined in this master thesis to have at least three common variables while other sources require at least four common variables. 
 \begin{comment}
 Nevertheless, the results are fairly good. ChatGPT ignores the inheritance between \textit{MathStuff} and \textit{BetterMathStuff} and does not output a data clump for each method in \textit{MathStuff}
 \end{comment}
-\subsubsection{Definition-based approach}
-In this approach, ChatGPT is provided a specific definition of data clumps and asked to apply this definition on the project. Therefore, a precise definition is elementary for this approach.
+
+
+In another approach, ChatGPT is provided a specific definition of data clumps and asked to apply this definition on the project. Therefore, a precise definition is elementary for this approach.
 
 The following query was used:
 A data clump exists if
@@ -96,12 +98,26 @@ A data clump exists if
 \item Two different classes have at least three common fields
 \end{enumerate}
 
-\subsubsection{Providing examples of data clumps to ChatGPT}
 
 Another approach for including ChatGPT for data clump refactoring is example-based. Multiple examples of data clumps and how they can be refactored are presented to ChatGPT. In order to avoid any bias, each type of data clump is equally represented and field identifiers or parameters field identifiers are unique across the whole example. This results in a larger request size and thusly more costs. Nevertheless, if larger projects were to be used the size of the examples becomes negligible so that this approach has its reasons. The examples provided to ChatGPT can be found in the digital appendix under the path \enquote{data\_clump\_examples.java} 
 
+\subsubsection{Model}
+The model is a parameter for ChatGPT that controls the quality, performance, and cost of processing a query and responding to it. 
 
-\subsection{Data format}
+OpenAI provides multiple models for user of its API. Each  ChatGPT model  is based on the same original model but is fine-tuned to optimize for a specific task. For this master thesis, only  the  models \enquote{gpt-4-1106-preview} and \enquote{gpt-3.5-turbo-1106} are relevant. Both models support a \ac{JSON}-only mode, which means that any response by the model will be valid \ac{JSON} instead of natural language, so it easier to parse and process. \cite{chatgpt_new_models}
+
+The model {gpt-4-1106-preview} is also called \textit{GPT-4 Turbo}. It can process 128,000 tokens at once and has a knowledge cutoff of April 2023. \cite{chatgpt_new_models}
+
+The model \enquote{gpt-3.5-turbo-1106} has a context window size of 16,000. The knowledge cutoff is September 2021. \cite{chatgpt_new_models}
+
+
+In general, GPT-4-Turbo has a better quality because of the larger context window size and more up-to-date information. While the more recent cutoff date might not be that important for data clump detection and refactoring, the larger context window size means that larger amount of code can be transmitted to ChatGPT at once. So, larger projects can be refactored more easily.  \cite{chatgpt_new_models}
+
+On the other hand, the costs per 1000 tokens is  \$0.003 for GPT-3-Turbo whereas the costs for GPT-4 is \$0.01 for 1000 tokens. As a result, the GPT-4-Turbo is thrice as expensive as GPT-3 which can be a reason to use GPT-3. \cite{chatgpt_new_models}
+
+Additionally, there are  stricter limits for using GPT-4. For instance, only 500,000 tokens can be sent per day, and 150,000 tokens can be sent per minute. In contrast, GPT-3-Turbo has  lower values for token per minutes but no  token per day limit.  ¸\cite{chatgpt_limits}
+
+\subsubsection{Data format}
 
 After creating a instruction, ChatGPT cannot do much because it does not have access to the source code which must be provided to ChatGPT. Therefore, the next part of the prompt is some representation of the source code
 
@@ -111,7 +127,7 @@ Providing the complete source code is the most natural manner to give ChatGPT th
 
 On the other hand, the \ac{AST} can be provided. The \ac{AST} only contains a reduced structure of the source code and will therefore cost not as much. However, the \ac{AST} is usually not available but must be produced by other tools or ChatGPT (which means the source code has to be sent to the \ac{LLM} nevertheless). Additionally, there is no fixed formate for the \ac{AST} which might complicate parsing and processing the \ac{AST} or the results by ChatGPT.
 
-\subsection{Data size}
+\subsubsection{Data size}
 
 The size of the data is the amount of data that is submitted during a single request. Here also two approaches are tested.
 
@@ -124,7 +140,14 @@ This means that every request only contains the instruction and the content of t
 
 Additionally, each file could be sent again separated in order to find data clumps that exists in a single file and might not be detected if two files are provided so that the total number of files would be $0.5*n*(n-1)+n$.
 
+\subsubsection{Temperature}
+As outlined in section \ref{sec:chatgpt}, the temperature is a significant parameter that controls the randomness of the \ac{LLM} output. A high temperature indicates that the response by ChatGPT is more random and unpredictable, while a low temperature results in more consistent responses.
 
+Hence, a higher temperature can help ChatGPT to be more creative so that it may find data clumps that it would usually not detect. However, it can also lead to a lower specificity because it may flag wrong methods or fields as part of a data clump because of the increased unpredictability. 
+
+As a result, adjusting the temperature parameter is a significant part for the small experiment. Here, two values will be tested. A low temperature of 0.1 and a hight value of 0.9. While these are two extremas and not a middle ground, they can give a good approximation of whether thelow or high temperatures are better for data clump detection. 
+
+\begin{comment}
 \subsection{Requesting follow-ups}
 
 As outlined in section \ref{sec:chain of thought},  one prompt might no be enough to refactor data clumps. This might also apply for the simpler task of detecting data clumps.
@@ -132,7 +155,7 @@ As outlined in section \ref{sec:chain of thought},  one prompt might no be enoug
 Instead of expecting that a single request will detect all data clumps, another approach would be to repeat the same requests multiple times and aggregate the results. These follow-up prompts result in ChatGPT to re-analyze the code so that more data clumps can be found. 
 
 The issue  with follow-up prompts is how often should a prompt be repeated. Each prompt repeat requires that the conversation history to be sent again because ChatGPT is stateless. This leads to higher resource usage and costs. There are multiple approach to implement follow up.
-\begin{comment}
+
 \begin{description}
 \item[Full project follow-up] The whole project (all relevant files) is sent to  ChatGPT again with an instruction to find more data clumps. As a result, more data is sent per  request while the number of request can be reduced. As a  result, ChatGPt might find additional data clumps that it has not found during the previous prompts.
 \item [Tuple-based follow-up] A tuple of two files in the project (i.~e. the content of those files) is sent again to ChatGPT with the instruction to find more data clumps. If the goal is to data clumps between tuples of all files, $0.5*n*(n-1)$ file tuples need to uploaded so that many requests will needed. However, this can help ChatGPT to focus on a smaller part of the software project to analyze in order to find more data clumps.
@@ -151,6 +174,7 @@ The following are the mein conclusion of the experiment:
     \item A high temperature is better for GPT-3. A high temperature for GPT-4 leads to reduced specificity but increased sensitivity. 
     \item While some results are very good(e-~g. 100 percent), the median and mean is often worse and seldom reach 50 percent. 
     \item The impact of providing all files or pair of files is negligible. 
+    \item The daily limit of token for ChatGPT is a major issue during the experiments because it was frequently reached and therefore, the experiment  must be conducted over a longer period of time. 
 \end{itemize}
 
 As already noted, the resulkts should be interpreted cautiously because the project size is small. Nevertheless, some observations can be made:
@@ -170,7 +194,7 @@ While in section \ref{sec:pipeline} a general approach to find and refactor data
 
 The  \textit{Data Clump Doctor} is NodeJS command line tool developed by Nils Baumgartner in preparation of this master thesis. It employs \textit{PMD} to find all classes, methods, and fields in a Java project to generate an \ac{AST}. This syntax tree is saved as a \ac{JSON}. 
 
-In a second step, the generated \ac{AST} can be loaded again to find data clumps. This multi-step approach results in better performance since the detection of data clump requires many nested for-loops so that any reduction of data size has a measurable effect on the performance.
+In a second step, the generated \ac{AST} can be loaded again to find data clumps. This multi-step approach results in better performance since the detection of data clumps requires many nested for-loops so that any reduction in data size has a measurable effect on the performance.
 
 All detected data clumps are reported in the format specified in section \ref{sec:data_clump_format}.
 
@@ -180,9 +204,9 @@ Since the general tool is developed in Typescript, the \textit{Data Clump Doctor
 \subsection{ChatGPT}
 ChatGPT is another approach to detect data clumps as it can process code easily and report data clumps in any format the user wants. It also supports many programming languages that other tools do not provide.
 
-However, ChatGPT has a limited context size, so that processing large projects is  either too costly or simply not possible.
+However, ChatGPT has a limited context size, so processing large projects is  either too costly or simply not possible.
 
-Additionally, giving ChatGPT the right instructions to find data clumps can be challenging. While ChatGPT can define and find some data clumps without further context, it is better to give it a precise definition to work with. The following definition leads to good result, however it cannot be guaranteed that this will work forever:
+Giving ChatGPT the right instructions to find data clumps can also be challenging. While ChatGPT can define and find some data clumps without further context, it is better to give it a precise definition to work with. The following definition leads to good result, however it cannot be guaranteed that this will work forever:
 
 
 A data clump exists
@@ -195,9 +219,9 @@ A data clump exists
 \end{comment}
 
 \subsection{IntelliJ}
-The Program Structure Interface provided by IntelliJ is an \ac{API} to analyze projects that can be loaded by IntelliJ. As a result, the various classes, methods etc. can be obtained which allows for the detection of data clumps. Like the ChatGPT approach, it can be easily extended to refactor the data clumps.
+The Program Structure Interface provided by IntelliJ is an \ac{API} to analyze projects that IntelliJ can load. As a result, the various classes, methods etc. can be obtained which allows for the detection of data clumps. Like the ChatGPT approach, it can be easily extended to refactor the data clumps.
 
-In order to use this API, an instance of IntelliJ must be started. To reduce loading times and improve the performance, IntelliJ can be started in a headless mode so that no GUI is initialized. Nevertheless, IntelliJ requires many resources and much overhead so that  the initialization  needs some time.
+In order to use this API, an instance of IntelliJ must be started. IntelliJ can be started in a headless mode to reduce loading times and improve the performance so that no GUI is initialized. Nevertheless, IntelliJ requires many resources and much overhead, so that  the initialization needs some time.
 
 Another problem during the development of the tool is the issue of correctly loading projects. While a project that has no IntelliJ meta data files can be loaded, finding references of a method or field can lead to undefined behavior. Sometimes all references are correctly found, sometimes only a subset of the references are found, and sometimes no even no references are detected. The reasons for this are difficult to determine and the documentation is scarce, so the the PSI approach seems to be only suitable for projects created via IntelliJ or correctly initialized by IntelliJ with the required meta data. Gradle and maven projects are therefore not suitable for the full refactoring step. 
 
@@ -231,14 +255,14 @@ Now, IntelliJ can perform the refactoring. Deepending of the category of a refer
     \begin{enumerate}
         \item First, for each argument provided in a method call it is determined whether the argument is connected to a data clump variable (i.~e. it provides a value to a parameter that is part of a data clump) 
         \item The position of those argument is stored and a reference to the argument is stored for further processing.
-        \item Since the extracted class is known and already existing, a matching constructor  is determined that supports all arguments to the data clump variables of the method call. 
-        \item For each argument to a data clump variable, the argument is inserted into the matching position of the constructor, and the argument  is deleted in the original method call. 
+        \item Since the extracted class is known and existing, a matching constructor is determined to support all arguments to the data clump variables of the method call. 
+        \item For each argument to a data clump variable, the argument is inserted into the matching position of the constructor, and the argument is deleted in the original method call. 
         \item the constructor call is added at the position of the method  where the parameter of the extracted class is expected. 
         
     \end{enumerate}
     
 \end{enumerate}
 
-This approach requires some coordination. For instance, the order of operation is important. Method and field declarations must be updated first because they are needed to successfully perform the refactoring of variable usages and method calls. 
+This approach requires some coordination. For instance, the order of operation is important. Method and field declarations must be updated first because they are needed to perform the refactoring of variable usages and method calls successfully. 
 
-Another aspect where the order of the operation matters is the hierarchy in abstract syntax tree. Consider the assignemt \textit{x=x+1}. In an abstract syntax tree, the reading of the value \textit{x} and the addition of 1 is executed first. It is also at a deeper level of the tree than the assignment. If the assignment were to be replaced by a setter, the syntax tree of the reading expression can be out of sync because it is not linked to the original assignment. Therefore, it is important to refactor parts of a code that have higher depth in the syntax tree before parts of the code with lower depths. 
+Another aspect, where the order of the operation matters, is the hierarchy in the abstract syntax tree. Consider the assignemt \textit{x=x+1}. In an abstract syntax tree, the reading of the value \textit{x} and the addition of 1 is executed first. It is also at a deeper level of the tree than the assignment. If the assignment were to be replaced by a setter, the syntax tree of the reading expression can be out of sync because it is not linked to the original assignment. Therefore, it is vital to refactor parts of a code with higher depth in the syntax tree before parts with lower depths. 

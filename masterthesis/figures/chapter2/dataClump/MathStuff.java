@@ -6,11 +6,11 @@ public class MathStuff {
         return Math.sqrt(x * x + y * y + z * z);
     }
 
-    public double printSum(int x, int y, int z) {
+    public double getSum(int x, int y, int z) {
         return x + y + z;
     }
 
-    public void printMax(int x, int y, int z) {
+    public double getMax(int x, int y, int z) {
         return Math.max(Math.max(x, y), z);
     }
 }

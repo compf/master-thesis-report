@@ -1,30 +1,30 @@
 {
     /*General project information*/
     "data_clumps": {
-      "parameters_to_parameters_data_clump-src/main/java/org/example/MathStuff.java-org.example.MathStuff/method/printSum(int x, int y, int z)-org.example.BetterMathStuff/method/printMax(int x, int y, int z)-xyz": {
+      "unique_key_1": {
         "type": "data_clump",
-        "key": "parameters_to_parameters_data_clump-src/main/java/org/example/MathStuff.java-org.example.MathStuff/method/printSum(int x, int y, int z)-org.example.BetterMathStuff/method/printMax(int x, int y, int z)-xyz",
+        "key": "unique_key_1",
         "probability": 1,
         "from_file_path": "src/main/java/org/example/MathStuff.java",
         "from_class_or_interface_name": "MathStuff",
         "from_class_or_interface_key": "org.example.MathStuff",
         "from_method_name": "printSum",
-        "from_method_key": "org.example.MathStuff/method/printSum(int x, int y, int z)",
+        "from_method_key": "from_method_key_1",
         "to_file_path": "src/main/java/org/example/BetterMathStuff.java",
         "to_class_or_interface_name": "BetterMathStuff",
         "to_class_or_interface_key": "org.example.BetterMathStuff",
         "to_method_name": "printMax",
-        "to_method_key": "org.example.BetterMathStuff/method/printMax(int x, int y, int z)",
+        "to_method_key": "to_method_key_1",
         "data_clump_type": "parameters_to_parameters_data_clump",
         "data_clump_data": {
-          "org.example.MathStuff/method/printSum(int x, int y, int z)/parameter/x": {
-            "key": "org.example.MathStuff/method/printSum(int x, int y, int z)/parameter/x",
+          "data_clump_data_key_1": {
+            "key": "data_clump_data_key_1",
             "name": "x",
             "type": "int",
             "probability": 1,
             "modifiers": [],
             "to_variable": {
-              "key": "org.example.BetterMathStuff/method/printMax(int x, int y, int z)/parameter/x",
+              "key": "data_clump_data_to_key_1",
               "name": "x",
               "type": "int",
               "modifiers": [],
