@@ -1,7 +1,7 @@
 \begingroup
 \renewcommand{\cleardoublepage}{} % TODO maybe removing this and next
 \renewcommand{\clearpage}{}
-\chapter{Concept}\label{chapter_conception}
+\chapter{Concept}\label{chapter:conception}
 \endgroup
 This chapter deals with the concept of the program. It provides information about the processing pipeline (\ref{sec:pipeline} and how the different parts of that pipeline can be modeled in a way that allows easy extension. This is expanded by the context that stores the data of each step (section (\ref{sec:context}). Next different approaches for executing the pipeline are discussed in section \ref{sec:pipeline_exec_order}. Then, the integration of \ac{LLM} like ChatGPT will be analyzed. 
 
@@ -23,11 +23,11 @@ Since a service-based approach is used, a handler can be seen as a gateway to a 
 Figure \ref{fig:solver_gateway_service_overview} illustrates how the service-based approach works for one step:
 
 \begin{enumerate}
-    \item The program developed in this master thesis \textbf{main program} executes one step (e.g. finding a suitable class name)
-    \item The gateway registered to that step is used. It is provided with the current context containing the results from previous steps.
-    \item The gateway starts or employs a specific service. This service might be dependent on the current step or might be constant. The gateway knows how to start or use the service and sends all relevant information to the service (e.g. via files, network streams etc.) 
-    \item The service processes the requests submitted by the gateway. For instance, ChatGPt can suggest a suitable class name. The service might be outside of the control of the developer. For example, it might be programmed in a different programming language or the source code might not be available. At some point it will create a response and send it back to the gateway. 
-    \item The gateway reads the response and processed it. It then creates a new context based on the previous context and the response from the service. 
+    \item The program developed in this master thesis \textbf{(main program)} executes one step (e.g. finding a suitable class name)
+    \item The handler registered to that step is used. It is provided with the current context containing the results from previous steps.
+    \item The handler starts or employs a specific service. This service might be dependent on the current step or might be constant. The gateway knows how to start or use the service and sends all relevant information to the service (e.g. via files, network streams etc.) 
+    \item The service processes the requests submitted by the handler. For instance, ChatGPT can suggest a suitable class name. The service might be outside of the control of the developer. For example, it might be programmed in a different programming language or the source code might not be available. At some point it will create a response and send it back to the handler. 
+    \item The handler reads the response and processed it. It then creates a new context based on the previous context and the response from the service. 
     \item The new context is returned to the program and can be used for successive steps (e.~g. the suggested name can be used for creating a respective class) 
 \end{enumerate}
 
@@ -43,11 +43,12 @@ The program, therefore, acts as an orchestrator. It starts every service and con
 
 An alternative approach is called choreography. Here each step would call the next step without using the central main program. 
 
-Both approaches have their advantages. In the choreography architecture, there is less coupling since a main program does not need to know which gateway handles with which step. Instead, each gateway need to know the next (and only the next) step. This can become challenging if steps are optional because the gateway does not know what service to call next. Additionally, debugging the process is more challenging as there is no central point that coordinates the pipeline.
+Both approaches have their advantages. In the choreography architecture, there is less coupling since a main program does not need to know which gateway handles which step. Instead, each gateway need to know the next (and only the next) step. This can become challenging if steps are optional because the gateway does not know what service to call next. Additionally, debugging the process is more challenging as there is no central point that coordinates the pipeline.
 
 On the other hand, the orchestrator architecture is easier to control and debug. It easier to configure and to implement. Nevertheless, the coupling to each gateway is stronger because each gateway must be known by by the main program. Additionally, the main program is a single point of failure. If there is a problem with the main program, the data clump refactoring cannot proceed as every step requires coordination with the orchestrator. Also the overhead should be considered because the orchestrator will need to act multiple time to process responses and generate new requests for the next gateway. This becomes more important if services are not local but are accessed using the internet or the local network, which causes more overhead. \cite{orchestration_choreography}
 
-In the following subsections, these steps will be outlined:
+\section{Pipeline steps}\label{sec:pipeline_steps}
+In the following subsections, the steps of the pipeline will be outlined. For each step, there is a discussion on why this step is noteworthy to consider and what points are important when implementing the step.
 \subsubsection{Code obtaining}\label{sec:code_obtaining}
 Data clumps can only be found if access to the source code is given. This requires that the source code is available in some location and that the location is known.
 
@@ -57,7 +58,7 @@ However, there might be more complex cases. For instance, the source code could 
 \subsubsection{Detecting data clumps}\label{subsec:chap3_data_clump_detection}
 It is easily agreeable that data clumps can only be fixed if found previously. Therefore, one of the first steps of the pipeline must be the detection of data clumps. 
 
-The data clump detection process itself can be further divided into sub-steps.
+The data clump detection process itself can be further divided into the sub-steps filtering, AST generation, similiarity detection, data-clump detection, and data clump filtering.
 \subsubsection{Filtering}\label{subsub:filtering_files}
 First of all, all programming language files need to be detected. Usually, there are specific file extensions (e.g., \textit{.java}) for a source code file, simplifying the finding of files. It is also common for software projects to have a root folder that contains all source code files. Therefore, one can recursively iterate through all files and directories of a given root folder with a matching extension. 
 
@@ -89,6 +90,8 @@ On the other hand, one can argue that those changes are still significant becaus
 
 Therefore, filtering out certain data clumps considered not worthy of refactoring can be suggested.
 
+There are several methods to filter out data clumps which will be discussed in section \ref{sec:data_clump_filtering}
+
 \subsubsection{Name finding}\label{subsec:chap3_data_clump_name_finding}
 The next step of the pipeline is to find a suitable identifier of the extracted class.
 
@@ -106,19 +109,19 @@ Therefore, additional tools will be needed to parse the source code and use the 
 \subsubsection{Class Extraction}\label{subsec:chap3_data_class_extraction}
 After a class name has been found, a respective class can be added to the source code. This class will be used as a replacement for the data clump variables or parameters. 
 
-In contrast to the previous step of the pipeline, this process can be automated more straightforwardly because it does not require creativity and a general template can be used, that is:
+In contrast to the name finding step of the pipeline, this process can be automated more straightforwardly because it does not require creativity and a general template can be used, that is:
 \begin{itemize}
     \item Create a private field for each variable of the data clump
-    \item Create a public getter for each variable of the data clump. This getter may be named get\textit{Var} where \textit{Var} is replaced by the capitalized name of the variable. The method returns the value of the respective field
-    \item Similarly, a setter set\textit{Var} may be created that has no return type, accepts a new value as a parameter, and sets the respective field. 
+    \item Create a public getter for each variable of the data clump. This getter may be named \textit{getVar} where \textit{Var} is replaced by the capitalized name of the variable. The method returns the value of the respective field
+    \item Similarly, a setter \textit{setVar} may be created that has no return type, accepts a new value as a parameter, and sets the respective field. 
     \item A constructor that initializes the fields with provided or default values may be created. 
 \end{itemize}
 
-Additionally, methods for converting an object to a string or creating a hash code may be useful, but these methods are usually optional for refactoring data clumps. 
+Additionally, methods for converting an object to a string, checking the equality of two objects, or creating a hash code may be useful, but these methods are usually optional for refactoring data clumps. 
 
 
 \subsubsection{Refactoring}
-After extracting a class, the next step is to refactor the source code to remove the data clumps. Here, again, we need to differentiate between method parameter data clumps as this impacts the access scope. 
+After extracting a class, the next step is to refactor the source code to remove the data clumps. Here, again, one needs to differentiate between method parameter data clumps as this impacts the access scope. 
 
 In case of a field data clump, the following transformations need to be applied.
 
@@ -145,18 +148,23 @@ Disadvantageously, this may only be effective if the project is correctly config
 
 \subsubsection{Evaluation}
 
-In the last step, one might evaluate the effectiveness and efficiency of the data clump refactoring. For instance, one could execute the data clump detection process again to determine how many data clumps are fixed in comparison to the first iteration. 
+As another optional step, one might evaluate the effectiveness and efficiency of the data clump refactoring. For instance, one could execute the data clump detection process again to determine how many data clumps are fixed in comparison to the first iteration. 
 
 Another metric for the evaluation could be the running time. A substantial running time of the refactoring can slow down the development process and cause the program not to be used again for future iterations. It could also be useful to anaylze the running time for each individual step so that handlers that require too much time or resources can be detected and later not be used. 
 
+\subsubsection{Committing}
+
+After all changes are made,they need are still local and not part of the \ac{VCS}. As a result, they must be committed and pushed so that every developer of the software project has access to the changes by the refactoring. Hence, it can be viewed as the reverse of the code obtaining step. 
+
+In this step, a suitable commit message should be chosen. This could also be done via ChatGPT. Also a manual message based on the changed files might be sufficient. Further issues that might arise is whether a new branch should be created for the refactoring and how humans or other automatic tools (Continuous integration continuous development) should be used to validate the refactoring.  
 \section{Context}\label{sec:context}
-In section \ref{sec:pipeline}, the several steps of the data clump pipeline are outlined. However, these steps do not include how the information generated by each step is stored and how successive steps might use this information.
+In section \ref{sec:pipeline_steps}, the several steps of the data clump pipeline are outlined. However, these steps do not include how the information generated by each step is stored and how successive steps might use this information.
 
 Therefore, a concept to store intermediate information needs to be developed. Such information might be called \textbf{context}.
 
 The context is a storage filled throughout the data clump refactoring pipeline. For instance, it might be stored in memory or a database if the context size is too large.
 
-Each step in the data clump refactoring pipeline can access the context and obtain such information as it may deem necessary for its use. A step may or may not update the context. For instance, if a service performs multiple step consecutively, it might not be able to store some information. To give a more concrete example, if a service can find data clumps and refactor them automatically, it might not be able to store the locations of each data clump so that respective context cannot be created. 
+Each step in the data clump refactoring pipeline can access the context and obtain such information as it may deem necessary for its use. A step may or may not update the context. For instance, if a service performs multiple step consecutively, it might not be able to store some information. To give a more concrete example, if a service can find data clumps and refactor them automatically, it might not be able to store the locations of each data clump so that respective context cannot be created. Also, a step can create multiple chained contexts if a step is capable of executing multiple steps. 
 
 \begin{figure}
     \centering
@@ -165,15 +173,15 @@ Each step in the data clump refactoring pipeline can access the context and obta
     \label{fig:context_pipeline}
 \end{figure}
 
-The context can be represented as a linked list. Each node of the list represents a part of the context. Figure \ref{fig:context_pipeline} illustrates how the context can be  represented.
+The context can be represented as a linked list. Each node of the list represents a part of the context. 
 
-Each context is an extension of a previous context. In the beginning, there is no context and the code obtaining context is created. If a gateway needs to access information from a specific context, it needs to traverse the linked list until it finds the needed information. While this can create overhead, the size of the linked list is bounded by the size of the pipeline so that the overhead is limited.  The overhead would only be relevant if the number of steps for refactoring data clumps would be substantially more, which is not to be expected. 
+Each context is an extension of a previous context. In the beginning, there is no context and the code obtaining context is created. If a handler needs to access information from a specific context, it needs to traverse the linked list until it finds the needed information. While this can create overhead, the size of the linked list is bounded by the size of the pipeline so that the overhead is limited.  The overhead would only be relevant if the number of steps for refactoring data clumps would be substantially more, which is not to be expected. 
 
 In figure \ref{fig:context_pipeline}, in the beginning, only the location of the project to analyze is stored, which is mandatory. The pipeline step executing the \textit{DataClumpDoctor} can use this context and append a new context. A name finding service like ChatGPT can then append a context with the names of the extracted classes. At the end, a service like IntelliJ can do the refactoring.
 
 
 
-To check whether a given pipeline is indeed executable, each step handler must describe how the context is updated when the step is executed. Each step can also specify whether a specific type of context must exist. For instance, a step may require that the names of the extracted class of each data clump must be stored in the context.  
+To check whether a given pipeline is indeed executable, each step handler must describe how the context is updated when the step is executed. Each step can also specify whether a specific type of context must exist. For instance, a step may require that the \ac{AST} is available for a given source code file. 
 
 Such context can only work if the context data is in a specific format, which can be generated by one step and might be correctly interpreted by each successive step. 
 
@@ -292,7 +300,7 @@ An interface to a \ac{LLM} should support providing messages. These messages are
 
 Providing a message does not mean that the message is processed by the \ac{LLM} but is kept until further instruction. Thus, a user can prepare multiple messages before sending them to the model.
 
-If the user decides to send the messages to the mode, another operation can be used. This operations send the accumulated message to the large language model and waits for the response, so that the operation is synchronous. While an asynchronous approach would also be feasible, in most cases the data clump detection and refactoring process cannot proceed without the relevant information from the model so that waiting is tolerable. 
+If the user decides to send the messages to the mode, another operation can be used. This operation sends the accumulated message to the large language model and waits for the response, so that the operation is synchronous. While an asynchronous approach would also be feasible, in most cases the data clump detection and refactoring process cannot proceed without the relevant information from the model so that waiting is tolerable. 
 
 After sending and receiving the messages, the response from the model can be returned. Now the interface must deal with the messages it has accumulated. Since most models have no memory, the messages must be sent again if they are still relevant for future requests. However, storing and resending messages can cost more so that this should not be done always.
 
@@ -322,11 +330,13 @@ These two perspectives can be reconciled by a template model. The instruction fi
 
 When loading the instruction, all references must be correctly mapped with the correct content so that it can be sent to the model and be correctly interpreted. 
 
+A reference to a raw string is in the format \enquote{\$\{id\}} where \enquote{id} is an identifier. When loading the template file a, string must be provided that replaces this reference.  A reference to a file is in the format \enquote{\%\{id\}}, so it starts with a percentage sign. On loading the template, a path to a file must be  provided and the content of that file replaces the reference. 
+
 Listing \ref{lst:nstruction_template} illustrates an example instruction file which is also used in section \ref{sec:initial_experiments} The instruction prompts the model that code files will be provided (l.~1) and that all data clumps in those source code files need to be detected (l.~4). It also informs the model that examples of data clump will be provided (l. 6 and 11-12) and describes how the response by the \ac{LLM} should be structured (l~7-9). 
 
-However, the examples and output format are not directly specified in the instruction file but are referenced. For instance the text \enquote{$\{output\_format\}$} will not be sent to the model but replaced by the actual output format that is stored somewhere else. The same applies to the examples. Also the specific programming language (e.~g. Java) is not directly defined by the instruction but will added when the instruction is sent to a large language model.
+However, the examples and output format are not directly specified in the instruction file but are referenced. For instance the text \enquote{\%\{output\_format\}} will not be sent to the model but replaced by the actual output format that is stored somewhere else. The same applies to the examples. Also the specific programming language (e.~g. Java) is not directly defined by the instruction but will added when the instruction is sent to a large language model.
 
-This allows for more flexibility since a single instruction files can be used for multiple programming languages and scenarios. However, it requires more configuration as outlined in section \ref{sec:config}
+This allows for more flexibility since a single instruction files can be used for multiple programming languages and scenarios. However, it requires more configuration as outlined in section \ref{sec:config}.
 \begin{lstlisting}[caption={Instruction file example}, label={lst:nstruction_template}, captionpos=b, numbers=left, ]
 I will provide you one or more ${programming_language}
 code files.
@@ -335,10 +345,10 @@ Find all data clumps in the respective files.
 Examples of data clump are provided below.
 Use the following JSON format for the output:
 ## JSON
-${output_format}
+%{output_format}
 
 ## Examples
-${examples}
+%{examples}
 \end{lstlisting}
 
 

@@ -1,7 +1,17 @@
 In this chapter, the background of data clumps will be discussed. A formal definition of code smells and data clumps will be presented ( sections \ref{sec:code_smell} and \ref{sec:data_clump_def}). ChatGPT will be discussed in section \ref{sec:chatgpt}. Also, the data clump type context format will be discussed in section \ref{sec:data_clump_format}. The Language Server Protocol used to refactor data clumps more easily is explained in section \ref{sec:lsp}. In the end, related research will be discussed (see section \ref{sec:related_research}). 
 \section{Code smells}\label{sec:code_smell}
 
-The term \enquote{Code smell} is suggested by Kent Beck in \cite{fowler2019refactoring} for source code that may need refactoring. If the refactoring is not performed on time, the costs of maintenance of the source code and the software project can be higher, and the efficiency of implementing changes is reduced. Some examples of code smells include unclear variable names, large classes, oversized methods, missing documentation, or code duplicates. Another possible code smell is data clumps. 
+The term \enquote{Code smell} is suggested by Kent Beck in \cite{fowler2019refactoring} for source code that may need refactoring. If the refactoring is not performed on time, the costs of maintenance of the source code and the software project can be higher, and the efficiency of implementing changes is reduced. Some examples of code smells include unclear variable names, large classes, oversized methods, missing documentation, or code duplicates. 
+
+Different types of code smells can be distinguished \cite{data_clumps_refactoring_guru}:
+\begin{description}
+    \item [Bloaters] Code smells increases the code size unnecessarily 
+    \item [Change Preventers] A code smell that makes it harder to apply changes to the source code because many files are affected by a small change
+    \item [Dispensables] Source code that can be easily removed without affecting the functionality
+\end{description}
+
+
+One relevant code smell is data clumps. 
 
 \section{Data clumps}\label{sec:data_clump_def}
 The term \enquote{Data Clump} was coined by Martin Fowler as one possible code smell that can occur in source code. He describes data clumps as follows:
@@ -22,14 +32,17 @@ These conditions often need to be more relaxed. For instance, methods can be inh
 
 For field data clumps, similar conditions apply. There must be at least three fields that appear in more than one class, and the names and data types of the variables must be the same, while the inner order may be different. Since in most programming languages, a field can have an additional access modifier (e.g., \textit{private}, \textit{static} etc. ), the access modifier should also be included to determine whether two groups of variables are identical and hence a data clump.  
 
-The definition might also need to be more relaxed for both method and field data clumps. Two variables, that have the same name but a compatible type in at least one direction  (e.g., \textit{int} and  \textit{double}), would be disregarded as a data clump according to the formalized definition. However, some would regard them as a data clump.
+The definition might also need to be more relaxed for both method and field data clumps. The case of two variables, that have the same name but only a partially compatible type, so that a implicit conversion is possible in one way but not the other way (e.g., \textit{int} and  \textit{double}), would be disregarded as a data clump according to the formalized definition. However, some would regard them as a data clump.
 
 Also, modification of a variable's identifier might not change its meaning. For instance, typos can happen, or synonyms can be used so that an automatic algorithm might not discover the connection between two variables but requires knowledge of the semantics of the source code. \cite{zhangImprovingPrecisionFowler2008}
 
 
 To conclude, the core definition of a data clump is clear. However, this definition still leaves out some edge cases that require a semantic understanding of the source code. 
 
-An example of a data clump is shown in listing \ref{lst:math_stuff_java}
+
+
+In the following, the definition by \cite{zhangImprovingPrecisionFowler2008} will be used. However,  instead of requiring more than three parameters of field for a data clump, more than two are required. The reasons for this change is that also Fowler believes that three variables can be sufficient for a data clump. Additionally due to the looser definition , a higher number of data clumps will be found in a software project which can help to better statistically analyze data clumps. In the end, these are subjective thresholds that are open for discussion. 
+
 \begin{figure} [htbp!]
 			\lstinputlisting
 			[caption={Some operations on vectors},
@@ -37,15 +50,12 @@ An example of a data clump is shown in listing \ref{lst:math_stuff_java}
 			captionpos=b,language=java, basicstyle=\footnotesize, tabsize=2, showstringspaces=false,  numbers=left]
 			{figures/chapter2/dataClump/MathStuff.java}
 		\end{figure}
-
-In the following, the definition by \cite{zhangImprovingPrecisionFowler2008} will be used. However,  instead of requiring more than three parameters of field for a data clump, more than two are required. The reasons for this change is that also Fowler believes that three variables can be sufficient for a data clump. Additionally due to the looser definition , a higher number of data clumps will be found in a software project which can help to better statistically analyze data clumps. In the end, these are subjective thresholds and there are arguments for and against a threshold of three or four.
-
 Listing \ref{lst:math_stuff_java} contains three methods that execute some vector operations (calculation of length, sum of coordinates, and the maximum coordinate). 
 
 
 It can be seen that the snippet contains a method parameter data clump since the variables \textit{x}, \textit{y}, and  \textit{z} occur thrice.  These variables might be called \textbf{data clump items}
   
-\subsection{Refactoring data clumps}
+\subsection{Refactoring data clumps}\label{sec:data_clump_refactor}
 Fowler suggests two  steps to refactor a data clump:
 
 In the  \textbf{Extract-Class}-step, a class with fields for each data clump item is extracted. A class for this purpose might already exist so that it can be re-used.
@@ -90,7 +100,15 @@ In the second step, a parameter object is introduced that replaces the three pre
 			captionpos=b,language=java, basicstyle=\footnotesize, tabsize=2, showstringspaces=false,  numbers=left]
 			{figures/chapter2/dataClump/MathUserRefactored.java}
 		\end{figure}
+\subsection{Reasons not to refactor data clumps}
+While data clumps are a code smell they might not be worth to refactor. 
 
+One reason for not refactoring data clumps is the tendency of producing data classes. These are classes that only provide access to data but no functionality. By extracting a class as outlined in \ref{sec:data_clump_refactor} the new class has no or scarce additional functionality. These data classes can be also seen as a code smell so that refactoring might not reduce the number of code smells significantly. 
+
+Another problem is the creation of those data classes in calling methods. Suppose a method previously requires three parameters \textit{x}, \textit{y}, and \textit{z}. By refactoring the method, it requires only one parameter of a data class (e.~g. \textit{Point}). Callers of such method have previously provided three arguments, and now have to create an instance of \textit{Point}. As a result, many instances can be created that consume memory and require garbage collection resulting in performance loss. While these effects might be minimal, the effect is more significant on embedded systems or other systems with few resources. 
+
+Also over-engineering can be an issue. As noted in \ref{sec:data_clump_def}, one can check the existence of a data clump by testing whether the removal of one parameter would make sense. This however is arbitrarily and no concise criteria can be given. Sometimes a group of parameters are connected but an extracted class would create a layer of abstraction that is unnecessary and makes the code even harder to read. This is particular important if the domain of each of the three variables is so distinctive that a common class name is hard to find. 
+\clearpage
 \subsection{ Data clumps Type Context }\label{sec:data_clump_format}
 
 The \textbf{Data clumps Type Context} \cite{dataclump_type_context} is developed by Baumgartner et al. to establish a standard for reporting data clumps.
@@ -113,16 +131,16 @@ The detected data clumps are described as a link between two files. These files 
 
 A similar principle is applied to the classes in which a data clump is located. Because a class name might not be unique, not only the names of the two classes but also unique identifiers of those classes are provided (l. 9-10 and 14-15).
 
-The information about the methods of the data clump )l. 11, 12, 16, 17) is optional. If one part of the data clump is a field-to-field data clump, no method is involved, so the respective part would be \textit{null}.
+The information about the methods of the data clump (l. 11, 12, 16, 17) is optional. If one part of the data clump is a field-to-field data clump, no method is involved, so the respective part would be \textit{null}.
 
 The field \enquote{probability} can be used by probabilistic data clump detection tools to indicate the probability that the detected data clump is indeed a data clump. For purposes of this master thesis, it will be ignored. 
 
 In lines 19-42, each variable that is part of the data clump is described. Here, only one variable is listed, although for a data clump there must be at least three variables. As for the data clump itself, the individual variables are separated into a \enquote{from-part} and a \enquote{to-part}. The former is implicitly defined (l.~20-25, 38-42), while the latter has a specifically named sub object \enquote{to\_variable} (l. 27-37). For each variable, the name (l. 22 and l. 28)) and the data type (l.~23 and l. 29) are provided. As for the general data clump, a probability is given whether the variable is indeed part of a data clump (l. 24). As mentioned above, this information will be ignored.  Additionally, modifiers like \enquote{private}, \enquote{final} etc. are also stored. 
 
-In order to find the variable in the source code, detailed location information is needed. Parts of the location information are, the line number (l.~32 and l.~39) and the column number (l.~33 and l.~40). To avoid any ambiguity, the end position of the variable is saved, too. Both numbers are one-index-based, meaning that the first line is one and the first column is also one. 
+In order to find the variable in the source code, detailed location information is needed. Parts of the location information are, the line number (l.~32 and l.~39) and the column number (l.~33 and l.~40). To avoid any ambiguity, the end position of the variable is saved, too. All numbers are one-index-based, meaning that the first line is one and the first column is also one. 
 
 
-\section{ChatGPT}\label{sec:chatgpt}
+\section{ChatGPT and other large large language models}\label{sec:chatgpt}
 
 ChatGPT \cite{ChatGPT_url} is a \ac{LLM} developed by OpenAI and released in November 2022. As a \ac{LLM}, ChatGPT can interpret user queries and return an appropriate response. 
 
@@ -132,7 +150,7 @@ The usage of ChatGPT is nevertheless somewhat restricted. For instance, content 
 
 Another essential feature of ChatGPT is the ability to store conversations. A conversation is a collection of queries and linked responses sent to ChatGPT. Using conversations, a user can refer to a previous query or response in a later query. For instance, if ChatGPT makes a mistake or misinterprets a query, a user can send another request connected to the previous request and point out the mistake or give more context, helping ChatGPT auto-correct itself. 
 
-ChatGPT can be used via a browser or via an API. Using ChatGPT via the browser is free, although restricted. A faster paid version is available and uses an improved model that supports the aforementioned image generation and other irrelevant features for this master thesis.  Using the API requires a payment based on used token. A token is approximately a word but a detailed token definition is difficult to specify. 
+ChatGPT can be used via a browser or via an API. Using ChatGPT via the browser is free, although restricted. A faster paid version is available and uses an improved model that supports the aforementioned image generation and other irrelevant features for this master thesis.  Using the API requires a payment based on used token. A token is approximately a word but the number of tokens consumed depends on the concrete kind of input. 
 
 Figure \ref{fig:chatgpt_browser} illustrates how ChatGPT can be used in the browser.
 \begin{figure}
@@ -165,7 +183,7 @@ Listing \ref{lst:chatgpt_api} shows how an \ac{API} query may look like if it us
 
 Since ChatGPT uses \ac{JSON} for communication, the content header of HTTP  must be set to \enquote{application/json} (l. 2). Afterwards a token must be provided to ChatGPT (l. 23). This  token must be generated on the OpenAI website and will be used to connect the query to an OpenAI account so that the user can be charged properly- The token should remain secret and may not be disclosed (e.~g. via \ac{VCS}) 
 
-Then, the actual query is defined (l. 4-24.)Firstly, the model is defined (l. 5). OpenAI provides multiple models that have different advantages and disadvantages. For instance, a newer model like \textit{gpt-4} has more capabilities but is more expensive. 
+Then, the actual query is defined (l. 4-24.). Firstly, the model is defined (l. 5). OpenAI provides multiple models that have different advantages and disadvantages. For instance, a newer model like \textit{gpt-4} has more capabilities but is more expensive. 
 
 Afterward, the actual messages are provided (l. 6-24). Each message is a tuple of a \textbf{role} and a \textbf{content}. The content of a message is the input or output provided to or by ChatGPT. 
 
@@ -196,7 +214,7 @@ The response of the ChatGPT \ac{API} based on listing \ref{lst:chatgpt_api} is d
 			{figures/chapter2/chatgpt_api_response.json}
 		\end{figure}
 
-In the lower part of the listing (l. 13-19), meta information is provided. This includes the response generation time (l. 12), the used model for the response (l. 14), an id for the response (l. 13).
+In the bottom part of the listing (l. 13-19), meta information is provided. This includes the response generation time (l. 12), the used model for the response (l. 14), an id for the response (l. 13).
 
 In order for clients to calculate the costs of using ChatGPT, each response also includes how many tokens have been used by the prompt (l. 18), by the response (l. 17), and the total number of tokens (l. 19).
 
@@ -209,35 +227,40 @@ While using  \ac{LLM} for refactoring brings many advantages  and possibilities,
 
 \subsubsection{Advantages}
 
-First of all, large language models are very flexible. A normal refactoring algorithm needs to consider many situations. For instance, an algorithm that modifies the method signature in a class might not work on an interface. A large language model does not need to be adapted to all edge cases but often finds a suitable solution to a problem because it is not restricted to a specific refactoring process, 
+First of all, large language models are very flexible. A normal refactoring algorithm needs to consider many situations. For instance, a traditional algorithm that modifies the method signature in a class might not work on an interface. A large language model does not need to be adapted to all edge cases but often finds a suitable solution to a problem because it is not restricted to a specific refactoring process. \cite{shirafuji2023refactoring}
 
-Additionally, a \ac{LLM} is more similar to a human as it is more  \enquote{creative}. While it is still a computer model and does not win the Turing-Test \cite{turing_test}, a \ac{LLM} can refactor code in a manner more closely as a human being would do. For instance, it can suggest class names that are related to the topic of the class, which a human being would also consider, while traditional algorithms would use placeholder names, concatenation of field names or other simple name construction algorithms. 
+Additionally, a \ac{LLM} is more similar to a human as it is more  \enquote{creative}. While it is still a computer model and does not win the Turing-Test \cite{turing_test}, a \ac{LLM} can refactor code in a manner more closely as a human being would do. For instance, it can suggest class names that are related to the topic of the class, which a human being would also consider, while traditional algorithms would use placeholder names, concatenation of field names or other simple name construction algorithms. \cite{shirafuji2023refactoring}
 
 Large language models are also extensible. For instance, if another programming language is used, an \ac{LLM} can be easily adapted, while a traditional refactoring approach would require more effort to be language-agnostic.
 
-Moreover, a \ac{LLM} can refactor the code in more ways than instructed. While a model can be specifically instructed to refactor data clumps, it might also correct formatting errors, spelling mistakes, or other code smells. While the focus of this master thesis will be on data clumps, other code smells are important too and might be more serious. Using a  \ac{LLM} allows developers to fix more code smells without developing and testing more tools to refactor multiple code smells. As they are better to understand the context of the code than a traditional algorithm, the quality of the code can therefore be improved. 
+Moreover, a \ac{LLM} can refactor the code in more ways than instructed. While a model can be specifically instructed to refactor data clumps, it might also correct formatting errors, spelling mistakes, or other code smells. While the focus of this master thesis will be on data clumps, other code smells are important too and might be more serious. Using a  \ac{LLM} allows developers to fix more code smells without developing and testing more tools to refactor multiple code smells. As they are better to understand the context of the code than a traditional algorithm, the quality of the code can therefore be improved. \cite{shirafuji2023refactoring}
 
 Furthermore, \ac{LLM} can adapt to the coding style of the source code. If for instance, the source code used the \enquote{snake\_case} or the \enquote{pascalCase} naming convention, the model can detect this convention and use it for its own refactoring (e.g. creating new methods, variables or classes). A traditional approach would need to be configured for each project to use the right convention so that the generated code might look more artificial as it does not fit to the rest of the code.
 
 
 \subsubsection{Disadvantages}
 
-First of all \ac{LLM}s are not trustworthy. They are often confident in their answers which nevertheless are wrong. This confidence can often be broken by asking subsequent questions which lead the \ac{LLM} to rethink the answer. however, doing this in an automatic way is challenging.
+First of all \ac{LLM}s are not trustworthy. They are often confident in their answers which nevertheless are wrong. This confidence can often be broken by asking subsequent questions which lead the \ac{LLM} to rethink the answer. however, doing this in an automatic way is challenging. \cite{azaria2023internal}
 
-Additionally, \ac{LLM} use randomness in their answers which means that the same query can result in different replies. The factors influencing the reply are generally not known and should not be assumed. As a result, requirements regarding a specific output format may be ignored by the model so that developers using a \ac{LLM} must always consider how to parse non-adhering output. 
+Additionally, \ac{LLM} use randomness in their answers which means that the same query can result in different replies. The factors influencing the reply are generally not known and should not be assumed. As a result, requirements regarding a specific output format may be ignored by the model so that developers using a \ac{LLM} must always consider how to parse non-adhering output.  \cite{hu2023large}
 
 Furthermore, \ac{LLM}s are usually black boxes. They do not give hindsight on how they came to a specific reply. While they can explain their reasoning, it is not possible to check the exact thought process.
-While a query can consist of multiple parts, conditions, or requirements, a \ac{LLM} will not always adhere to all of these. It may weigh some requirements, ignore other, or interpret them wrongly so that the result is unexpected. A \ac{LLM} may also come to an intermediate result that it will not show at the end even though the intermediate result was correct or requested. Also, no sources of the information is provided. 
+While a query can consist of multiple parts, conditions, or requirements, a \ac{LLM} will not always adhere to all of these. It may weigh some requirements, ignore other, or interpret them wrongly so that the result is unexpected. A \ac{LLM} may also come to an intermediate result that it will not show at the end even though the intermediate result was correct or requested. Also, no sources of the information is provided. \cite{chen2023instructzero}
 
-Moreover, \ac{LLM}s do not have access to the latest information about a topic. They cannot access external sources like current news and up-to-date documentation. Instead, they employ a so-called cut-off date. Only information before that cut-off date will be used. As of the time of writing this section, the cut-off date for ChatGPt is April  2023. However, the release was several months later.  
+Moreover, \ac{LLM}s do not have access to the latest information about a topic. They cannot access external sources like current news and up-to-date documentation. Instead, they employ a so-called cut-off date. Only information before that cut-off date will be used. As of the time of writing this section, the cut-off date for ChatGPT is April  2023. However, the release was several months later.  
 
-There are also security issues with using  \ac{LLM} like ChatGPT. If a model is asked to generate or refactor code, one cannot trust that the code is safe to use. As a result of the cut-off date, the code might use operations that are considered deprecated or even unsafe to use because security vulnerabilities have been detected in the meantime. As a result, the developer needs to verify whether the code is safe to use which is another burden. 
+There are also security issues with using  \ac{LLM} like ChatGPT. If a model is asked to generate or refactor code, one cannot trust that the code is safe to use. As a result of the cut-off date, the code might use operations that are considered deprecated or even unsafe to use because security vulnerabilities have been detected in the meantime. As a result, the developer needs to verify whether the code is safe to use which is another burden.  \cite{pearce2021asleep}
 
-Furthermore, it is not out of the question that a malicious attacker might change the query or the reply of a \ac{LLM}. Therefore, using such a model might be a feasible way to hack systems or create damage which is difficult to detect and prevent.
+Furthermore, it is not out of the question that a malicious attacker might change the query or the reply of a \ac{LLM}. Therefore, using such a model might be a feasible way to hack systems or create damage which is difficult to detect and prevent. \cite{not_what_you_signed_for}
 
-Lastly, also costs and capacity considerations needs to be observed. For large projects, a \ac{LLM} might be too costly because  the costs are often dependent on the input size. Therefore, the use of large language models should be adequately prepared so that as many costs as possible can be saved.  
+Lastly, also costs and capacity considerations needs to be observed. For large projects, a \ac{LLM} might be too costly because  the costs are often dependent on the input size. Therefore, the use of large language models should be adequately prepared so that as many costs as possible can be saved.  \cite{chen2023frugalgpt}
+
+
+
 \subsection{Consideration while using large language models}
-In order to use a \ac{LLM} more effectively, the prompts and queries need to be modeled in a specific manner so that they are interpreted correctly. While deviating from these manners may still produce correct results, it nevertheless increases the risk of wrong results. The following tips were derived from the OpenAI documentation \cite{ChatGPT_url} and hence apply only to ChatGPT. Generally speaking. However, many recommendations will work for other \ac{LLM} too because they will help to make the prompt more clearly and prevent misunderstanding:
+In order to use a \ac{LLM} more effectively, the prompts and queries need to be modeled in a specific manner so that they are interpreted correctly. While deviating from these manners may still produce correct results, it nevertheless increases the risk of wrong results. These considerations are  referred to as \textbf{prompt engineering}.
+
+The following tips were derived from the OpenAI documentation \cite{ChatGPT_url} and hence apply only to ChatGPT. Generally speaking, however, many recommendations will work for other \ac{LLM} too because they will help to make the prompt more clearly and prevent misunderstanding:
 
 \subsubsection{Separate instruction and input}
 Many queries to \ac{LLM} include an instruction and an input. For instance, a query to find and refactor data clumps could provide the source code containing the possible data clumps \textbf{(input)}. The instruction could be the query \enquote{Find and refactor all data clumps in this source code}. 
@@ -288,6 +311,23 @@ For instance, a query to find and refactor data clumps can be separated into a d
 This is useful if a human is reviewing the output from a \ac{LLM} since obvious errors can be spotted more easily if the task is divided into multiple steps. However, it is more challenging for an automated tool since it cannot find errors in the same way. 
 
 Furthermore, one should consider that each queries requires further overhead so that the performance might be impacted more negatively. 
+\subsection{Self-hosted large language models}
+
+As an alternative to commercial  \ac{LLM}s projects like ChatGPT, several other models exists. Some of them can be self-hosted.  
+
+Self-hosting means that the user of a \ac{LLM} has to provide for the infrastructure and resources to run and employ the model. For instance, a separate server could be configured that runs a large language model and listens to requests. This server could be directly set up by the user or rented from another organization (e.g virtual private server). 
+
+With this approach, costs can be saved. Instead of being dependent on the price model of OpenAI which can be subject to changes, the user has to pay for the actual costs (e.g. the monthly rent for a server, the power bills, hardware etc). These might amortize after some years but this is not certain.
+
+Moreover, privacy is more preserved since data does not flow to OpenAI but remains in the control of the user. This is especially important in regions with stricter privacy laws (e.~g. European Union).
+
+A self-hosted \ac{LLM} is also more configurable. There a specific models that have been more intensively trained on coding tasks so that the quality of the results can be improved. The models from OpenAI are more generally trained. 
+
+However, this configuration requires effort and time. Finding a suitable model for a task, installing it, and configuring it is not trivial. For instance, a server needs to be set up that  runs the model, reiceives queries (e.~g. over a network) and respond back. 
+
+This server must be suitable equipped. In general, at least 32 GB of RAM are necessary. Also video RAM and storage requirements must be met to gain useful performance. These are requirements that cannot be achieved by some users. 
+
+
 \section{Language Server Protocol} \label{sec:lsp}
 The \ac{LSP}  \cite{lsp_website} is a protocol developed by Microsoft to create a language-independent interface for code-related operations. 
 The \ac{LSP}  describes a server and a client who communicate to each other using the JSON-Remote-Process-Call protocol \cite{json_rpc}. 
@@ -316,7 +356,13 @@ Afterward, the client requests the definition of a method or variable, and the s
 In the end, the client can save the document and notify the server that the document was closed which means that the physical file of the document represents the current version of the document again. 
 
 
+\section{Data clump doctor}
 
+The  \textit{Data Clump Doctor} is NodeJS command line tool developed by Nils Baumgartner in preparation of this master thesis. It employs \textit{PMD} to find all classes, methods, and fields in a Java project to generate an \ac{AST}. This syntax tree is saved as a \ac{JSON}. 
+
+In a second step, the generated \ac{AST} can be loaded again to find data clumps. This multi-step approach results in better performance since the detection of data clumps requires many nested for-loops so that any reduction in data size has a measurable effect on the performance.
+
+All detected data clumps are reported in the format specified in section \ref{sec:data_clump_format}.
 \section{Related Research}\label{sec:related_research}
 The problem of data clump detection and refactoring is addressed in multiple papers. Also the  use of large language models in software development is a fairly recent rearch topic. In this section, research to both topics will be outlined: 
 
@@ -331,7 +377,9 @@ Hall et al. analyzed the impact of code smells (including data clump) on the occ
 
 Murphy et al. \cite{stench_blossom} developed a visual tool to find code smells (including data clumps). the tool named \textit{Stench Blossom} is a plugin for Eclipse. If a plugin user views a file, the tool searches for code smells and displays them at the right side of the eclipse editor. Each code smell is visually displayed as a a \textbf{petal}. The radius of such petal represents the strength of a smell (i.~e. how strongly violates the code smell the given coding guidelines). The petal has a color that indicates how obvious a code smell is. Orange code smells are not very obvious while blue code smells are easy to detect by human beings. Since orange has a closer connection to warnings, it is more easily to perceive so that undetected code smells can be fixed better. Experiments with \textit{Stench Blossom} shows that the median number of code smells detected by humans using the tool increased from 11 to 21. However, data particular for data clumps is not given.  
 
-
+\begin{comment}
+Neto et al. developed an agent-based platform to detect and refactor code smells (including data clumps). The platform uses everal agents that work regularly to fix code smells. Each can obtain norms that describes what code smells it should fix, what conditions 
+\end{comment}
 \subsection{Related to large language models in software development}
 
 White et al. \cite{White2023ChatGPTPP} outline how ChatGPT can be used in software development to improve the worklflow of developers. This includes  exploration of requirements, removing ambiguity in technical specification, or describing source code. The authors suggest specific prompts to elicit a suitable response from ChatGPt.
