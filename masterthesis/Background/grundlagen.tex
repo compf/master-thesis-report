@@ -11,37 +11,46 @@ Different types of code smells can be distinguished \cite{data_clumps_refactorin
 \end{description}
 
 
-One relevant code smell is data clumps. 
 
 \section{Data clumps}\label{sec:data_clump_def}
-The term \enquote{Data Clump} was coined by Martin Fowler as one possible code smell that can occur in source code. He describes data clumps as follows:
+The term \enquote{Data Clump} was coined by Martin Fowler as one possible code smell that can occur in source code. 
+Data clumps can be classified as bloaters because they require a longer signature of a method or a larger class. Especially in the case of methods, one can also classify them as change preventers because if a new parameters are added (e.g. a Z-coordinate in the vector example), many method signatures and their associated calls must be modified. 
+
+Martin Fowlers originally describes data clumps as follows:
 
 \begin{displayquote}
-Data items tend to be like children: They enjoy hanging around together around in groups. Often you will see
+\enquote{Data items tend to be like children: They enjoy hanging around together. Often you'll see
 the same three or four data items together in lots of
-places: fields in a couple of classes, parameters in many
-method signatures. \cite{fowler2019refactoring} 
+places: as fields in a couple of classes, as parameters in many
+method signatures. Bunches of data that hang around together really ought to find a home together.} \cite{fowler2019refactoring} 
 \end{displayquote}
+
 
 This definition is somewhat imprecise. It is not specified whether three or four data items are necessary. Also, \enquote{a couple of classes} and \enquote{in many method signatures} do not define concrete numbers. The author suggests checking whether the removal of one data clump item would have a significant effect on the coherence of the code.
 
 A more precise and algorithmic definition of \enquote{data clumps} is provided by \cite{zhangImprovingPrecisionFowler2008}. They say a data clump can be defined on the field or method-parameter levels. 
-To be a method parameter data clump, a group of at least three variables must appear in multiple methods. Those variables must be duplicated, meaning they share the same name and data type. However, the inner order of the group does not need to be the same. 
+To be a method parameter data clump, a group of at least four variables must appear in multiple methods. Those variables must be duplicated, meaning they share the same name and data type. However, the inner order of the group does not need to be the same. In this master thesis, these data clumps are referred to as \textbf{parameters-to-parameters data clumps}.
 
 These conditions often need to be more relaxed. For instance, methods can be inherited and overridden so that a group of parameters may appear in each derived class, thereby fulfilling the definition of a method parameter data clump. Since (except for the identifiers of the parameters) an overriding method must be the same as the overridden method, they are not considered data clumps.
 
-For field data clumps, similar conditions apply. There must be at least three fields that appear in more than one class, and the names and data types of the variables must be the same, while the inner order may be different. Since in most programming languages, a field can have an additional access modifier (e.g., \textit{private}, \textit{static} etc. ), the access modifier should also be included to determine whether two groups of variables are identical and hence a data clump.  
+For field data clumps, similar conditions apply. There must be at least four fields that appear in more than one class, and the names and data types of the variables must be the same, while the inner order may be different. Since in most programming languages, a field can have an additional access modifier (e.g., \textit{private}, \textit{static} etc. ), the access modifier should also be included to determine whether two groups of variables are identical and hence a data clump.  Data clumps related to field of different classes will be referred to as \textbf{fields-to-fields data clumps}. 
 
-The definition might also need to be more relaxed for both method and field data clumps. The case of two variables, that have the same name but only a partially compatible type, so that a implicit conversion is possible in one way but not the other way (e.g., \textit{int} and  \textit{double}), would be disregarded as a data clump according to the formalized definition. However, some would regard them as a data clump.
+The definition might also need to be more relaxed for both method and field data clumps. The scenario of two variables, that have the same name but only a partially compatible type, so that a implicit conversion is possible in one way but not the other way (e.g., \textit{int} and  \textit{double}), would be disregarded as a data clump according to the formalized definition. However, some would regard them as a data clump.
 
 Also, modification of a variable's identifier might not change its meaning. For instance, typos can happen, or synonyms can be used so that an automatic algorithm might not discover the connection between two variables but requires knowledge of the semantics of the source code. \cite{zhangImprovingPrecisionFowler2008}
+
+Additionally, data clumps can also exist between a method and a class. if at least four fields of a method are similar to the parameters of a method, it can be considered as a data clump. This method could be in the same or in the same or in another class. In the latter case, it should be noted that constructors or similar initialization method can easily be flagged as data clumps because they require similar parameters to existing fields. In the following, these data clumps are referred to as \textbf{parameters-to-fields data clumps}
 
 
 To conclude, the core definition of a data clump is clear. However, this definition still leaves out some edge cases that require a semantic understanding of the source code. 
 
 
 
-In the following, the definition by \cite{zhangImprovingPrecisionFowler2008} will be used. However,  instead of requiring more than three parameters of field for a data clump, more than two are required. The reasons for this change is that also Fowler believes that three variables can be sufficient for a data clump. Additionally due to the looser definition , a higher number of data clumps will be found in a software project which can help to better statistically analyze data clumps. In the end, these are subjective thresholds that are open for discussion. 
+In the following, the definition by \cite{zhangImprovingPrecisionFowler2008} will be used. However,  instead of requiring at least four parameters or fields for a data clump, more than two are required. The reasons for this change is that also Fowler believes that three variables can be sufficient for a data clump. Additionally due to the looser definition , a higher number of data clumps will be found in a software project which can help to better statistically analyze data clumps. In the end, these are subjective thresholds that are open for discussion. The thresholds for fields-to-fields, parameters-to-fields, and parameters-to-parameters should therefore be parameterized.
+
+Listing \ref{lst:company_bill_tax} depicts as an UML-diagram a parameters-to-*parameters data clump. The class \textit{Company} has two methods dealing with financial payments. Both methods  receives three parameters, namely an IBAN, a monetary amount, and a transaction date. While this example is comparably small, there could be more classes and methods in a real-world application that receives these three parameters to perform financial operations. As a result, changing the method signature can be time-consuming. For instance, adding a description to a transaction requires changing all affected method signatures and their associated calls. Also changing the datatype of the monetary value (e.~g. a custom Money class) requires similar changes. Additionally, the readability of these methods might be not ideal as a reader would not know what a \textit{IBAN} is or what currency \textit{amount} represents. These facts must be outlined in the documentation which therefore needs to be duplicated for each method. 
+
+
 
 \begin{figure} [htbp!]
 			\lstinputlisting
@@ -56,11 +65,23 @@ Listing \ref{lst:math_stuff_java} contains three methods that execute some vecto
 It can be seen that the snippet contains a method parameter data clump since the variables \textit{x}, \textit{y}, and  \textit{z} occur thrice.  These variables might be called \textbf{data clump items}
   
 \subsection{Refactoring data clumps}\label{sec:data_clump_refactor}
-Fowler suggests two  steps to refactor a data clump:
+
+There are several approaches for refactoring data clumps. The general approach is always feasible and suggested by Fowler.
+He outlines two  steps to refactor a data clump:
 
 In the  \textbf{Extract-Class}-step, a class with fields for each data clump item is extracted. A class for this purpose might already exist so that it can be re-used.
 
 In the second step, \textbf{Preserve Whole Object} or \textbf{Introduce Parameter Object} might be applied. This means that the method's signature is changed so that the extracted class replaces the data clump items, and all references to the method are changed accordingly.
+
+If the extracted class already exists, it can be challenging to identify such a class. Given a current refactoring process (i.~e. a bot or human being is currently refactoring data clumps), two possibilities can occur. Either it was created during the ongoing refactoring process so that its location and name is known, or such knowledge is missing. The former case is easy to handle.  The latter variant occurs if the extracted class is created after the data clump is introduced but the data clump is not fixed immediately or the extracted class already existed but for some reasons the data clump was introduced. In this case, a suitable extracted class must be identified which requires extensive knowledge of the source code.
+
+Additionally, there could be classes that are a superset of the required fields to refactor the data clump. Suppose a data clump \textit{x}, \textit{y}, \textit{z} needs to be refactored. There could be a extracted class \textit{Vector4D} which has the fields  \textit{x}, \textit{y}, \textit{z}, \textit{w}. One could argue that this extracted class could be used by setting \textit{w} to 0 or some other default value. On the contrary, a 4D vector has different application than a 3D vector so that creating a 3D vector class might be more suitable. 
+
+Another approach for refactoring data clumps is applicable to parameter-to-parameters data clumps in the same class. In this case, the parameters can be extracted to fields and removed from the method signature. This approach only works if the values of the parameters are known when creating instances of the class containing the method. It might also create a temporal  coupling if the fields are modified during the execution of the method, which should be avoided. 
+
+
+In the case of fields-to-fields data clump, introducing a common base class or interface could also help to solve the data clump issue. The new base class contains all data clump items a fields and is inherited by the two classes. Assuming only single inheritance hierarchies are supported, this does not work if at least one class already inherits from another class. In this case, using interfaces instead of classes can partially solve the data clump issue, but the data clump fields still need to be defined for each class.
+
 
 
 To illustrate the suggested data clump refactoring process, listing \ref{lst:math_user_java} shows how the methods in \ref{lst:math_stuff_java} can be used. 
@@ -100,18 +121,30 @@ In the second step, a parameter object is introduced that replaces the three pre
 			captionpos=b,language=java, basicstyle=\footnotesize, tabsize=2, showstringspaces=false,  numbers=left]
 			{figures/chapter2/dataClump/MathUserRefactored.java}
 		\end{figure}
-\subsection{Reasons not to refactor data clumps}
+\subsection{Reasons not to refactor data clumps}\label{sec:data_clump_not_refactor}
 While data clumps are a code smell they might not be worth to refactor. 
 
 One reason for not refactoring data clumps is the tendency of producing data classes. These are classes that only provide access to data but no functionality. By extracting a class as outlined in \ref{sec:data_clump_refactor} the new class has no or scarce additional functionality. These data classes can be also seen as a code smell so that refactoring might not reduce the number of code smells significantly. 
 
-Another problem is the creation of those data classes in calling methods. Suppose a method previously requires three parameters \textit{x}, \textit{y}, and \textit{z}. By refactoring the method, it requires only one parameter of a data class (e.~g. \textit{Point}). Callers of such method have previously provided three arguments, and now have to create an instance of \textit{Point}. As a result, many instances can be created that consume memory and require garbage collection resulting in performance loss. While these effects might be minimal, the effect is more significant on embedded systems or other systems with few resources. 
+Another problem is the creation of those data classes is calling methods. Suppose a method previously requires three parameters \textit{x}, \textit{y}, and \textit{z}. By refactoring the method, it requires only one parameter of a data class (e.~g. \textit{Point}). Callers of such method have previously provided three arguments, and now have to create an instance of \textit{Point}. As a result, many instances can be created that consume memory and require garbage collection resulting in performance loss. While these effects might be minimal, the effect is more significant on embedded systems or other systems with few resources. 
 
-Also over-engineering can be an issue. As noted in \ref{sec:data_clump_def}, one can check the existence of a data clump by testing whether the removal of one parameter would make sense. This however is arbitrarily and no concise criteria can be given. Sometimes a group of parameters are connected but an extracted class would create a layer of abstraction that is unnecessary and makes the code even harder to read. This is particular important if the domain of each of the three variables is so distinctive that a common class name is hard to find. 
+Also over-engineering can be an issue. As noted in \ref{sec:data_clump_def}, one can check the existence of a data clump by testing whether the removal of one parameter would make sense. This however is arbitrarily and no concise criteria can be given. Sometimes a group of parameters are connected but an extracted class would create a layer of abstraction that is unnecessary and makes the code even harder to read. This is particular important if the domain of each of the three variables is so distinctive that a common class name is hard to find.
+
+\subsection{Representation of data clumps}\label{sec:data_clump_graph}
+
+Data clumps can be represented as a graph, so that clusters or pattern can be detected to further evaluate whether a specific data clump is worth refactoring. 
+
+For instance, a graph can be constructed that contains nodes for each class and additionally each method in the software project. If two methods form a data clump, they are connected by an edge in the graph representation. Similarly, two classes connected by an edge if there is a data clump relationship, or a class and a method   
+
+Another approach is proposed by Baumgartner et al. Here, only the classes that contain data clumps are represented as nodes, and two nodes are connected by an edge if there is a data clump relationship between those two classes. For instance, an edge exists if a method in one class and another method in a separate class are part of a parameters-to-parameters data clump. \cite{data_clumps_baumgartner}.
+
+
+
+
 \clearpage
 \subsection{ Data clumps Type Context }\label{sec:data_clump_format}
 
-The \textbf{Data clumps Type Context} \cite{dataclump_type_context} is developed by Baumgartner et al. to establish a standard for reporting data clumps.
+The \textbf{Data clumps Type Context} \cite{dataclump_type_context} is developed by Baumgartner et al. to establish a standard for reporting data clumps. It employs the first graph representation mentioned in section \ref{sec:data_clump_graph}.
 
 An example of the Data clump type context can be seen in listing \ref{lst:data_clump_type_context_example}. Only a subset of the format will be discussed here for space reasons.
 
@@ -140,11 +173,35 @@ In lines 19-42, each variable that is part of the data clump is described. Here,
 In order to find the variable in the source code, detailed location information is needed. Parts of the location information are, the line number (l.~32 and l.~39) and the column number (l.~33 and l.~40). To avoid any ambiguity, the end position of the variable is saved, too. All numbers are one-index-based, meaning that the first line is one and the first column is also one. 
 
 
-\section{ChatGPT and other large large language models}\label{sec:chatgpt}
+\section{ChatGPT and other large large language models}
+
+The term \enquote{large language models} refers to a machine learning model that can generate and understand texts in an all-purpose manner. 
+
+A \ac{LLM} is trained on a large data set of texts. These texts can come from books, internet pages or other textual sources. The input data is then prepared and sanitized to avoid biases and factual errors.
+
+
+Then, the training process is performed. By word embedding, the relationship between words is trained such that the model learns the semantic relationship between words. For instance it can learn that cats are animals  or that there is a relationship between men and women. This relationship can be represented as vectors so that for example the relationship \enquote{men to women} can be applied to the term \enquote{king} which results in \enquote{queen}.
+
+Which this training, the model is able to generate coherent texts based on an input that attempts to satidfy any query
+
+
+For instance, given the text \enquote{How are}, the model  has a access to a corpus of texts where this sentence ends with \enquote{you} so that it is likely to finish the sentence with this word. 
+
+To improve these results, fine tuning is performed. For instance, humans are asked to evaluate the outputs of a \ac{LLM} so eventual errors can be corrected or the model performs better for specific tasks.
+
+
+
+Since source code can be viewed as a language, the methods can be applied too. However, specific fine-tuning is needed as source code  has a stricter syntax and a different data set(e.~g. public source code repositories).
+
+It should be noted that a \ac{LLM} still has no sentience. Even if it seems to produce clear and meaningful output, it is still not aware of the inherent meaning. This can result in logical and confident output that is nevertheless wrong. \cite{Amaratunga2023}
+
+\subsection{ChatGPT}
+\label{sec:chatgpt}
+
 
 ChatGPT \cite{ChatGPT_url} is a \ac{LLM} developed by OpenAI and released in November 2022. As a \ac{LLM}, ChatGPT can interpret user queries and return an appropriate response. 
 
-A query can be a question or a prompt directing ChatGPT to answer a question or provide some output. The range of topics ChatGPT can help with is basically unlimited. For instance, ChatGPT can help with math, history, politics, or coding topics. ChatGPT can also understand programming language and therefore, help developers to code. Since September 2023, ChatGPT can also process images \cite{ChatGPT_image}. However, it must be noted that ChatGPT may not always provide accurate responses since it is, in the end, just a language model without knowledge about the inherent meanings of its responses. 
+A query can be a question or a prompt directing ChatGPT to answer a question or provide some output. The range of topics ChatGPT can help with is basically unlimited. For instance, ChatGPT can help with math, history, politics, or coding topics. ChatGPT can also understand programming language and therefore, help developers to code. Since September 2023, ChatGPT can also process images \cite{ChatGPT_image}.  
 
 The usage of ChatGPT is nevertheless somewhat restricted. For instance, content regarded as hate speech or used for illegal purposes will be suppressed.
 
@@ -168,10 +225,10 @@ In order to use the ChatGPT \ac{API}, a user has to create an OpenAI account and
 
 A token is the smallest unit used by ChatGPT to process a query. For instance, a token could be one english word, a syntactical part of a programming language, a number, or a similar independent part of a query. According to OpenAI, a token is 3/4 of a word, so 100 tokens are about 75 words. However, this is just an estimate for natural language texts in the English language. 
 
-The \ac{API} itself used JSON combined with HTTPS. For the purpose of this master thesis, only a subset of the available means to use the \ac{API} will be explained because the whole \ac{API} would be too complex and irrelevant. 
+The \ac{API} itself used JSON combined with \ac{HTTP}. For the purpose of this master thesis, only a subset of the available means to use the \ac{API} will be explained because the whole \ac{API} would be too complex and irrelevant. 
 
 \subsubsection{Query}
-Listing \ref{lst:chatgpt_api} shows how an \ac{API} query may look like if it used via \textit{curl} which is a tool perform HTTP requests:
+Listing \ref{lst:chatgpt_api} shows how an \ac{API} query may look like if it used via \textit{curl} which is a tool to  perform \ac{HTTP} requests:
  \begin{figure} [htbp!]
 			\lstinputlisting
 			[caption={ Example query to ChatGPT  \cite{ChatGPT_url}},
@@ -181,7 +238,7 @@ Listing \ref{lst:chatgpt_api} shows how an \ac{API} query may look like if it us
 		\end{figure}
  
 
-Since ChatGPT uses \ac{JSON} for communication, the content header of HTTP  must be set to \enquote{application/json} (l. 2). Afterwards a token must be provided to ChatGPT (l. 23). This  token must be generated on the OpenAI website and will be used to connect the query to an OpenAI account so that the user can be charged properly- The token should remain secret and may not be disclosed (e.~g. via \ac{VCS}) 
+Since ChatGPT uses \ac{JSON} for communication, the content header of \ac{HTTP}  must be set to \enquote{application/json} (l. 2). Afterwards a token must be provided to ChatGPT (l. 23). This  token must be generated on the OpenAI website and will be used to connect the query to an OpenAI account so that the user can be charged properly- The token should remain secret and may not be disclosed (e.~g. via \ac{VCS}) 
 
 Then, the actual query is defined (l. 4-24.). Firstly, the model is defined (l. 5). OpenAI provides multiple models that have different advantages and disadvantages. For instance, a newer model like \textit{gpt-4} has more capabilities but is more expensive. 
 
@@ -323,10 +380,36 @@ Moreover, privacy is more preserved since data does not flow to OpenAI but remai
 
 A self-hosted \ac{LLM} is also more configurable. There a specific models that have been more intensively trained on coding tasks so that the quality of the results can be improved. The models from OpenAI are more generally trained. 
 
-However, this configuration requires effort and time. Finding a suitable model for a task, installing it, and configuring it is not trivial. For instance, a server needs to be set up that  runs the model, reiceives queries (e.~g. over a network) and respond back. 
+However, this configuration requires effort and time. Finding a suitable model for a task, installing it, and configuring it is not trivial. For instance, a server needs to be set up that  runs the model, receives queries (e.~g. over a network) and respond back. 
 
 This server must be suitable equipped. In general, at least 32 GB of RAM are necessary. Also video RAM and storage requirements must be met to gain useful performance. These are requirements that cannot be achieved by some users. 
 
+\subsubsection{Hosting a large language server}
+
+One method to host a \ac{LLM} is via \textit{Ollama} \cite{ollama}. Ollama is a program to download, configure, and host a local \ac{LLM}. Users can set up a large language model with one command and query the model via the command line or a \ac{HTTP} interface.
+
+After installing Ollama, a user can use the command \textit{ollama pull <model>} to download a compatible model. The list of compatible models is provided on the official website \cite{ollama}. Each model can be used for general task but they are also specialized in specific task. For instance, the \textit{Llama2} model is specialized for human interaction while the \textit{Codellama} is specialized for discussing and generating source code. The \textit{Phind CodeLlama} model is based on the Codellama model and is focused more on the code generation task. 
+
+After a model has been downloaded, a user can execute the command \textit{ollama run <model>} to submit queries 
+
+Similar to to ChatGPT, there is an \ac{API} to integrate Ollama in other application. After installed, Ollama listens to \ac{HTTP} connections  on localhost and port 11434.
+
+Listing \ref{lst:ollama_request} shows how such an \ac{API} can be used via \textit{curl}.
+
+The difference to the ChatGPT \ac{API} are scarce. In contrast to ChatGPT, there is no header for an authorization token because no direct payment to any organization is needed. 
+
+Additionally, Ollama streams replies by default meaning that not the full response is returned at once but multiple response parts that must be aggregated by the user. As this is not useful in the context of this master thesis, it is disabled by setting stream to false (l. 11).
+
+Moreover, another model is used (l.~4) as the ChatGPT models are not available. 
+
+
+ \begin{figure} [htbp!]. 
+			\lstinputlisting
+			[caption={ Example query to ChatGPT  \cite{ChatGPT_url}},
+			label={lst:ollama_request},
+			captionpos=b,language=json, basicstyle=\footnotesize, tabsize=2, showstringspaces=false,  numbers=left]
+			{figures/chapter2/ollama/ollama_request}
+		\end{figure}
 
 \section{Language Server Protocol} \label{sec:lsp}
 The \ac{LSP}  \cite{lsp_website} is a protocol developed by Microsoft to create a language-independent interface for code-related operations. 
@@ -356,7 +439,14 @@ Afterward, the client requests the definition of a method or variable, and the s
 In the end, the client can save the document and notify the server that the document was closed which means that the physical file of the document represents the current version of the document again. 
 
 
-\section{Data clump doctor}
+\section{PSI}\label{sec:psi}
+The Program Structure Interface provided by IntelliJ is an \ac{API} to analyze projects that IntelliJ can load. As a result, the various classes, methods etc. can be obtained which allows for the detection of data clumps. Also modifications are possible so that data clumps can be refactored.
+
+In order to use this API, an instance of IntelliJ must be started. IntelliJ can be started in a headless mode to reduce loading times and improve the performance so that no GUI is initialized. Nevertheless, IntelliJ requires many resources and much overhead, so that  the initialization needs some time.
+
+
+
+\section{Data clump doctor} \label{sec:data_clump_doctor}
 
 The  \textit{Data Clump Doctor} is NodeJS command line tool developed by Nils Baumgartner in preparation of this master thesis. It employs \textit{PMD} to find all classes, methods, and fields in a Java project to generate an \ac{AST}. This syntax tree is saved as a \ac{JSON}. 
 

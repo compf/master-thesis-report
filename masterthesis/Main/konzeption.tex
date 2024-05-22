@@ -10,7 +10,8 @@ This chapter deals with the concept of the program. It provides information abou
 \section{Pipeline}\label{sec:pipeline}
 In order to find and refactor data clumps automatically, a particular sequence of steps \textbf{(pipeline)} has to be respected. Most steps of this sequence must be in a specific order because they rely on information extracted in a previous step, or the quality of the results (which might be needed by subsequent steps) would worsen.
 
-Each step of the pipeline is performed by a  \textbf{Handler}. A handler might handle one or more steps.  Each handler has information about what steps of the pipeline it supports and  a handler can be registered to a pipeline step if it supports the particular step.  
+\subsection{Structure of the pipeline}
+Each step of the pipeline is performed by a  \textbf{handler}. A handler might handle one or more steps.  Each handler has information about what steps of the pipeline it supports and  a handler can be registered to a pipeline step if it supports the particular step.  
 
 Since a service-based approach is used, a handler can be seen as a gateway to a different program or service that performs the specific functionality.  The handler and the respective service are tightly coupled. While a handler could deal with multiple services, it is not required by the design, and requires special care. Nevertheless, it recommendable to write the handler as abstract as possible.
 \begin{figure}
@@ -25,7 +26,7 @@ Figure \ref{fig:solver_gateway_service_overview} illustrates how the service-bas
 \begin{enumerate}
     \item The program developed in this master thesis \textbf{(main program)} executes one step (e.g. finding a suitable class name)
     \item The handler registered to that step is used. It is provided with the current context containing the results from previous steps.
-    \item The handler starts or employs a specific service. This service might be dependent on the current step or might be constant. The gateway knows how to start or use the service and sends all relevant information to the service (e.g. via files, network streams etc.) 
+    \item The handler starts or employs a specific service. This service might be dependent on the current step or might be constant. The handler knows how to start or use the service and sends all relevant information to the service (e.g. via files, network streams etc.). 
     \item The service processes the requests submitted by the handler. For instance, ChatGPT can suggest a suitable class name. The service might be outside of the control of the developer. For example, it might be programmed in a different programming language or the source code might not be available. At some point it will create a response and send it back to the handler. 
     \item The handler reads the response and processed it. It then creates a new context based on the previous context and the response from the service. 
     \item The new context is returned to the program and can be used for successive steps (e.~g. the suggested name can be used for creating a respective class) 
@@ -47,7 +48,7 @@ Both approaches have their advantages. In the choreography architecture, there i
 
 On the other hand, the orchestrator architecture is easier to control and debug. It easier to configure and to implement. Nevertheless, the coupling to each gateway is stronger because each gateway must be known by by the main program. Additionally, the main program is a single point of failure. If there is a problem with the main program, the data clump refactoring cannot proceed as every step requires coordination with the orchestrator. Also the overhead should be considered because the orchestrator will need to act multiple time to process responses and generate new requests for the next gateway. This becomes more important if services are not local but are accessed using the internet or the local network, which causes more overhead. \cite{orchestration_choreography}
 
-\section{Pipeline steps}\label{sec:pipeline_steps}
+\subsection{Pipeline steps}\label{sec:pipeline_steps}
 In the following subsections, the steps of the pipeline will be outlined. For each step, there is a discussion on why this step is noteworthy to consider and what points are important when implementing the step.
 \subsubsection{Code obtaining}\label{sec:code_obtaining}
 Data clumps can only be found if access to the source code is given. This requires that the source code is available in some location and that the location is known.
@@ -58,7 +59,7 @@ However, there might be more complex cases. For instance, the source code could 
 \subsubsection{Detecting data clumps}\label{subsec:chap3_data_clump_detection}
 It is easily agreeable that data clumps can only be fixed if found previously. Therefore, one of the first steps of the pipeline must be the detection of data clumps. 
 
-The data clump detection process itself can be further divided into the sub-steps filtering, AST generation, similiarity detection, data-clump detection, and data clump filtering.
+The data clump detection process itself can be further divided into the sub-steps filtering, \ac{AST} generation, similarity detection, data-clump detection, and data clump filtering.
 \subsubsection{Filtering}\label{subsub:filtering_files}
 First of all, all programming language files need to be detected. Usually, there are specific file extensions (e.g., \textit{.java}) for a source code file, simplifying the finding of files. It is also common for software projects to have a root folder that contains all source code files. Therefore, one can recursively iterate through all files and directories of a given root folder with a matching extension. 
 
@@ -84,7 +85,7 @@ In the case of field data clumps, we also have to consider the worst case, namel
 
 A subsequent refactoring of these fields is more complicated than that of less accessible fields because they might be used by external programs or libraries that are beyond the control of the developer, which might induce bugs or non-compilable software. 
 
-One can argue that refactoring should never affect the public interface since the issues as mentioned earlier can occur \cite{10.1145/1352678.1352681}.
+One can argue that refactoring should never affect the public interface since the issues as mentioned earlier can occur \cite{10.1145/1352678.1352681  }.
 
 On the other hand, one can argue that those changes are still significant because they can improve readability, and the source code may be in the early stages to make such breaking changes feasible. 
 
@@ -150,7 +151,7 @@ Disadvantageously, this may only be effective if the project is correctly config
 
 As another optional step, one might evaluate the effectiveness and efficiency of the data clump refactoring. For instance, one could execute the data clump detection process again to determine how many data clumps are fixed in comparison to the first iteration. 
 
-Another metric for the evaluation could be the running time. A substantial running time of the refactoring can slow down the development process and cause the program not to be used again for future iterations. It could also be useful to anaylze the running time for each individual step so that handlers that require too much time or resources can be detected and later not be used. 
+Another metric for the evaluation could be the running time. A substantial running time of the refactoring can slow down the development process and cause the program not to be used again for future iterations. It could also be useful to analyze the running time for each individual step so that handlers that require too much time or resources can be detected and later not be used. 
 
 \subsubsection{Committing}
 
@@ -240,23 +241,8 @@ One could argue that the context should contain information about the location o
 The validation step context requires at least information about whether the validation is successful (i.~e. no compiler errors occur and all unit tests pass). 
 
 In case of a failed validation, one might need more information. For instance, it is helpful to know which unit test fails or on which line the code fails to compile. In many cases, modern build tools like \textit{Gradle} already acquire these data so they can be easily obtained. 
-\begin{comment}
-
-\section{Pipeline execution example}
-Listing \ref{lst:math_stuff_java} will be used as the foundation to describe a detailed approach for fixing data clumps.
-
-Looking at the parameters \textit{x}, \textit{y}, and \textit{z}, there are multiple suggestions for a class name. The most trivial one is a simple concatenation  (e.g., \textit{XYZ} or \textit{X\_Y\_Z}). However, this name is often not suitable as it can be hard to read and to understand its meaning.
-
-A more suitable approach requires domain knowledge. It is common knowledge that the terms \textit{x}, \textit{y}, and \textit{z} are terms used in math to describe coordinates. Using this information, a fitting name could be \textit{Coordinate}. Simple methods would not have discovered this name as artificial or human intelligence is required. 
 
 
-
-Since a suitable class name has been found, the following class can be created using previously obtained information. 
-
-Listing \ref{lst:coordinate_java} shows an example implementation of a coordinate class. This class contains fields, getters, and setters for all method parameters. There is also a constructor for initialization. This respects Fowler's opinion that the extracted class should not be a mere data class but a functional class that can be easily extended and modified.
-
-
-\end{comment}
 \section{Pipeline execution order}\label{sec:pipeline_exec_order}
 
 Another issue to analyze is the pipeline execution order. This should not be confused with the pipeline step execution order. The latter is simply the order of the different steps (e.~g. code obtaining before data clump detection). 

@@ -1,0 +1,12 @@
+curl http://localhost:11434/api/chat
+  -H "Content-Type: application/json" \
+-d '{
+  "model": "codellama",
+  "messages": [
+    {
+      "role": "user",
+      "content": What is 1+1?"
+    }
+  ],
+  "stream": false
+}'

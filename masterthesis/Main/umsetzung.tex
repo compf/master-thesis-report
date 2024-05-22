@@ -4,13 +4,13 @@
 \renewcommand{\clearpage}{}
 \chapter{Implementation}\label{chapter:implementation}
 \endgroup
-In this chapter, the theoretical thoughts of chapter \ref{chapter:conception} will be implemented. Firstly, in section \ref{sec:config}, the configuration of the tool is explained. After that experiments are performed in order to find out how ChatGPT can be integrated for data clump finding ( see section \ref{sec:prompt_engineering_impl}). In section \ref{sec:step_impl} an overview will be given which combination of tools can be used together to find and refactor data clumps and the limitation and strengths of each combination will be outlined. 
+In this chapter, the the design choices and considerations discussed in chapter \ref{chapter:conception} will be implemented. Firstly, in section \ref{sec:config}, the configuration of the tool is explained. After that experiments are performed in order to find out how ChatGPT can be integrated for data clump finding ( see section \ref{sec:prompt_engineering_impl}). In section \ref{sec:step_impl} an overview will be given which combination of tools can be used together to find and refactor data clumps and the limitation and strengths of each combination will be outlined. 
 \section{Configuration}\label{sec:config}
 An important aspect for the usability of the tool is the possibility to configure the tool for the user's need. 
 
 Since the goal of the tool is to allow the combination of multiple services and other tools in order to find and refactor data clumps, the user must be able to define which handler deals with which step (see section \ref{sec:pipeline}).
 
-The configuration is provided by a \ac{JSON} file whose location needs to be provided to the tool via a command line argument. It might be argued that providing the configuration directly via the command line is better suited than a separate configuration file because they do not require the creations of files and are easier for users who start the tool just once. Nevertheless, configuration files are persistent and escpecially \ac{JSON} can be more easily structured so that they are easier to understand. As a result, only \ac{JSON} files will be used  for the configuration. 
+The configuration is provided by a \ac{JSON} file whose location needs to be provided to the tool via a command line argument. It might be argued that providing the configuration directly via the command line is better suited than a separate configuration file because they do not require the creations of files and are easier for users who start the tool just once. Nevertheless, configuration files are persistent and especially \ac{JSON} can be more easily structured so that they are easier to understand. As a result, only \ac{JSON} files will be used  for the configuration. 
 
 
 Listing \ref{lst:config} shows an example configuration file:
@@ -44,17 +44,34 @@ With this approach, a looser coupling can be achieved. The main program and the 
 \section{Data clump filtering approaches}
 \label{sec:data_clump_filtering}
 
-As noted in section \ref{sec:pipeline_steps}, data clump filtering can be used to reduce the data size of the refactoring process and only refactor those data clumps that are worthy to refactor. In the following list, there  are some approaches to filter out data clumps:
+As noted in section \ref{sec:pipeline_steps}, data clump filtering can be used to reduce the data size of the refactoring process and only refactor those data clumps that are worthy to refactor. Two concepts to  reduce the number of data clumps can be distinguished.
 
-\begin{itemize}
-    \item Filter out if a data clumps occur more than a given threshold (e.g. the fields \textit{x}, \textit{y}, and \textit{z} occur mor than 4 times across the code. 
+In the filtering approach, a binary condition is tested on each data clump individually. if the data clump does not meet the criterion, it is removed from further consideration. For instance, all data clumps that have only three variables can be filtered out. 
+The following list presents some criteria for filtering data clumps
+\begin{enumerate}
     \item Ignore interfaces or abstract classes as there is a risk that the refactoring will be incomplete because the source code of derived classes or classes implementing the interface is not available. 
-    \item  Filter out if the data clumps appears in less or more than \textit{n} files
-    \item Choose randomly with a given probability whether to filter out a data clump
-    \item filter out methods with only three parameters or classes with only three fields because these methods are short enough or the number of fields is not too large. 
-\end{itemize}
 
-Whether any filter method is suitable for a project is an open research topic which this master thesis does not attempt to solve. 
+    \item Choose randomly with a given probability whether to filter out a data clump
+    \item Ignore data clumps with specific annotation such as \enquote{@injected} because they are filled via dependency injection thereby complicating refactoring.
+ 
+\end{enumerate}
+
+In the ranking approach, each data clump is scored using a metric. Then, the data clumps are sorted based upon their score in a descending order. Finally, the first  \textit{n} data clumps are retained while the remaining data clumps are filtered out. With this ranking approach only important data clumps are retained. The importance of a data clump is determined by a metric, and the \enquote{survival} of a data clump depends on whether other data clumps with better scores exists.
+
+In the following list, some metrics for scoring a data clump are explained
+
+\begin{enumerate}
+
+    \item The number of occurrences of data clump. For instance, if there is a data clump with the variables \textit{x}, \textit{y}, and  \textit{z}, it is counted how many methods have these parameters and how many classes have these fields
+
+     \item The number of data clump items. For instance, the \enquote{xyz}-data-clump has three data clump items.
+     
+    \item The number of affected files. Every file that is affected by a data clump. This includes the location of the data clump and also the files where methods and fields that are part of the data clump are references because these files must also be changed if the data clump is refactored. 
+    
+\end{enumerate}
+
+Note that any metric mentioned can also be used by a bianry filter. For instance, one can filter out data clumps that have only three items.
+Whether any filter or metric method is suitable for a project is an open research topic which this master thesis does not attempt to solve. 
 
 
 
@@ -68,6 +85,9 @@ Whether any filter method is suitable for a project is an open research topic wh
 
 
 \section{Extent of large language model integration}
+
+A major part of this master thesis is the question how well \ac{LLM} can be integrated into the data clump  detection and refactoring process. Several extends to such integration exists which will be discussed in the following subsections. 
+
 \subsubsection{No Large language model integration}
 
 The most basic approach to refactor data clumps automatically is by using no \ac{LLM} as if they do not exists. This is the only working approach if the use of  \ac{LLM} is forbidden or too costly. The tools described in section \ref{sec:implementation_tools} are used to perform the detection and refactoring of data clumps. 
@@ -98,7 +118,7 @@ In a multi-shot approach, the model is asked to find data clumps and only then a
 
 \section{Prompt engineering ChatGPT for data clump detection and refactoring}\label{sec:prompt_engineering_impl}
 
-As outlined in  section \ref{sec:llm_challenges}, using \ac{LLM} can result in some challenges for refactoring code. Therefore, experiments are needed to test which input can lead to good results for finding or refactoring data clumps or both. These experiments should not be seen as a replacement for the full evaluation discussed in chapter \ref{chapter:eval}, but a mandatory prerequisite to save costs since the full evaluations needs to be performed on a larger set of projects.
+As outlined in  section \ref{sec:llm_challenges}, using \ac{LLM} can result in some challenges for refactoring code. Therefore, experiments are needed to test which input can lead to good results for finding or refactoring data clumps or both. These experiments should not be seen as a replacement for the full evaluation discussed in chapter \ref{chapter:eval}, but a mandatory prerequisite to save costs since the full evaluations needs to be performed on a more numerous set of larger projects.
 
 The following scenarios of ChatGPT are addressed:
 \begin{enumerate}
@@ -128,6 +148,41 @@ The input project is a modified version of the source code discussed in \ref{sec
     \label{tbl:javaTest_data_clumps}
 \end{table}
 
+Integrating large language models into the pipeline requires special attention. As the \ac{LLM} is a special service that resides outside of the domain of the pipeline, all required information must be submitted to it and any context not provided to the model is not available for consideration. The way such context is worded or submitted to the model has a great impact on the quality of the results.
+
+Additionally, there are many models available that have been trained on general or fine-tuned  tasks. Selecting the right model for a specific task is not trivial. 
+
+These parameters can be subsumed as the configuration of the \ac{LLM} as they should be changeable by the user. 
+
+Therefore, experiments should be conducted to ascertain what model is useful for data clump detection and refactoring and how the information for the model is structured.  
+
+Four groups of configuration options can be distinguished:
+\begin{enumerate}
+    \item The prompt including the manner the term \enquote{data clumps} is conveyed to the model
+    \item How to process the source code of the project under analysis to the \ac{LLM}
+    \item The manner the LLM is prompted to output its results
+    \item model specific parameters like the choice of the model itself and parameters like the temperature
+\end{enumerate}
+
+The first three options are inter-related. Changing the type of input the LLM is confronted with or the output format requires a change of the prompt in order for the LLM to understand what to do. The template system discussed in section \ref{sec:llm_msg_structure} simplifies the prompt building because the prompts for explaining the input format, output format, and the other relevant context can be separated.
+
+The several configuration options are as follows
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\begin{comment}
 In this section, the results of some of these experiments will be discussed.  As repeatedly noted, these experiments are not always reproducible and therefore are only to some extent helpful. In all cases, ChatGPT is asked to output in \ac{JSON} to have a consistent format.
 
 In each experiment, different parameters of the input are adjusted. Each these parameters has an influence of the quality of the output:
@@ -139,7 +194,7 @@ In each experiment, different parameters of the input are adjusted. Each these p
     \item Data size
     \item Temperature
 \end{itemize}
-
+\end{comment}
 \subsubsection{Instruction}\label{sec:llm_instruction}
 The instruction is a main part of a prompt to ChatGPT or other \ac{LLM}. It tells the  \ac{LLM} what to do and how to respond. As a result, varying the instruction is an important part of prompt engineering. \newline
 
@@ -181,6 +236,16 @@ On the other hand, the costs per 1000 tokens is  \$0.003 for GPT-3-Turbo whereas
 
 Additionally, there are  stricter limits for using GPT-4. For instance, only 500,000 tokens can be sent per day, and 150,000 tokens can be sent per minute. In contrast, GPT-3-Turbo has  lower values for token per minutes but no  token per day limit.  ¸\cite{chatgpt_limits}
 
+\subsubsection{Output format}
+ Similar to the input format, a model can also be configured to format its output. If the content of full files is provided, the model can  apply the required refactoring on the file and return the refactored files. This however requires transmitting the full file content nearly twice which induces costs and resource usage. It can lead to small errors if parts of the source code that have nothing to do with data clumps are changed even though there was no reason to do so. The \ac{LLM} being a probabilistic model cannot prevent such small mistakes. Additionally some \acs{LLM} have a maximal output size which prevents them from outputting large files or many small files.
+
+ An alternative approach is similar to the related input approach. The model is instructed only to return those lines that have been changed. These changes can be applied to the file by a pipeline handler without the help of the \ac{LLM}. However, the model must provide some context of where the changes should be applied. For instance, the model can return the line number for the changes. This can cause problems if the  line number must be determined by the model because the line number might be not up-to-date if previous changes created new new-lines, or the LLM starts counting the lines at the wrong location.
+
+ Alternatively, the LLM could return the old content of each line. Then every occurrence of the old content can be replaced by the new content. Based on heuristic assumption that if the text \textit{t} appears multiple times and is suggested to be changed by the \ac{LLM}, it can be replaced everywhere in this file. 
+
+ Combining both approaches further helps to increase the accuracy, as the handler can check whether the content at the line number matches the old content returned by the LLM.  
+ 
+
 \subsubsection{Data format}
 
 After creating a instruction, ChatGPT cannot do much because it does not have access to the source code which must be provided to ChatGPT. Therefore, the next part of the prompt is some representation of the source code
@@ -195,7 +260,7 @@ On the other hand, the \ac{AST} can be provided. The \ac{AST} only contains a re
 In case ChatGPT should also perform the refactoring, the \ac{AST} becomes not as useful. Refactoring data clumps always include updating method calls or variable usages which might not be available in the \ac{AST}. One could submit the \ac{AST} and the source code so that ChatGPT uses the \ac{AST} for detecting and the source code for refactoring, but this creates more costs and whether it may worsen the quality is an open question as ChatGPT needs to process more data and create a connection between source code and \ac{AST}.
 \subsubsection{Data size}
 
-The size of the data is the amount of data that is submitted during a single request. Here also two approaches are tested.
+The size of the data is the amount of data that is submitted during a single request. Here three approaches are tested.
 
 In the first approach, the full project is submitted to ChatGPT to find data clump while in the second pairs of files are transmitted which each pair of file being a separate independent request.
 
@@ -205,6 +270,9 @@ In the second approach, pair of files are transmitted to ChatGPT with an instruc
 This means that every request only contains the instruction and the content of the two files. Therefore, ChatGPT can only find data clumps only in those two files and in no others as it has no memory of previous prompts. One might think that this approach is cheaper, however, if one still wants to find data clump in the whole software project, he has to to transmit $\binom{n}{2}=0.5*n*(n-1)$ where $n$ is the number of relevant files. Therefore, the cost can be much higher than transmitting each file only once as in the first approach.
 
 Additionally, each file could be sent again separated in order to find data clumps that exists in a single file and might not be detected if two files are provided so that the total number of files would be $0.5*n*(n-1)+n$.
+
+
+Another approach is not to sent full file contents but only code snippets that contain source code. Each snippet of code so provided is related to a data clump. It can be the method declaration of a data clump an associated method call, a field definition, or a variable usage. By providing only these lines, many irrelevant lines of code can be omitted. The caveat of this idea that the data clumps  and their usage must be known already in order to find those snippets of code. Therefore, this method only works in limited circumstances.
 
 \subsubsection{Temperature}
 As outlined in section \ref{sec:chatgpt}, the temperature is a significant parameter that controls the randomness of the \ac{LLM} output. A high temperature indicates that the response by ChatGPT is more random and unpredictable, while a low temperature results in more consistent responses.
@@ -230,9 +298,17 @@ The issue  with follow-up prompts is how often should a prompt be repeated. Each
 
 \subsection{Results of the experiments}\label{sec:initial_experiments}
 
-The results of the experiments are now described. Each parameter configuration tested three times. While more repetitions would be better for more valid results, this is nevertheless a small experiment whose goal is to find good and bad ChatGPT configurations. 
+The results of the experiments are now described. Each parameter configuration is tested three times. While more repetitions would be better for more valid results, this is nevertheless a small experiment whose goal is to find good and bad ChatGPT configurations. 
 
-The following are the mein conclusion of the experiment:
+The results are evaluated by comparing them to a ground truth. In the case of the data clump detection-only experiment, it is determined how often a detected data clump appears in the ground truth (specificity) and how often a ground truth data clump is detected (sensitivity).
+
+In the data clump detection and refactoring experiment (3), the comparison to a ground truth is more difficult because ChatGPT has more flexibility with regard to naming, formatting, or other refactoring activities. To overcome this, a heuristic is used that count errors. Initially it is tested whether the refactored source compiles. If it does not compile, ChatGPT has made a huge error and the comparison fails.
+
+If it does compile, for each method and class, the best fitting method or class from the ground truth is determined and then tested how close it is to the ground truth. For instance, each refactored method should now have only one parameter. it is also tested whether all (two) extracted classes exists and whether  they have all required fields. This approach has some disadvantages. Especially if ChatGPT decides to refactor more than the data clumps, the finding of equivalent method or classes is more error-prone and can lead to more negative results. 
+
+As the the size of the experiment is limited, only a qualitative analysis of the results is performed. The full results of the experiments are available int the digital appendix. 
+
+The following are the main conclusion of the experiment:
 \begin{itemize}
 \item \textbf{Regarding data clump detection}
 \begin{itemize}
@@ -259,37 +335,34 @@ The following are the mein conclusion of the experiment:
 As already noted, the results should be interpreted cautiously because the project size is small. Nevertheless, some observations can be made:
 
 \begin{itemize}
-\begin{comment}
     \item Use examples for data clump as the instruction format as they seem to produce better results
     \item Use a high temperature which allows for more creativity and apparent better results
     \item If possible (given the higher costs) use GPT-4
     \item Whether all files or pair of files should be transferred is difficult to say and the impact is difficult to determine. 
-    \end{comment}
     \item The accuracy of ChatGPT detecting and replacing data clumps at the same time is better than expected. However, there is a risk of creating non-compilable source code
     \item finding data clumps only, leads to worse accuracy
 \end{itemize}
 These result can be explained that detecting and refactoring data clumps is more \enquote{natural} task than just detecting data clumps. No specific format needs to be used that ChatGPT must understand and apply. This shows that combining ChatGPT with other services can work but the best results are obtained by performing the complete detection and refactoring process by ChatGPT alone. 
 
-It is interesting that providing a data clump definition worsens the results. On explanation for this observation could be that the definition of this master thesis conflicts with other definitions known by ChatGPT.
+It is interesting that providing a data clump definition worsens the results. On explanation for this observation could be that the definition of this master thesis conflicts with other definitions known by ChatGPT or that the definition is not precise enough.
 
 \section{Implementation of tools (excluding large language models} \label{sec:step_impl}
 
+\subsubsection{Data Clump Doctor}
 
-\subsection{IntelliJ}
-The Program Structure Interface provided by IntelliJ is an \ac{API} to analyze projects that IntelliJ can load. As a result, the various classes, methods etc. can be obtained which allows for the detection of data clumps. Like the ChatGPT approach, it can be easily extended to refactor the data clumps.
+The data clump doctor introduced in section \ref{sec:data_clump_doctor} is used for detecting data clumps. As it is developed in Typescript and uses the data clump type context format discussed in section \ref{sec:data_clump_format}, it can be easily integrated into the pipeline so that the handler directly calls the relevant methods of the data clump doctor to detect data clumps. 
 
-In order to use this API, an instance of IntelliJ must be started. IntelliJ can be started in a headless mode to reduce loading times and improve the performance so that no GUI is initialized. Nevertheless, IntelliJ requires many resources and much overhead, so that  the initialization needs some time.
+\subsubsection{IntellIJ}
 
-Another problem during the development of the tool is the issue of correctly loading projects. While a project that has no IntelliJ meta data files can be loaded, finding references of a method or field can lead to undefined behavior. Sometimes all references are correctly found, sometimes only a subset of the references are found, and sometimes no even no references are detected. The reasons for this are difficult to determine and the documentation is scarce, so the the PSI approach seems to be only suitable for projects created via IntelliJ or correctly initialized by IntelliJ with the required meta data. Gradle and maven projects are therefore not suitable for the full refactoring step. 
+For refactoring data clumps, the  \ac{API} from IntelliJ mentioned in section \ref{sec:psi} can be used because it allows for easy modification of the source code that does not result in faulty code. 
 
 
-IntelliJ proves to be a effective way to refactor data clump because of it easy access to the syntax tree.
+\begin{comment}The reasons for this are difficult to determine and the documentation is scarce, so the the PSI approach seems to be only suitable for projects created via IntelliJ or correctly initialized by IntelliJ with the required meta data. Gradle and maven projects are therefore not suitable for the full refactoring step. 
+\end{comment}
 
-There are two ways of using IntelliJ for the refactoring of data clumps.
 
-In the first way, IntelliJ performs the refactoring with libraries that are already included. Noteworthy are the \textit{IntroduceParameterProcessor} and teh \textit{ExtractFieldsProcessor}. Both classes can perform all necessary steps to refactor data clumps. The former is used to refactor parameters in a method, while the latter is used for data clumps with fields. They can be combined in case of parameters-to-field data clumps. The problem is that -- as already noted-- IntelliJ only works correctly if the software project is an IntelliJ project which is not always the case.
+The basic approach for refactoring is based on modifying references. A  reference is an information about the usage of an element. Element in this context could mean a class, a method, or a variable. Four kinds of references are relevant for data clump refactoring.
 
-In case of a non-IntelliJ project like Gradle or Maven, a different approach is needed. Here, the \ac{LSP} as described in section \ref{sec:lsp} is used to find all references of the methods, fields, and variables that are part of the data clump. For instance, the \ac{LSP} find all references of a method parameter that is part of a data clump. These references are grouped into four categories. 
 \begin{enumerate}
      \item A field is declared
     \item A variable (field or method parameter) is read from or assigned to
@@ -297,12 +370,21 @@ In case of a non-IntelliJ project like Gradle or Maven, a different approach is 
     \item A method is declared or overridden
     \item A method is called
 \end{enumerate}
+In many cases , IntelliJ can find all references automatically and categorize them.
 
-This information can be obtained by \ac{LSP} and is provided to IntellJ which does not have the capability to obtain the data in case of non-supported project.
+However, this does not always happen. A project can be loaded wrongly so that  finding references of a method or field can lead to undefined behavior. Sometimes all references are correctly found, sometimes only a subset of the references are found, and sometimes no even no references are detected. This could be explained by invalid caches or unsupported projects although it is difficult to determine whether there are reference errors as no ground truth exists.
 
-IntelliJ can then perform the refactoring with the information it can obtain even from non-supported projects and the information from \ac{LSP}. For instance, the data from \ac{LSP} informs IntelliJ where a particular method call is located, and IntelliJ can parse the specific source code part so that refactoring is easier.
+To solve this issue, two approaches can be considered.
 
-Now, IntelliJ can perform the refactoring. Depending of the category of a reference determined in the previous step, IntelliJ needs to perform distinct step. 
+In the first approach,, the \ac{LSP} as described in section \ref{sec:lsp} is used to find all references of the methods, fields, and variables that are part of the data clump. For instance, the \ac{LSP} server finds all references of a method parameter that is part of a data clump. This approach represents the pipeline idea that many tools need to work together to achieve a common goal.
+
+The second approach uses IntelliJ alone. Since not all references can be detected, the syntax tree must be traversed to find all occurrences where a relevant reference is used. For method parameters, the search can be shortened because their scope is very limited. 
+
+Whether such manual search is faster than the combined use of \ac{LSP} and IntelliJ is difficult to determine. On the one hand, can external services be faster because they are implemented better (i.~e. more sophisticated algorithms). On the other hand, starting two services leads to more overhead. 
+
+
+
+Regardless of how the reference issue is solved, IntelliJ can now perform the refactoring. Depending of the category of a reference , IntelliJ needs to perform distinct step. 
 \begin{enumerate}
     \item In case of a declared field, the field can be deleted because it is part of a field data clump. Now it can be determined whether the class contains already the new field that replaces the fields of the data clump.
     \item If a method is declared, IntelliJ can modify the signature of the method. This can be the original method or an overridden one. IntelliJ needs to remove the parameters that are part of the data clump and add a new method parameter which replaces the method parameters of the data clump. 
