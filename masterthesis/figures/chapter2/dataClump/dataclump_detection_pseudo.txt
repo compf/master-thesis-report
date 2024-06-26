@@ -1,0 +1,14 @@
+Let classes be the set of all classes in the project with at least n fields
+let methods be the set of all methods in the project with at least n parameters
+	and do not override another method
+all := classes  $\bigcup$  methods
+result=[]
+for (a1, a2) in all:
+	v1:=a1.fields if a1 is Class else a1.parameters
+		v1:=a2.fields if a2 is Class else a2.parameters
+	common:=v $\cap$  v2
+	
+	if len(common)>=n
+		result.add(a1,a2)
+	
+	

@@ -36,8 +36,8 @@ Not all relevant objects are part of the pipeline. Some are outside of the pipel
 Each object that appears in the \ac{JSON} is instantiated using dependency injection. This means that the objects initially are registered at a central location but not fully instantiated until they are really needed. The general approach is as follows:
 \begin{enumerate}
     \item The main program loads the \ac{JSON} and iterates over all objects
-    \item Each object has a category (e.~g. \textit{LanguageModelInterface} (see l.~ 28)) and a name (e.~g. ChatGPTInterface) 
-    \item The name of the object and it paremters are registered at the central dependency manager under the category given
+    \item Each object has a category (e.~g. \textit{LanguageModelInterface} (see l.~ 28)) and a name (e.~g. ChatGPTInterface). The name and its category might be identical if only one instance of the respective is needed. 
+    \item The name of the object and it parameters are registered at the central dependency manager under the category given
     \item If a handler or other object needs another object of a specific category, it can ask the central manager. If the respective object has  yet not been created, it will be created. Otherwise, the already instantiated object will be returned. 
 \end{enumerate}
 With this approach, a looser coupling can be achieved. The main program and the handlers does not need to know the exact details of the configuration but provide and receive them from a central dependency manager. Only the handler-specific configuration (e.~g. loading the project location  for the \textit{CodeObtaining} handler is still required and must be performed by each handler. These parameters are stored by the dependency manager. 
@@ -66,11 +66,11 @@ In the following list, some metrics for scoring a data clump are explained
 
      \item The number of data clump items. For instance, the \enquote{xyz}-data-clump has three data clump items.
      
-    \item The number of affected files. Every file that is affected by a data clump. This includes the location of the data clump and also the files where methods and fields that are part of the data clump are references because these files must also be changed if the data clump is refactored. 
+    \item The number of affected files. Every file that is affected by a data clump. 
     
 \end{enumerate}
 
-Note that any metric mentioned can also be used by a bianry filter. For instance, one can filter out data clumps that have only three items.
+Note that any metric mentioned can also be used by a binary filter. For instance, one can filter out data clumps that have only three items.
 Whether any filter or metric method is suitable for a project is an open research topic which this master thesis does not attempt to solve. 
 
 
@@ -82,8 +82,36 @@ Whether any filter or metric method is suitable for a project is an open researc
 
 
 
+\section{Integration of large language models}
+Integrating large language models to detect and refactor data clumps poses the challenge of transmitting source code to the model, and afterwards integrating the changes and  feedback back to the source code. Difficulties arise of how to submit the source code to the \ac{LLM} and  the model should reply so that such integration runs as seamlessly as possible. 
+
+\subsection{Input processing}
+Providing the complete source code is the most natural manner to give ChatGPT the relevant information. Since ChatGPT is language-agnostic, it can deal with many programming languages and therefore is able to process the source code files to find data clumps. However, source code files can be large as they can contain comments, method bodies or other parts of the programming language that are not relevant for detecting data clumps. This leads to higher costs.
+
+Another possible approach is to only provides those lines of code that relate to data clumps. This reduces the file sizes strongly and helps the \ac{LLM} to focus more on the relevant parts. Optionally, a border can be added so that a small number of lines in the neighborhood are transmitted as well in order to provide context. The major issue with this strategy is to choose which lines of code to transmit. Only if the data clumps are already known, all relevant lines can be found and transmitted to the model. This does not work if it is the purpose of the model to also detect data clumps.
+
+If information about the location of fields and method parameter is given (i.~e. by an \ac{AST}), those lines can be transmitted which reduce the transmission size, but to a lesser extent.
+
+On the other hand, the \ac{AST} can be provided. The \ac{AST} only contains a reduced structure of the source code and will therefore cost not as much. However, the \ac{AST} is usually not available but must be produced by other tools or ChatGPT (which means the source code has to be sent to the \ac{LLM} nevertheless). Additionally, there is no fixed format for the \ac{AST} which might complicate parsing and processing the \ac{AST} or the results by ChatGPT.
 
 
+In case ChatGPT should also perform the refactoring, the \ac{AST} becomes not as useful. Refactoring data clumps always include updating method calls or variable usages which might not be available in the \ac{AST}. One could submit the \ac{AST} and the source code so that ChatGPT uses the \ac{AST} for detecting and the source code for refactoring, but this creates more costs and whether it may worsen the quality is an open question as ChatGPT needs to process more data and create a connection between source code and \ac{AST}.
+
+
+\subsection{Output processing}
+Accurately processing the response by the \ac{LLM} can also cause difficulties.
+
+The choice of output format depends on how the \ac{LLM} is integrated into the refactoring process. In one case, the \ac{LLM} should perform the refactoring as autonomous as possible by modifying existing files or creating new files. This reduces human intervention to a minimum and is therefore the least time-consuming strategy. The drawback of this method is that the \ac{LLM} will likely make errors. For instance, the modified files are not compilable as the file might not be complete or the  overwritten files contain explanatory text. A human in the loop mus then apply the necessary corrections on the overwritten file.
+
+Another approach is to create a mirror file. This means that the original file is untouched but the changes are written to a similar named but new file. A human in the loop must then manually apply the refactoring suggested in the mirror file to the original file. While this is a more time-consuming task, it allows for more control by the developer. Additionally, \acs{LLM} tend to omit unchanged code. Directly overwriting files will therefore result in much smaller files that have lost much of their contents. Moreover, creating multiple mirror file would be possible allowing to the developer to have multiple refactoring option suggested by one or multiple models with various parameters so that there is more flexibility. 
+
+
+
+Two output formats are often employed by large language models. The \ac{JSON} format allows for easeier automatic processing of the response as \ac{JSON} data can be parsed without major obstacles and can contain all relevant information. For instance, \ac{JSON} data that contains the path to a file as the key, and the file content as its value can be parsed and the file content can be written to the given location. Some \acs{LLM} also allow to force the \ac{JSON} format so that the response is always valid \ac{JSON}, although it might not be in the requested format. 
+
+The disadvantage of \ac{JSON} is that it is harder to read by the human in the loop. Because JSOn strings do not support new lines and code files contain many new lines, they are hard to read and understand.
+
+On the other hand, Markdown can be an alternative. It is less structured but allows for clearer separation of code and normal text which eases readability for human. Nevertheless, parsing the markdown ins more difficult. 
 \section{Extent of large language model integration}
 
 A major part of this master thesis is the question how well \ac{LLM} can be integrated into the data clump  detection and refactoring process. Several extends to such integration exists which will be discussed in the following subsections. 

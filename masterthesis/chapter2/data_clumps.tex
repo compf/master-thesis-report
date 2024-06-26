@@ -1,0 +1,121 @@
+\section{Data clumps}\label{sec:data_clump_def}
+The term \enquote{Data Clump} was coined by Martin Fowler as one possible code smell that can occur in source code. 
+Data clumps can be classified as bloaters because they require a longer signature of a method or a larger class. Especially in the case of methods, one can also classify them as change preventers because if a new parameters are added (e.g. a Z-coordinate in the vector example), many method signatures and their associated calls must be modified. 
+
+Martin Fowlers originally describes data clumps as follows:
+
+\begin{displayquote}
+\enquote{Data items tend to be like children: They enjoy hanging around together. Often you'll see
+the same three or four data items together in lots of
+places: as fields in a couple of classes, as parameters in many
+method signatures. Bunches of data that hang around together really ought to find a home together.} \cite{fowler2019refactoring} 
+\end{displayquote}
+
+
+This definition is somewhat imprecise. It is not specified whether three or four data items are necessary. Also, \enquote{a couple of classes} and \enquote{in many method signatures} do not define concrete numbers. The author suggests checking whether the removal of one data clump item would have a significant effect on the coherence of the code.
+
+A more precise and algorithmic definition of \enquote{data clumps} is provided by \cite{zhangImprovingPrecisionFowler2008}. They say a data clump can be defined on the field or method-parameter levels. 
+To be a method parameter data clump, a group of at least four variables must appear in multiple methods. Those variables must be duplicated, meaning they share the same name and data type. However, the inner order of the group does not need to be the same. In this master thesis, these data clumps are referred to as \textbf{parameters-to-parameters data clumps}.
+
+These conditions often need to be more relaxed. For instance, methods can be inherited and overridden so that a group of parameters may appear in each derived class, thereby fulfilling the definition of a method parameter data clump. Since (except for the identifiers of the parameters) an overriding method must be the same as the overridden method, they are not considered data clumps.
+
+For field data clumps, similar conditions apply. There must be at least four fields that appear in more than one class, and the names and data types of the variables must be the same, while the inner order may be different. Since in most programming languages, a field can have an additional access modifier (e.g., \textit{private}, \textit{static} etc. ), the access modifier should also be included to determine whether two groups of variables are identical and hence a data clump.  Data clumps related to field of different classes will be referred to as \textbf{fields-to-fields data clumps}. 
+
+The definition might also need to be more relaxed for both method and field data clumps. The scenario of two variables, that have the same name but only a partially compatible type, so that a implicit conversion is possible in one way but not the other way (e.g., \textit{int} and  \textit{double}), would be disregarded as a data clump according to the formalized definition. However, some would regard them as a data clump.
+
+Also, modification of a variable's identifier might not change its meaning. For instance, typos can happen, or synonyms can be used so that an automatic algorithm might not discover the connection between two variables but requires knowledge of the semantics of the source code. \cite{zhangImprovingPrecisionFowler2008}
+
+Additionally, data clumps can also exist between a method and a class. if at least four fields of a method are similar to the parameters of a method, it can be considered as a data clump. This method could be in the same or in the same or in another class. In the latter case, it should be noted that constructors or similar initialization method can easily be flagged as data clumps because they require similar parameters to existing fields. In the following, these data clumps are referred to as \textbf{parameters-to-fields data clumps}
+
+
+To conclude, the core definition of a data clump is clear. However, this definition still leaves out some edge cases that require a semantic understanding of the source code. 
+
+
+
+In the following, the definition by \cite{zhangImprovingPrecisionFowler2008} will be used. However,  instead of requiring at least four parameters or fields for a data clump, more than two are required. The reasons for this change is that also Fowler believes that three variables can be sufficient for a data clump. Additionally due to the looser definition , a higher number of data clumps will be found in a software project which can help to better statistically analyze data clumps. In the end, these are subjective thresholds that are open for discussion. The thresholds for fields-to-fields, parameters-to-fields, and parameters-to-parameters should therefore be parameterized.
+
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.9]{figures/chapter2/dataClump/refactor_simple_case.pdf}
+    \caption{A simple data clump and a proposed refactoring}
+    \label{fig:company_bill_tax}
+\end{figure}
+Figure \ref{fig:company_bill_tax} depicts as an UML-diagram a parameters-to-*parameters data clump. The class \textit{Company} has two methods dealing with financial payments. Both methods  receives three parameters, namely an IBAN, a monetary amount, and a transaction date. While this example is comparably small, there could be more classes and methods in a real-world application that receives these three parameters to perform financial operations. As a result, changing the method signature can be time-consuming. For instance, adding a description to a transaction requires changing all affected method signatures and their associated calls. Also changing the datatype of the monetary value (e.~g. a custom Money class) requires similar changes. Additionally, the readability of these methods might be not ideal as a reader would not know what a \textit{IBAN} is or what currency \textit{amount} represents. These facts must be outlined in the documentation which therefore needs to be duplicated for each method. 
+
+
+\subsection{Identifying data clumps}
+
+In contrast to local code smells like large methods or missing documentation, data clumps can be classified as a global code smell. Considering only a small area of the source code is often not enough because they can be spread over multiple classes and methods. 
+
+ \begin{lstlisting}[ mathescape=true,captionpos=b,caption={Example algorithm for data clumps finding}, numbers=left, label={lst:data_clumps_algo}]
+ Let classes be the set of all classes
+ in the project with at least n fields
+ 
+let methods be the set of all methods
+in the project with at least n parameters
+	and which do not override another method
+ 
+all := classes  $\bigcup$  methods
+result=[]
+for (a1, a2) in all:
+	v1:=a1.fields if a1 is Class else a1.parameters
+	v2:=a2.fields if a2 is Class else a2.parameters
+	common:=v1 $\cap$  v2
+	
+	if len(common)>=n
+		result.add(a1,a2)
+	
+	
+\end{lstlisting}
+
+Listing \ref{lst:data_clumps_algo} shows how an algorithm to find data clumps could be designed. In the first step all data clump holders must be identified.
+A data clump holder is a class that has at least $n$ fields or a method that has at least $n$ parameters.  Methods that overrides other methods can be ignored because either the base method is available as source code and will be detected at another time by this algorithm or the base method is not in the source code (e.~g. external library) so that refactoring is not feasible. 
+
+It should be noted that other programming languages like C++ can have other data clump holder (e.~g. global variables in namespaces). 
+The parameter $n$ is the minimum amount of variables to form a data clump. For purposes of this master thesis, it is 3.  
+
+Afterwards, all distinct tuples of data clump holders are compared. If two data clump holders share at least $n$ fields/parameters, they form a data clump which can be reported. 
+
+This algorithm has some drawbacks. It has a time complexity of $\Theta(n^2)$. Additionally, finding common parameters between two data clump holders is not trivial. One problem is that two identical type identifiers might refer to different types. Therefore, the type names must be qualified so that they are unique.
+  
+\subsection{Refactoring data clumps}\label{sec:data_clump_refactor}
+
+There are several approaches for refactoring data clumps. The general approach is always feasible and suggested by Fowler.
+He outlines two  steps to refactor a data clump:
+
+In the  \textbf{Extract-Class}-step, a class with fields for each data clump item is extracted. A class for this purpose might already exist so that it can be re-used.
+
+In the second step, \textbf{Preserve Whole Object} or \textbf{Introduce Parameter Object} might be applied. This means that the method's signature is changed so that the extracted class replaces the data clump items, and all references to the method are changed accordingly.
+
+If the extracted class already exists, it can be challenging to identify such a class. Given a current refactoring process (i.~e. a bot or human being is currently refactoring data clumps), two possibilities can occur. Either it was created during the ongoing refactoring process so that its location and name is known, or such knowledge is missing. The former case is easy to handle.  The latter variant occurs if the extracted class is created after the data clump is introduced but the data clump is not fixed immediately or the extracted class already existed but for some reasons the data clump was introduced. In this case, a suitable extracted class must be identified which requires extensive knowledge of the source code.
+
+Additionally, there could be classes that are a superset of the required fields to refactor the data clump. Suppose a data clump \textit{x}, \textit{y}, \textit{z} needs to be refactored. There could be a extracted class \textit{Vector4D} which has the fields  \textit{x}, \textit{y}, \textit{z}, \textit{w}. One could argue that this extracted class could be used by setting \textit{w} to 0 or some other default value. On the contrary, a 4D vector has different application than a 3D vector so that creating a 3D vector class might be more suitable. 
+
+Another approach for refactoring data clumps is applicable to parameter-to-parameters data clumps in the same class. In this case, the parameters can be extracted to fields and removed from the method signature. This approach only works if the values of the parameters are known when creating instances of the class containing the method. It might also create a temporal  coupling if the fields are modified during the execution of the method, which should be avoided. 
+
+
+In the case of fields-to-fields data clump, introducing a common base class or interface could also help to solve the data clump issue. The new base class contains all data clump items a fields and is inherited by the two classes. Assuming only single inheritance hierarchies are supported, this does not work if at least one class already inherits from another class. In this case, using interfaces instead of classes can partially solve the data clump issue, but the data clump fields still need to be defined for each class.
+
+
+
+
+
+\subsection{Reasons not to refactor data clumps}\label{sec:data_clump_not_refactor}
+While data clumps are a code smell they might not be worth to refactor. 
+
+One reason for not refactoring data clumps is the tendency of producing data classes. These are classes that only provide access to data but no functionality. By extracting a class as outlined in \ref{sec:data_clump_refactor} the new class has no or scarce additional functionality. These data classes can be also seen as a code smell so that refactoring might not reduce the number of code smells significantly. 
+
+Another problem is the creation of those data classes is calling methods. Suppose a method previously requires three parameters \textit{x}, \textit{y}, and \textit{z}. By refactoring the method, it requires only one parameter of a data class (e.~g. \textit{Point}). Callers of such method have previously provided three arguments, and now have to create an instance of \textit{Point}. As a result, many instances can be created that consume memory and require garbage collection resulting in performance loss. While these effects might be minimal, the effect is more significant on embedded systems or other systems with few resources. 
+
+Also over-engineering can be an issue. As noted in \ref{sec:data_clump_def}, one can check the existence of a data clump by testing whether the removal of one parameter would make sense. This however is arbitrarily and no concise criteria can be given. Sometimes a group of parameters are connected but an extracted class would create a layer of abstraction that is unnecessary and makes the code even harder to read. This is particular important if the domain of each of the three variables is so distinctive that a common class name is hard to find.
+
+\subsection{Representation of data clumps}\label{sec:data_clump_graph}
+
+Data clumps can be represented as a graph, so that clusters or pattern can be detected to further evaluate whether a specific data clump is worth refactoring. 
+
+For instance, a graph can be constructed that contains nodes for each class and additionally each method in the software project. If two methods form a data clump, they are connected by an edge in the graph representation. Similarly, two classes connected by an edge if there is a data clump relationship, or a class and a method   
+
+Another approach is proposed by Baumgartner et al. Here, only the classes that contain data clumps are represented as nodes, and two nodes are connected by an edge if there is a data clump relationship between those two classes. For instance, an edge exists if a method in one class and another method in a separate class are part of a parameters-to-parameters data clump. \cite{data_clumps_baumgartner}.
+
+
+

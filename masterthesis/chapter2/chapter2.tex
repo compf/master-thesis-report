@@ -1,0 +1,55 @@
+In this chapter, the background of data clumps will be discussed. A formal definition of code smells and data clumps will be presented ( sections \ref{sec:code_smell} and \ref{sec:data_clump_def}). ChatGPT will be discussed in section \ref{sec:chatgpt}. Also, the data clump type context format will be discussed in section \ref{sec:data_clump_format}. The Language Server Protocol used to refactor data clumps more easily is explained in section \ref{sec:lsp}. In the end, related research will be discussed (see section \ref{sec:related_research}). 
+
+
+
+
+\input{chapter2/code_smells}
+\input{chapter2/data_clumps}
+\input{chapter2/lllm}
+\input{chapter2/research}
+
+\section{Language Server Protocol} \label{sec:lsp}
+The \ac{LSP}  \cite{lsp_website} is a protocol developed by Microsoft to create a language-independent interface for code-related operations. 
+The \ac{LSP}  describes a server and a client who communicate to each other using the JSON-Remote-Process-Call protocol \cite{json_rpc}. 
+
+The client can generally be anything that works with source code but has no detailed knowledge of a specific programming language. For instance, an \ac{IDE}, an editor or a refactoring tool can be described as a client.
+
+The client starts a server based on a programming language. The server has a inherent knowledge of one ore more programming languages and can provide source-code-related functionality. For instance, the server can rename a variable, find the usages of a method, or inform the client about compiler errors. 
+
+Initially, client and server share some information to set up. This includes the path to the project that the server should load and information about what functionality each of them supports. These functionalities are named \textit{Capabilities}. For example, the server can announce that it supports renaming variables while the client shows error messages. Hence, server and client can interact in a manner such that no unsupported messages are transferred.
+
+Figure \ref{fig:lsp_usage} illustrates how the \ac{LSP} works in practice after the initialization process. 
+\begin{figure}
+    \centering
+    \includegraphics{figures/chapter2/language-server-sequence.png}
+    \caption{Example usage of the Language Server Protocol}
+    \label{fig:lsp_usage}
+    \cite{lsp_website}
+\end{figure}
+
+After the server has been successfully started by the client, a user can open a document (e.g. source code file). The request to open the document is submitted to the server. From now one, the server may not rely on the file system since that might be not the current version of the opened document. 
+
+The client can now inform the server about some changes (e.g. adding a new method). The server can, in the meantime, inform the client about syntactical errors which the client might show to the user of the client.
+
+Afterward, the client requests the definition of a method or variable, and the server returns a response with the requested data.
+
+In the end, the client can save the document and notify the server that the document was closed which means that the physical file of the document represents the current version of the document again. 
+
+
+\section{PSI}\label{sec:psi}
+The Program Structure Interface provided by IntelliJ is an \ac{API} to analyze projects that IntelliJ can load. As a result, the various classes, methods etc. can be obtained which allows for the detection of data clumps. Also modifications are possible so that data clumps can be refactored.
+
+In order to use this API, an instance of IntelliJ must be started. IntelliJ can be started in a headless mode to reduce loading times and improve the performance so that no GUI is initialized. Nevertheless, IntelliJ requires many resources and much overhead, so that  the initialization needs some time.
+
+
+
+\section{Data clump doctor} \label{sec:data_clump_doctor}
+
+The  \textit{Data Clump Doctor} is NodeJS command line tool developed by Nils Baumgartner in preparation of this master thesis. It employs \textit{PMD} to find all classes, methods, and fields in a Java project to generate an \ac{AST}. This syntax tree is saved as a \ac{JSON}. 
+
+In a second step, the generated \ac{AST} can be loaded again to find data clumps. This multi-step approach results in better performance since the detection of data clumps requires many nested for-loops so that any reduction in data size has a measurable effect on the performance.
+
+All detected data clumps are reported in the format specified in section \ref{sec:data_clump_format}.
+
+
+

@@ -1,0 +1,139 @@
+\label{sec:introduction}
+The prevalence of code smells are a major challenge  in modern software development as they tend to induce bugs and increase costs in the future \cite{mealyEvaluatingSoftwareRefactoring2006}.
+
+One example of code smells is data clumps \cite{BaumgartnerAP23}. These can be defined as a group of variables that are used in multiple parts of a software project \cite{fowler2019refactoring}. For instance, if the variables \textit{x}, \textit{y}, and \textit{z} are used multiple times in the source code, they could be interpreted as an Euclidean point or vector. Therefore, one could extract  a class \textit{Vector3d} containing the fields x, y, and z. 
+
+This refactoring approach reduces the code size, makes the code more readable, and simplifies further changes to the source code \cite{data_clumps_refactoring_guru} \cite{join_data_items}. 
+
+There are many approaches to detecting code smells (e.g. SonarCloud,  PMD, Checkstyle) that can be integrated into the development process but these do not automatically fix them  \cite{vidalApproachPrioritizeCode2016}. 
+Since developers are often distracted with implementing new features, fixing bugs, or doing similar tasks, the refactoring of code smells gets pushed back so that many code smells (even if detected) remain unfixed   \cite{10.1145/2393596.2393655 }.
+
+
+One approach to solve this issue is to automatically fix certain code smells that are easy to define so that human intervention is minimized. This automation can be regularly applied, allowing code smells to be gradually addressed without distracting developers from their primary tasks but profiting from cleaner code. 
+However,  automatic refactoring  is more difficult than a simple detection because it requires changes to the source code that have the potential to induce bugs or even make the software project unable to build \cite{9796303}. Hence, the tools used must be carefully assessed. 
+
+The data clump example mentioned above is one of those code smells that can be clearly defined. For instance, one can propose that a group of at least three variables that appear in more than one part of the source code constitutes a data clump \cite{zhangImprovingPrecisionFowler2008}.
+
+
+
+
+However, a successful re-factorization of data clumps requires several steps. This includes renaming of identifiers, removing symbols, and extracting a class. Also a class name for the extracted class (e.g. \textit{Vector3}) must be determined. To minimize human intervention, a suitable identifier of the class must be found that accurately describes the purpose of these variables and their connection. Hence, domain knowledge and some creativity are necessary to fully perform the refactoring process.
+
+As a result,  additional tools (such as ChatGPT \cite{ChatGPT_url}) are needed to fully automate the refactoring pipeline while minimizing the need for manual changes. 
+
+
+
+
+\section{Objective}
+Therefore a synergistic approach can help by using multiple tools and services.  Each can tool can be regarded as  a service that provides a certain functionality and is encapsulated from other tools so that replacing a program by another can always be done in an efficient manner. 
+
+
+The goal of this master thesis is to develop a tool that  combines ChatGPT and other refactoring tools  to automatically detect and refactor data clumps in software projects. The program  shall at least support the Java programming language but shall be extendable to  other programming languages. The tool shall also  be able to filter out some files and data clumps by several criteria to reduce resources and costs. 
+
+
+
+\section{Approach}
+
+To facilitate the integration of tools and services, a pipeline architecture is used. Given a software project, the pipeline is gradually filled with information from the tools and services that are used so that each tool and service can contribute to the target of refactoring data clumps.
+
+A major part of the master thesis will deal with how to use and integrate ChatGPT into the refactoring pipeline. 
+ChatGPT is an AI language model developed by OpenAI that uses a Generative Pre-trained Transformer (GPT) model to process textual input data (i.e. natural language or source code). Users can provide queries, questions, or other textual material to ChatGPT and the model responds with a textual reply attempting to satisfy the user's request \cite{yetistirenEvaluatingCodeQuality2023}. It also employs a conversation feature so that previous requests and replies can be referred to by future requests and responses \cite{sobania2023analysis}.
+
+Given ChatGPT's capability to process  source code \cite{sadik2023analysis}\cite{guo2023exploring}, one this master thesis attempts to explore to what extent it can help developers find data clumps and refactor them. Different extents of ChatGPT inclusion will be tested  
+
+With a minimal ChatGPT inclusion approach,  data clumps will be found using traditional approaches and ChatGPT will be provided with a list of data clump variables and asked to suggest a suitable name for the extracted class, while the refactoring process will be executed using other refactoring tools.
+
+
+Conversely, it will be tested whether ChatGPT can execute the refactoring itself by providing the whole source code of a software project and providing specific queries to find the data clumps, refactor them, and output the refactored source code. \cite{White2023ChatGPTPP}.
+
+
+The goal is to find a ChatGPT usage that finds most data clumps, while ensuring that they are refactored correctly. Also possible costs for the usage of ChatGPT and other resources will be considered \cite{xia2023conversation}. \cite{4ef0b456377aafb68884e643779dffb36b8e7cc1}.
+
+
+The methodology of this master thesis will be evaluated by sending  pull requests about discovered data clumps and a refactoring proposal to several public GitHub repositories and analyzing whether the pull request is accepted, rejected, or amended.   
+
+As a result, the following research question will be explored in this master thesis
+
+\begin{description}
+    \item [RQ1] To what extent can ChatGPT perform data clump refactoring on its own.
+    \item [RQ2] Can using multiple manual tools in cooperation with ChatGPT improve the results.
+    \item [RQ3] Are data clumps significant enough for developers to consider pull requests that only suggest refactoring data clumps. 
+\end{description}
+
+\section{Organization}
+
+In chapter \ref{chapter:background}, the background of this master thesis  is outlined. To this end, data clumps are defined and refactoring proposals discussed. Additionally ChatGPT is introduced. This includes the usage of the ChatGPT \ac{API}, and the potentials and challenges of large language models. Other tools that can perform  steps of the data clump refactoring pipeline are also discussed 
+
+In chapter \ref{chapter:conception}, the design and structure of the tool is explained. A pipeline for combining multiple services and programs is introduced. Furthermore, the integration of large language models is discussed. 
+
+In chapter \ref{chapter:implementation}, the theoretical thoughts are implemented as a real program. Moreover, there is a discussion of how each tool and service can be used for the purpose of refactoring data clumps and what challenges exist. Also, the integration of ChatGPT is tested. A small initial evaluation is performed to test how ChatGPT can be used for detecting and refactoring data clumps. 
+
+A larger evaluation is performed in chapter \ref{chapter:eval}.
+
+In chapter \ref{chapter:conclusion}, a conclusion is given. Open questions, possible improvements of the tool and the chances and drawbacks of large language models are discussed.
+
+To illustrate the suggested data clump refactoring process, listing \ref{lst:math_user_java} shows how the methods in \ref{lst:math_stuff_java} can be used. 
+
+
+  \begin{figure} [htbp!]
+			\lstinputlisting
+			[caption={Some operations on vectors},
+			label={lst:math_user_java},
+			captionpos=b,language=java, basicstyle=\footnotesize, tabsize=2, showstringspaces=false,  numbers=left]
+			{figures/chapter2/dataClump/MathUser.java}
+	\end{figure}
+
+In the first step, a new class can be extracted, which contains all data clump items as fields. It should also contain setters and getters to access the fields in an encapsulated manner. The class should be named so that its purpose is clear. Listing \ref{lst:coordinate_java} shows how such a class may look like. 
+
+  \begin{figure} [htbp!]
+			\lstinputlisting
+			[caption={ Resulting Coordinate class},
+			label={lst:coordinate_java},
+			captionpos=b,language=java, basicstyle=\footnotesize, tabsize=2, showstringspaces=false,  numbers=left]
+			{figures/chapter2/dataClump/Coordinate.java}
+		\end{figure}
+
+In the second step, a parameter object is introduced that replaces the three previous data clump items in each of the three methods of the \textit{MathStuff} class so that the signature only contains one parameter of type \textit{Coordinate}. Also, the calls in \textit{MathUsage} are refactored to reflect that change ( listing \ref{lst:math_stuff_refactored_java} and \ref{lst:math_user_refactored_java}). 
+\clearpage
+  \begin{figure} [htbp!]
+			\lstinputlisting
+			[caption={ Refactored MathStuff class},
+			label={lst:math_stuff_refactored_java},
+			captionpos=b,language=java, basicstyle=\footnotesize, tabsize=2, showstringspaces=false,  numbers=left]
+			{figures/chapter2/dataClump/MathStuffRefactored.java}
+		\end{figure}
+
+
+
+
+  
+\clearpage
+\subsection{ Data clumps Type Context }\label{sec:data_clump_format}
+
+The \textbf{Data clumps Type Context} \cite{dataclump_type_context} is developed by Baumgartner et al. to establish a standard for reporting data clumps. It employs the first graph representation mentioned in section \ref{sec:data_clump_graph}.
+
+An example of the Data clump type context can be seen in listing \ref{lst:data_clump_type_context_example}. Only a subset of the format will be discussed here for space reasons.
+
+  \begin{figure} [htbp!]
+			\lstinputlisting
+			[caption={ Resulting Coordinate class},
+			label={lst:data_clump_type_context_example},
+			captionpos=b,language=java, basicstyle=\footnotesize, tabsize=2, showstringspaces=false,  numbers=left]
+			{figures/chapter2/data_clump_type_context_example.json}
+		\end{figure}
+
+The format consists of three layers. In the outer layer left out here, general project information is defined: The programming language or the project's location. Also the number of methods, classes, and the number of detected data clumps can be obtained in this general part. 
+
+In the next layer, each detected data clump is mapped with a unique key (l. 4).
+
+The detected data clumps are described as a link between two files. These files might be identical if the data clumps are located in the same file. Here, one must differentiate between the \enquote{from-part}, and the \enquote{to-part} representing the two nodes in the data clump graph. For instance, \enquote{from\_file\_path} indicates the location of one part of the data clump, while \enquote{to\_file\_path} provides the path to the opposite end. 
+
+A similar principle is applied to the classes in which a data clump is located. Because a class name might not be unique, not only the names of the two classes but also unique identifiers of those classes are provided (l. 9-10 and 14-15).
+
+The information about the methods of the data clump (l. 11, 12, 16, 17) is optional. If one part of the data clump is a field-to-field data clump, no method is involved, so the respective part would be \textit{null}.
+
+The field \enquote{probability} can be used by probabilistic data clump detection tools to indicate the probability that the detected data clump is indeed a data clump. For purposes of this master thesis, it will be ignored. 
+
+In lines 19-42, each variable that is part of the data clump is described. Here, only one variable is listed, although for a data clump there must be at least three variables. As for the data clump itself, the individual variables are separated into a \enquote{from-part} and a \enquote{to-part}. The former is implicitly defined (l.~20-25, 38-42), while the latter has a specifically named sub object \enquote{to\_variable} (l. 27-37). For each variable, the name (l. 22 and l. 28)) and the data type (l.~23 and l. 29) are provided. As for the general data clump, a probability is given whether the variable is indeed part of a data clump (l. 24). As mentioned above, this information will be ignored.  Additionally, modifiers like \enquote{private}, \enquote{final} etc. are also stored. 
+
+In order to find the variable in the source code, detailed location information is needed. Parts of the location information are, the line number (l.~32 and l.~39) and the column number (l.~33 and l.~40). To avoid any ambiguity, the end position of the variable is saved, too. All numbers are one-index-based, meaning that the first line is one and the first column is also one. 

@@ -1,11 +1,13 @@
 \label{sec:introduction}
-The prevalence of code smells are a major challenge  in modern software development as they tend to induce bugs and increase costs in the future \cite{mealyEvaluatingSoftwareRefactoring2006}.
+A major part of software development happens not before the release of the software but afterwards. Maintaining software so that it is compatible with new requirements, environments and related changes is leading to huge costs.
 
-One example of code smells is data clumps \cite{BaumgartnerAP23}. These can be defined as a group of variables that are used in multiple parts of a software project \cite{fowler2019refactoring}. For instance, if the variables \textit{x}, \textit{y}, and \textit{z} are used multiple times in the source code, they could be interpreted as an Euclidean point or vector. Therefore, one could extract  a class \textit{Vector3d} containing the fields x, y, and z. 
+One issue that complicates maintenance are code smells. Code smell are parts of the source code that tend to make the source code hard to read without directly causing any functional issues. Refactoring and removing code smells has a positive impact on the maintainability  of a software project and reduces cost associated wuth development in the long-term.\cite{mealyEvaluatingSoftwareRefactoring2006}.
 
-This refactoring approach reduces the code size, makes the code more readable, and simplifies further changes to the source code \cite{data_clumps_refactoring_guru} \cite{join_data_items}. 
+Many code smells and how to refactor them are discussed in the literature. One particular code smell named \textbf{data clumps} is however often not considered as a real code smell and not refactored. Data clumps refer to the duplication of fields or method parameter across the source code which increases the code size and makes the source code harder to read because the variables have a oblivious connection that is not obvious.  \cite{BaumgartnerAP23}  \cite{data_clumps_refactoring_guru} \cite{join_data_items}..
 
-There are many approaches to detecting code smells (e.g. SonarCloud,  PMD, Checkstyle) that can be integrated into the development process but these do not automatically fix them  \cite{vidalApproachPrioritizeCode2016}. 
+
+
+There are many approaches to detecting code smells (e.g. SonarCloud,  PMD, Checkstyle) that can be integrated into the development process but these do not automatically fix them  \cite{vidalApproachPrioritizeCode2016}.  Additionally, data clumps are not a typical code smell detected by these tools. 
 Since developers are often distracted with implementing new features, fixing bugs, or doing similar tasks, the refactoring of code smells gets pushed back so that many code smells (even if detected) remain unfixed   \cite{10.1145/2393596.2393655}.
 
 
