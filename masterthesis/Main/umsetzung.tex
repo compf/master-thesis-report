@@ -88,9 +88,11 @@ Integrating large language models to detect and refactor data clumps poses the c
 \subsection{Input processing}
 Providing the complete source code is the most natural manner to give ChatGPT the relevant information. Since ChatGPT is language-agnostic, it can deal with many programming languages and therefore is able to process the source code files to find data clumps. However, source code files can be large as they can contain comments, method bodies or other parts of the programming language that are not relevant for detecting data clumps. This leads to higher costs.
 
-Another possible approach is to only provides those lines of code that relate to data clumps. This reduces the file sizes strongly and helps the \ac{LLM} to focus more on the relevant parts. Optionally, a border can be added so that a small number of lines in the neighborhood are transmitted as well in order to provide context. The major issue with this strategy is to choose which lines of code to transmit. Only if the data clumps are already known, all relevant lines can be found and transmitted to the model. This does not work if it is the purpose of the model to also detect data clumps.
+Another possible approach is to only provides those lines of code that relate to data clumps. These lines are lines where data clump items are declared or used: In case of data clumps affecting parameters, the respective method calls are also code lines related to data clumps. Additionally, a set of lines above and beyond a relevant line can be included to give an \ac{LLM} more context. This reduces the file sizes strongly and helps the \ac{LLM} to focus more on the important parts. Any line that might be relevant to data clump refactoring (but does not necessarily have to be) is referred to as \textbf{line of interest}
 
-If information about the location of fields and method parameter is given (i.~e. by an \ac{AST}), those lines can be transmitted which reduce the transmission size, but to a lesser extent.
+The major issue with this strategy is to choose which lines of code to transmit. Only if the data clumps are already known, all relevant lines can be found and transmitted to the model. This does not work if it is the purpose of the model to also detect data clumps. 
+
+If information about the location of fields and method parameter is given (i.~e. by an \ac{AST}), those lines can be transmitted which reduce the transmission size, but to a lesser extent. In this case, there will be more relevant. In this case, the number of lines of interest will be larger, which can degrade the quality of the results. 
 
 On the other hand, the \ac{AST} can be provided. The \ac{AST} only contains a reduced structure of the source code and will therefore cost not as much. However, the \ac{AST} is usually not available but must be produced by other tools or ChatGPT (which means the source code has to be sent to the \ac{LLM} nevertheless). Additionally, there is no fixed format for the \ac{AST} which might complicate parsing and processing the \ac{AST} or the results by ChatGPT.
 
@@ -101,7 +103,7 @@ In case ChatGPT should also perform the refactoring, the \ac{AST} becomes not as
 \subsection{Output processing}
 Accurately processing the response by the \ac{LLM} can also cause difficulties.
 
-The choice of output format depends on how the \ac{LLM} is integrated into the refactoring process. In one case, the \ac{LLM} should perform the refactoring as autonomous as possible by modifying existing files or creating new files. This reduces human intervention to a minimum and is therefore the least time-consuming strategy. The drawback of this method is that the \ac{LLM} will likely make errors. For instance, the modified files are not compilable as the file might not be complete or the  overwritten files contain explanatory text. A human in the loop mus then apply the necessary corrections on the overwritten file.
+The choice of output format depends on how the \ac{LLM} is integrated into the refactoring process. In one case, the \ac{LLM} should perform the refactoring as autonomous as possible by modifying existing files or creating new files. This reduces human intervention to a minimum and is therefore the least time-consuming strategy. The drawback of this method is that the \ac{LLM} will likely make errors. For instance, the modified files are not compilable as the file might not be complete or the  overwritten files contain explanatory text. A human in the loop must then apply the necessary corrections on the overwritten file.
 
 Another approach is to create a mirror file. This means that the original file is untouched but the changes are written to a similar named but new file. A human in the loop must then manually apply the refactoring suggested in the mirror file to the original file. While this is a more time-consuming task, it allows for more control by the developer. Additionally, \acs{LLM} tend to omit unchanged code. Directly overwriting files will therefore result in much smaller files that have lost much of their contents. Moreover, creating multiple mirror file would be possible allowing to the developer to have multiple refactoring option suggested by one or multiple models with various parameters so that there is more flexibility. 
 
@@ -109,9 +111,31 @@ Another approach is to create a mirror file. This means that the original file i
 
 Two output formats are often employed by large language models. The \ac{JSON} format allows for easeier automatic processing of the response as \ac{JSON} data can be parsed without major obstacles and can contain all relevant information. For instance, \ac{JSON} data that contains the path to a file as the key, and the file content as its value can be parsed and the file content can be written to the given location. Some \acs{LLM} also allow to force the \ac{JSON} format so that the response is always valid \ac{JSON}, although it might not be in the requested format. 
 
-The disadvantage of \ac{JSON} is that it is harder to read by the human in the loop. Because JSOn strings do not support new lines and code files contain many new lines, they are hard to read and understand.
+The disadvantage of \ac{JSON} is that it is harder to read by the human in the loop. Because JSON strings do not support new lines and code files contain many new lines, they are hard to read and understand.
 
-On the other hand, Markdown can be an alternative. It is less structured but allows for clearer separation of code and normal text which eases readability for human. Nevertheless, parsing the markdown ins more difficult. 
+On the other hand, Markdown can be an alternative. It is less structured but allows for clearer separation of code and normal text which eases readability for human. Nevertheless, parsing the markdown is more difficult. 
+
+
+
+\subsection{Proposal handling}
+
+One issue that might occur while working with \ac{LLM} is that their output quality can vary. The same prompt can generate various outputs of which some might be useful and some are not useful. This however is also an advantage of \acs{LLM}. Refactoring data clumps can be performed in many different ways and therefore, the first output might not be the best output. 
+
+Two approaches should be distinguished:
+\subsubsection{Parallel Proposals}
+The model generates multiple independent proposals. This means that in each proposal the model has no memory of its previous proposals. At the end, the best proposal is chosen and applied to the source code.
+
+The issue is determine the \enquote{best} proposal. One approach could be to determine the proposal that causes the least compiler errors. While this idea might be helpful to reduce the manual work to correct errors, it also can tend to produce proposals that change as few code as possible. For instance, refactoring nothing can cause no compiler errors.
+
+As an alternative, one could count the number of changed lines in a proposal and rate proposals with more changes higher than those with fewer changes. This idea rewards proposals that refactor all lines of interests more than proposals that only refactor only a small part of the program while the data clump exists in other known parts too. 
+
+\subsubsection{Sequential proposals}
+
+With sequential proposals, one conversation is hold and the context is kept meaning that the \ac{LLM} does not forget its previous output. Using this idean, not the first proposal is choosen but the last one after the \ac{LLM} has been given enough chances to correct errors.  To facilitate this, build errors from the refactoring proposal can be gathered and presented to the model so that it can improve its refactoring. This represents the chain of thought idea discussed in section \ref{sec:chain of thought}
+
+It should be noted that at some point a proposal should be finally chosen as the \ac{LLM} might not always find a solution that compiles immediately. 
+
+
 \section{Extent of large language model integration}
 
 A major part of this master thesis is the question how well \ac{LLM} can be integrated into the data clump  detection and refactoring process. Several extends to such integration exists which will be discussed in the following subsections. 
@@ -380,7 +404,7 @@ It is interesting that providing a data clump definition worsens the results. On
 
 The data clump doctor introduced in section \ref{sec:data_clump_doctor} is used for detecting data clumps. As it is developed in Typescript and uses the data clump type context format discussed in section \ref{sec:data_clump_format}, it can be easily integrated into the pipeline so that the handler directly calls the relevant methods of the data clump doctor to detect data clumps. 
 
-\subsubsection{IntellIJ}
+\subsubsection{IntellIJ} \label{sec:intellij_refactoring}
 
 For refactoring data clumps, the  \ac{API} from IntelliJ mentioned in section \ref{sec:psi} can be used because it allows for easy modification of the source code that does not result in faulty code. 
 

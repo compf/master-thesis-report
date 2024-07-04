@@ -25,7 +25,9 @@ With the first two criteria,  only larger projects are considered. This increase
 
 \subsection{Criteria for selecting data clumps}
 
-For each selected project, one data clump was chosen. For each data clump detected by the \textit{DataClumpDoctor} the following scores were calculated:
+For each selected project, one data clump was chosen. Two selection approaches were used. 
+In the first approach, a data clump was chosen based on a weighted combination of metrics to identify an \enquote{important} data clump. These metrics are:
+
 \begin{itemize}
     \item The number of occurrences of data clump. For instance, if there is a data clump with the variables \textit{x}, \textit{y}, and  \textit{z}, it is counted how many methods have these parameters and how many classes have these fields
 
@@ -50,22 +52,25 @@ After considering all of these criteria, one final data clump was selected.
 
 \subsection{Assignment to a category}
 
-After a data clump is selected, the next step is to assign the project to a category to determine the extent \acs{LLM} are used to find and refactor data clumps.  The following six categories were used as each category is subdivided for each LLM. 
+After a data clump is selected, the next step is to assign the project to a category to determine the extent \acs{LLM} are used to find and refactor data clumps. 
 
-\begin{itemize}
-    \item ChatGPT-4 / Codellama performs the detection and refactoring
-    \item ChatGPT / Codellama performs the refactoring but the detected data clumps via the \textit{DataClumpDoctor}
-    \item ChatGPT / Codellama only suggest a suitable name, and the refactoring is performed via \ac{PSI}
-\end{itemize}
+Two categories are to be distinguished which are explained in the following subsections:
 
-The following considerations influences the decision which category to assign each data clump:
-\begin{itemize}
-   \item	The number of affected files. The more affected files, the more likely only the name suggestion category is used. 
-\item	The existence of special codestyle guidelines, for instance naming convention, documentation requirements etc. these should be handled better by a LLM
-\item	The existence of other code smells that could be fixed by the LLM even though it is not their primary task.
-\item Balancing: Each category should be represented equally in the pull request
-\end{itemize}
+\subsubsection{Full refactoring by ChatGPT}
+In this method, ChatGPT performs the refactoring completely. Because transmitting whole GitHub projects would infeasible, the DataClumpDoctor was used to detect the previously selected data clump and obtain all lines of interests. A neighborhood of 5 was used so that 5 lines below and 5 lines above each location of interest was transmitted. 
 
-After the analysis and assignment phase concludes, a refactoring phase is performed. If an \ac{LLM} is asked to execute the actual refactoring, the experiment is conducted at least ten times with varying temperatures and the definition-based instruction as this offers a suitable balance between using the limited context window and the quality of the results. The result of each experiment was saved without modifying the actual project, and a final candidate for refactoring was chosen. 
+Then, ChatGPT is instructed to refactor all data clumps in the provided lines of interest. This instruction was repeated at least ten times, in each time the context of ChatGPT was cleared so it didn't know its previous answers. 
 
-Based on the suggestion by the LLM, the refactoring was applied by inserting the refactoring suggestions at the correct position manually. This intermediate state was tested on whether it contains build errors.  
+From these ten proposal, one proposal was chosen that describes refactoring data clumps most acurately. For instance, the extracted class is valid, most usages of the data clump items are updated and all method signatures are refactored (if applicable). Generating multiple proposals in necessary because not every proposal will be correct.
+
+\subsubsection{Refactoring by IntelliJ}
+
+The second approach for refactoring was via IntelliJ. In this case, ChatGPT only suggest as suitable name for the extracted class, but is otherwise not involved in the refactoring. Instead, IntelliJ, performs all refactoring in the manner described in section  \ref{sec:intellij_refactoring} is applied. This results in a very consistent refactoring without any creativity. Hence, this refactoring needs only to be executed once and the first proposal can be selected immediately. 
+
+After selecting a proposal, the proposal is applied and saved on a separate branch.
+
+Afterwards, the proposal might not be fully correct. For instance, there might none-updated method calls, missing semicolons etc. An additional problem occurs if codestyle tools like SpotBugs or Checkstyle are employed. If the refactoring by the \ac{LLM} does not conform to the required codestyle, the code might not compile because the developers of the project force a certain style. All these are issues that can still arise and require additional handling. Therefore, a manual correction step is performed. The project is  manually changed in such a way that it fully compiles. However, no creative refactoring is performed. For instance, if one part of the source code was not refactored, it was refactored like another part regardless of whether another refactoring might have make more sense. This reduces human intervention to a minimum and ensures that the creative part of the refactoring is done by the \ac{LLM}. 
+
+As soon as this manual refactoring finished and the program compiles, the changes were squashed into one commit and a pull request was created in the respective repository. In this pull request, the maintainers were described the purpose of this pull request and  the definition of data clumps used in this master thesis. They were asked to give feedback by filling out a feedback form or by giving feedback via GitHub comments under the respective pull request. It was explicitly stressed that rejecting the pull request would not be perceived negatively. 
+
+The feedback by the form and comments were collected and evaluated as described in subsection ?

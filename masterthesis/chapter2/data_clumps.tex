@@ -45,38 +45,43 @@ Figure \ref{fig:company_bill_tax} depicts as an UML-diagram a parameters-to-*par
 
 \subsection{Identifying data clumps}
 
+The difficulty of identifying data clumps can vary strongly dependent of how many files are affected by a data clump. If a data clump resides in only one file (e.~g. many methods in the same file share parameter), a trained eye can spot them and apply the necessary refactoring. This \textbf{manual approach} requires however that the developer is willing to spend time detecting a data clump and removing it. 
+
+In contrast, an algorithmic method for finding can be defined as follows:
+\begin{figure}
+\begin{lstlisting}[numbers=left]
+    holders := all potential data clump holders 
+            with at least three items inside the project
+     For each (h1, h2) in HolderList with h1 != h2
+        common := intersection(h1, h2)
+        if common.size>=3:
+            reportDataClump(h1, h2, common)
+        
+
+\end{lstlisting}
+\caption{Algorithm for detecting data clumps}
+\label{lst:data_clumps_algo}
+\end{figure}
 In contrast to local code smells like large methods or missing documentation, data clumps can be classified as a global code smell. Considering only a small area of the source code is often not enough because they can be spread over multiple classes and methods. 
 
- \begin{lstlisting}[ mathescape=true,captionpos=b,caption={Example algorithm for data clumps finding}, numbers=left, label={lst:data_clumps_algo}]
- Let classes be the set of all classes
- in the project with at least n fields
- 
-let methods be the set of all methods
-in the project with at least n parameters
-	and which do not override another method
- 
-all := classes  $\bigcup$  methods
-result=[]
-for (a1, a2) in all:
-	v1:=a1.fields if a1 is Class else a1.parameters
-	v2:=a2.fields if a2 is Class else a2.parameters
-	common:=v1 $\cap$  v2
-	
-	if len(common)>=n
-		result.add(a1,a2)
-	
-	
-\end{lstlisting}
+
+
+
 
 Listing \ref{lst:data_clumps_algo} shows how an algorithm to find data clumps could be designed. In the first step all data clump holders must be identified.
-A data clump holder is a class that has at least $n$ fields or a method that has at least $n$ parameters.  Methods that overrides other methods can be ignored because either the base method is available as source code and will be detected at another time by this algorithm or the base method is not in the source code (e.~g. external library) so that refactoring is not feasible. 
-
+A data clump holder is a class that has at least 3 fields or a method that has at least 3 parameters.  Only methods and classed for which source code is available should be detected because refactoring would be impossible otherwise. In case of methods, overridden methods should only be refactored if their super methods also constitutes a data clump that can be refactored.  For instance, if a method overrides another method of which the source code is not available (external library), refactoring would be infeasible. 
 It should be noted that other programming languages like C++ can have other data clump holder (e.~g. global variables in namespaces). 
-The parameter $n$ is the minimum amount of variables to form a data clump. For purposes of this master thesis, it is 3.  
 
-Afterwards, all distinct tuples of data clump holders are compared. If two data clump holders share at least $n$ fields/parameters, they form a data clump which can be reported. 
 
-This algorithm has some drawbacks. It has a time complexity of $\Theta(n^2)$. Additionally, finding common parameters between two data clump holders is not trivial. One problem is that two identical type identifiers might refer to different types. Therefore, the type names must be qualified so that they are unique.
+Afterwards, all distinct tuples of data clump holders are compared. If two data clump holders share at least $n$ fields/parameters, they form a data clump which can be reported. Determining common variables require comparing the identifiers and types of the variables and determining whether they are similar as specified in section \ref{sec:data_clump_def}. However, finding common parameters between two data clump holders is not trivial.  For instance, the algorithm does not specify how the identifiers of two data clump holders are compared (strict equality, synonyms). A similar issues arises with the types of the variables.  Two identical type identifiers might refer to different types. Therefore, the type names must be qualified so that they are unique. These details can be crucial for performance optimization and accuracy of its result. 
+
+
+
+If a data clump is detected, it can be reported for further processing. For instance, a warning could be displayed in an \ac{IDE} or the detected data clumps can be stored to a file. Here also, the concrete implementation is dependent on how the data clumps will be processed later.
+
+This algorithm has some drawbacks. It has a time complexity of $\Theta(n^2)$ where $n$ is the number of potential data clump holders. Therefore, analyzing  large projects can be time-consuming unless the set of potential data clump holders is reduced beforehand. Nevertheless, it accurately finds every data clump and is deterministic.
+
+In contrast, probabilistic methods use an artificial intelligence like a Large Language Model to detect data clumps. Theses are non-deterministic and their reasoning are not always explainable. However,  these key difference help them to find data clumps that are difficult to find with the algorithmic approach. For instance, they can use synonyms for comparing variable names. 
   
 \subsection{Refactoring data clumps}\label{sec:data_clump_refactor}
 
@@ -89,7 +94,7 @@ In the second step, \textbf{Preserve Whole Object} or \textbf{Introduce Paramete
 
 If the extracted class already exists, it can be challenging to identify such a class. Given a current refactoring process (i.~e. a bot or human being is currently refactoring data clumps), two possibilities can occur. Either it was created during the ongoing refactoring process so that its location and name is known, or such knowledge is missing. The former case is easy to handle.  The latter variant occurs if the extracted class is created after the data clump is introduced but the data clump is not fixed immediately or the extracted class already existed but for some reasons the data clump was introduced. In this case, a suitable extracted class must be identified which requires extensive knowledge of the source code.
 
-Additionally, there could be classes that are a superset of the required fields to refactor the data clump. Suppose a data clump \textit{x}, \textit{y}, \textit{z} needs to be refactored. There could be a extracted class \textit{Vector4D} which has the fields  \textit{x}, \textit{y}, \textit{z}, \textit{w}. One could argue that this extracted class could be used by setting \textit{w} to 0 or some other default value. On the contrary, a 4D vector has different application than a 3D vector so that creating a 3D vector class might be more suitable. 
+Additionally, there could be classes that are a superset of the required fields to refactor the data clump. Suppose a data clump \textit{x}, \textit{y}, \textit{z} needs to be refactored. There could be a  class \textit{Vector4D} which has the fields  \textit{x}, \textit{y}, \textit{z}, \textit{w}. One could argue that this extracted class could be used by setting \textit{w} to 0 or some other default value. On the contrary, a 4D vector has different application than a 3D vector so that creating a 3D vector class might be more suitable. 
 
 Another approach for refactoring data clumps is applicable to parameter-to-parameters data clumps in the same class. In this case, the parameters can be extracted to fields and removed from the method signature. This approach only works if the values of the parameters are known when creating instances of the class containing the method. It might also create a temporal  coupling if the fields are modified during the execution of the method, which should be avoided. 
 
@@ -103,11 +108,13 @@ In the case of fields-to-fields data clump, introducing a common base class or i
 \subsection{Reasons not to refactor data clumps}\label{sec:data_clump_not_refactor}
 While data clumps are a code smell they might not be worth to refactor. 
 
-One reason for not refactoring data clumps is the tendency of producing data classes. These are classes that only provide access to data but no functionality. By extracting a class as outlined in \ref{sec:data_clump_refactor} the new class has no or scarce additional functionality. These data classes can be also seen as a code smell so that refactoring might not reduce the number of code smells significantly. 
+One reason for not refactoring data clumps is the tendency of producing data classes. These are classes that only provide access to data but no functionality. By extracting a class as outlined in \ref{sec:data_clump_refactor} the new class has no or scarce additional functionality. These data classes can be also seen as a code smell so that refactoring might not reduce the number of code smells significantly. One way to mitigate this risk can be to further refactor the code by moving functionality related to the extracted class to such class thereby preventing data classes \cite{fowler2019refactoring}. 
 
-Another problem is the creation of those data classes is calling methods. Suppose a method previously requires three parameters \textit{x}, \textit{y}, and \textit{z}. By refactoring the method, it requires only one parameter of a data class (e.~g. \textit{Point}). Callers of such method have previously provided three arguments, and now have to create an instance of \textit{Point}. As a result, many instances can be created that consume memory and require garbage collection resulting in performance loss. While these effects might be minimal, the effect is more significant on embedded systems or other systems with few resources. 
+Another problem is the creation of those data classes is object instantiation. Suppose a method previously requires three parameters \textit{x}, \textit{y}, and \textit{z}. By refactoring the method, it requires only one parameter of a data class (e.~g. \textit{Point}). Callers of such method have previously provided three arguments, and now have to create an instance of \textit{Point}. As a result, many instances can be created that consume memory and require garbage collection resulting in performance loss. While these effects might be minimal, the effect is more significant on embedded systems or other systems with few resources. A similar problem occurs if the access to variables is replaced by getters or setters which also creates some overhead. While many compilers are capable of optimizing such issues, they should nevertheless be considered. 
 
 Also over-engineering can be an issue. As noted in \ref{sec:data_clump_def}, one can check the existence of a data clump by testing whether the removal of one parameter would make sense. This however is arbitrarily and no concise criteria can be given. Sometimes a group of parameters are connected but an extracted class would create a layer of abstraction that is unnecessary and makes the code even harder to read. This is particular important if the domain of each of the three variables is so distinctive that a common class name is hard to find.
+
+In modular software projects, extracting a class can cause unwanted or even impossible dependencies.  Suppose a software project as a component for server-related code and for client-related code. Neither of this code is dependent of the other (i.~e. classes in one component are not visible in the other). A data clump connecting those components can only be refactored if the extracted class is located somewhere else. For instance, one could create a \textit{util} package. However, this creates an indirect dependency between server and client code and also might overload the \textit{util} package because it should not contain domain-specific code. 
 
 \subsection{Representation of data clumps}\label{sec:data_clump_graph}
 
