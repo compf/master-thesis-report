@@ -1,0 +1,124 @@
+\subsection{Pipeline steps}\label{sec:pipeline_steps}
+In the following subsections, the steps of the pipeline will be outlined. For each step, there is a discussion on why this step is noteworthy to consider and what points are important when implementing the step.
+\subsubsection{Code obtaining}\label{sec:code_obtaining}
+Data clumps can only be found if access to the source code is given. This requires that the source code is available in some location and that the location is known.
+
+In most cases, this is trivial since a developer needing to find and fix data clumps should know where the source code is located.
+
+However, there might be more complex cases. For instance, the source code could be located on a \ac{VCS} or must be downloaded elsewhere so that the newest changes can be considered. Therefore, defining a specific step for obtaining the source code before executing the rest of the pipeline is useful. 
+
+The context created by this step contains the absolute path to the project to analyze and founds the basis for the succeeding context
+\subsubsection{Detecting data clumps}\label{subsec:chap3_data_clump_detection}
+It is widely acknowledged that addressing data clumps is only possible after they have been identified. As such, detecting data clumps should be prioritized as one of the initial steps in the pipeline.
+
+The data clump detection process itself can be further divided into the sub-steps filtering, \ac{AST} generation, similarity detection, data-clump detection, and data clump filtering.
+\subsubsection{Filtering}\label{subsub:filtering_files}
+First of all, all programming language files need to be detected. Usually, there are specific file extensions (e.g., \textit{.java}) for a source code file, simplifying the finding of files. It is also common for software projects to have a root folder that contains all source code files. Therefore, one can recursively iterate through all files and directories of a given root folder with a matching extension. 
+
+However, not every source code file might be analyzed for data clumps. For instance, parts of the projects must not be refactored, or a re-factorization would be too time-consuming. As outlined in chapter \ref{sec:introduction}, the cost of detecting data clumps might need to be lowered. Therefore, filtering rules might be necessary to reduce the size of the relevant files for the subsequent steps.  
+
+These filtering rules can be subdivided into inclusion rules and exclusion rules.  To faciliate these rules, globs are common.  Globs are filenames that contain wildcard patterns (e.~g. \textbf{*}). Each inclusion glob specifies which file must be included, and each exclusion glob specifies files that must be excluded. For instance, consider \textit{includeGlobs=[\enquote{*.java}]} and \textit{excludeGlobs=\enquote{*Main.java}}. In this case, all Java files are included, if however a file ends with \enquote{Main.java} it is excluded. 
+
+The precedence between include and exclude rules can have a major impact on defining the correct rules. In the example above, exclusion rules prevail over inclusion rules.  This means that single files can be excluded with few exclusion rules. If however only a small set of files should be considered and a larger set of files be excluded, this prevalence should be reversed so that inclusion rules prevail over exclusion rules. In this master thesis, the latter approach will be chosen because it is more compatible with programs like PMD and simplifies analyzing only parts of the software project. 
+
+\subsubsection{Extraction of AST}
+Then,  the source code needs to be simplified as comments, the method bodies, and other language parts are irrelevant for detecting data clumps. This could be achieved by extracting a subset of the \ac{AST} from the source code, which includes all the relevant information to identify data clumps.
+
+The associated context contains the \ac{AST} of every analyzed class.
+\begin{comment}
+\subsubsection{Similarity detection}
+
+The next step is finding pairs of method parameters and pairs of identical or at least similar fields. For this, the identifier and the data type can be compared. Unequal variable names might not rule out a similarity between two variables. For instance, typos may happen, or synonyms may be used. Also, the type might be different. For instance, the data type \textit{double} can be seen as a super-set of the datatype \textit{int} because every 32-bit integer can be converted to a \textit{double}.
+
+From this, a graph can be constructed that visualizes the relationship of the several variables. A node represents a parameter or field value, while an edge exists if and only if a relationship between two variables is detected. 
+\end{comment}
+\subsubsection{Data clump detection}
+This step is one of the most critical steps of the pipeline. 
+The handler finds all data clumps given the filter constraints established before and returns a new context with the description of the detected data clump in the format suggested by the \textit{DataClumpDoctor}. 
+
+If the \textit{DataClumpDoctor} is used, it also creates an \ac{AST} context if none exists yet so that the syntax tree information can be used for the next steps if they them. 
+
+For the data clump definition, the rules from section \ref{sec:data_clump_def} can be used. However, defining one's own rules can lead to better results, so flexibility is essential, too. 
+
+\subsubsection{Data clump filtering or prioritization} \label{subsub:filtering_data_clumps}
+In section \ref{subsub:filtering_files}, a filtering by files is performed. However, even if many data clumps were detected, they do not always need to be refactored. One can decide to ignore certain data clumps and refactor them later or even never. 
+
+There can be many reasons for this approach. For instance, parts of the source code that are infrequently updated might be too risky for refactoring since any automatic tool might cause bugs or invalid code that is hard to fix because the developers are unfamiliar with this part of the source code. On the contrary, a part of the source code that is updated more frequently might be in an intermittent state, so that refactoring is currently not recommendable. Also, as noted in section  \ref{subsub:filtering_files}, if a service like ChatGPT is used, the cost of transferring many source code files with data clumps might be too high. 
+
+In the case of field data clumps, we also have to consider the worst case, namely that at least one of the data clump fields is public. This is regarded as a bad design as fields should always be encapsulated by getters and setters \cite{5680918}. Nevertheless, it is still prevalent \cite{5076631}.
+
+A subsequent refactoring of these fields is more complicated than that of less accessible fields because they might be used by external programs or libraries that are beyond the control of the developer, which might induce bugs or non-compilable software. 
+
+One can argue that refactoring should never affect the public interface since the issues as mentioned earlier can occur \cite{10.1145/1352678.1352681  }.
+
+On the other hand, one can argue that those changes are still significant because they can improve readability, and the source code may be in the early stages to make such breaking changes feasible. 
+
+Therefore, filtering out certain data clumps considered not worthy of refactoring can be suggested.
+
+There are several methods to filter out data clumps which will be discussed in section \ref{sec:data_clump_filtering}
+
+\subsubsection{Name finding}\label{subsec:chap3_data_clump_name_finding}
+The next step of the pipeline is to find a suitable identifier of the extracted class.
+
+There are some criteria for this identifier. It should be a valid name in the respective programming language so that, in general, only alphanumerical characters may be chosen. It should not conflict with other identifiers as it may lead to bugs or compiler errors, and it should be readable and, as best as feasible, represent the fields of the class.
+
+Hence, the name finding is a complex process requiring domain knowledge and creativity if the resulting name is accepted. 
+Since English is the predominant language of identifiers, it will be assumed that only English identifiers will be used. 
+
+\subsubsection{Reference finding}
+ Having detected a data clump, there is still information missing to refactor it. In particular, successful re-factorization requires that every method call, method definition, variable usage or variable definition that is connected to the data clump is updated in a later step. These so-called \textbf{references} need to be found so that they can be updated.
+
+Since the identifier of the data clump variables (or methods) is known, one could search for all occurrences of that identifier. This, however, is not enough because identifiers have a scope. A variable with the name \textit{var} can be declared as a field, as a parameter of a method or inside a block (e.~g. if-branch). All these names can refer to different variables although they have the same identifier. As a result, a textural replacement approach will not work consistently.
+
+Therefore, additional tools will be needed to parse the source code and use the rules of the programming language to find where the data clump items are indeed used.
+\subsubsection{Class Extraction}\label{subsec:chap3_data_class_extraction}
+After a class name has been found, a respective class can be added to the source code. This class will be used as a replacement for the data clump variables or parameters. 
+
+In contrast to the name finding step of the pipeline, this process can be automated more straightforwardly because it does not require creativity and a general template can be used, that is:
+\begin{itemize}
+    \item Create a private field for each variable of the data clump
+    \item Create a public getter for each variable of the data clump. This getter may be named \textit{getVar} where \textit{Var} is replaced by the capitalized name of the variable. The method returns the value of the respective field
+    \item Similarly, a setter \textit{setVar} may be created that has no return type, accepts a new value as a parameter, and sets the respective field. 
+    \item A constructor that initializes the fields with provided or default values may be created. 
+\end{itemize}
+
+Additionally, methods for converting an object to a string, checking the equality of two objects, or creating a hash code may be useful, but these methods are usually optional for refactoring data clumps. 
+
+
+\subsubsection{Refactoring}
+After extracting a class, the next step is to refactor the source code to remove the data clumps. Here, again, one needs to differentiate between method parameter data clumps as this impacts the access scope. 
+
+In case of a field data clump, the following transformations need to be applied.
+
+\begin{enumerate}
+    \item For each class in which the same field data clump is detected, the data clump variables are replaced by an object of the extracted class
+    \item A getter of that object is created that has the same access level as the highest access level of the data clump items
+    \item If a data clump item is read, it must be replaced by a call of the respective getter of the extracted class
+    \item Similarly, if a data clump item is written to, the assignment must be replaced by a setter
+\end{enumerate}
+
+
+
+In the case of a method data clump, the general approach is similar to the case of field data clumps. An object of the extracted class replaces the data clump items, and all references to the data clump items are also updated. Here, the object of the extracted class is not a getter because it is only locally defined. Additionally, the calls to the refactored method must be updated. Instead of providing the arguments for the data clump items directly to the method, an intermediate object can be created that is filled with those values, and this object is provided to the method. 
+
+\subsubsection{Validation}
+
+At the conclusion of the refactoring process, it is not certain that everything is perfect. This applies to manual refactoring and also automatic refactoring. For instance, there might be an undetected error, the refactoring leads to ambiguous method signatures, some reference are not up-to-date etc.
+
+As a result, it is critical to test the project after refactoring so make sure that all requirements are still fulfilled. Testing includes checking the project for build errors (e.~g. invalid syntax, missing dependencies etc.) and unit test, where the functionality of the project is tested. Since those unit tests are supposed to run quick, they should be included in the validation check. 
+
+Many build systems like \textit{Gradle} or \textit{Maven} support simple commands to run all unit tests and build the project in a consistent manner.  Therefore, one can run such a command and check the exit code or output to determine whether the project compiles and passes unit tests.
+
+Disadvantageously, this may only be effective if the project is correctly configured with a build system. This might not always be the case, and it is not trivial to construct an interface for a general build solution. 
+
+\subsubsection{Evaluation}
+
+As another optional step, one might evaluate the effectiveness and efficiency of the data clump refactoring. For instance, one could execute the data clump detection process again to determine how many data clumps are fixed in comparison to the first iteration. 
+
+Another metric for the evaluation could be the running time. A substantial running time of the refactoring can slow down the development process and cause the program not to be used again for future iterations. It could also be useful to analyze the running time for each individual step so that handlers that require too much time or resources can be detected and later not be used. 
+
+\subsubsection{Committing}
+
+After all changes are made,they need are still local and not part of the \ac{VCS}. As a result, they must be committed and pushed so that every developer of the software project has access to the changes by the refactoring. Hence, it can be viewed as the reverse of the code obtaining step. 
+
+In this step, a suitable commit message should be chosen. This could also be done via ChatGPT. Also a manual message based on the changed files might be sufficient. Further issues that might arise is whether a new branch should be created for the refactoring and how humans or other automatic tools (Continuous integration continuous development) should be used to validate the refactoring.  
