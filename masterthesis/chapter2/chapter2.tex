@@ -1,4 +1,4 @@
-In this chapter, the background of data clumps will be discussed. A formal definition of code smells and data clumps will be presented ( sections \ref{sec:code_smell} and \ref{sec:data_clump_def}). ChatGPT will be discussed in section \ref{sec:chatgpt}. Also, the data clump type context format will be discussed in section \ref{sec:data_clump_format}. The Language Server Protocol used to refactor data clumps more easily is explained in section \ref{sec:lsp}. In the end, related research will be discussed (see section \ref{sec:related_research}). 
+In this chapter, the background of data clumps will be discussed. A formal definition of code smells and data clumps will be presented ( sections \ref{sec:code_smell} and \ref{sec:data_clump_def}). ChatGPT will be discussed in section \ref{sec:chatgpt}. The Language Server Protocol used to refactor data clumps more easily is explained in section \ref{sec:lsp}. In the end, related research will be discussed (see section \ref{sec:related_research}). 
 
 
 
@@ -49,7 +49,7 @@ The  \textit{Data Clump Doctor} is NodeJS command line tool developed by Nils Ba
 
 In a second step, the generated \ac{AST} can be loaded again to find data clumps. This multi-step approach results in better performance since the detection of data clumps requires many nested for-loops so that any reduction in data size has a measurable effect on the performance.
 
-All detected data clumps are reported in the format specified in section \ref{sec:data_clump_format}.
+
 
 
 

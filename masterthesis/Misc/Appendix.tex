@@ -1,7 +1,33 @@
 
 \renewcommand\appendixpagename{Appendix}
 \begin{appendices}
+\chapter{Data Clump Type Context}
+\label{sec:data_clump_format}
+An example of the Data clump type context can be seen in listing \ref{lst:data_clump_type_context_example}. Only a subset of the format will be discussed here for space reasons.
 
+  \begin{figure} [htbp!]
+			\lstinputlisting
+			[caption={ Resulting Coordinate class},
+			label={lst:data_clump_type_context_example},
+			captionpos=b,language=java, basicstyle=\footnotesize, tabsize=2, showstringspaces=false,  numbers=left]
+			{figures/chapter2/data_clump_type_context_example.json}
+		\end{figure}
+
+The format consists of three layers. In the outer layer left out here, general project information is defined: The programming language or the project's location. Also the number of methods, classes, and the number of detected data clumps can be obtained in this general part. 
+
+In the next layer, each detected data clump is mapped with a unique key (l. 4).
+
+The detected data clumps are described as a link between two files. These files might be identical if the data clumps are located in the same file. Here, one must differentiate between the \enquote{from-part}, and the \enquote{to-part} representing the two nodes in the data clump graph. For instance, \enquote{from\_file\_path} indicates the location of one part of the data clump, while \enquote{to\_file\_path} provides the path to the opposite end. 
+
+A similar principle is applied to the classes in which a data clump is located. Because a class name might not be unique, not only the names of the two classes but also unique identifiers of those classes are provided (l. 9-10 and 14-15).
+
+The information about the methods of the data clump (l. 11, 12, 16, 17) is optional. If one part of the data clump is a field-to-field data clump, no method is involved, so the respective part would be \textit{null}.
+
+The field \enquote{probability} can be used by probabilistic data clump detection tools to indicate the probability that the detected data clump is indeed a data clump. For purposes of this master thesis, it will be ignored. 
+
+In lines 19-42, each variable that is part of the data clump is described. Here, only one variable is listed, although for a data clump there must be at least three variables. As for the data clump itself, the individual variables are separated into a \enquote{from-part} and a \enquote{to-part}. The former is implicitly defined (l.~20-25, 38-42), while the latter has a specifically named sub object \enquote{to\_variable} (l. 27-37). For each variable, the name (l. 22 and l. 28)) and the data type (l.~23 and l. 29) are provided. As for the general data clump, a probability is given whether the variable is indeed part of a data clump (l. 24). As mentioned above, this information will be ignored.  Additionally, modifiers like \enquote{private}, \enquote{final} etc. are also stored. 
+
+In order to find the variable in the source code, detailed location information is needed. Parts of the location information are, the line number (l.~32 and l.~39) and the column number (l.~33 and l.~40). To avoid any ambiguity, the end position of the variable is saved, too. All numbers are one-index-based, meaning that the first line is one and the first column is also one. 
 \begin{comment}
 \chapter{Änderungen an der Parserdatei}\label{chapter:appendix_parser_changes}
 

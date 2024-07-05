@@ -25,14 +25,15 @@ The definition might also need to be more relaxed for both method and field data
 
 Also, modification of a variable's identifier might not change its meaning. For instance, typos can happen, or synonyms can be used so that an automatic algorithm might not discover the connection between two variables but requires knowledge of the semantics of the source code. \cite{zhangImprovingPrecisionFowler2008}
 
-Additionally, data clumps can also exist between a method and a class. if at least four fields of a method are similar to the parameters of a method, it can be considered as a data clump. This method could be in the same or in the same or in another class. In the latter case, it should be noted that constructors or similar initialization method can easily be flagged as data clumps because they require similar parameters to existing fields. In the following, these data clumps are referred to as \textbf{parameters-to-fields data clumps}
-
+Additionally, data clumps can also exist between a method and a class. if at least four fields of a method are similar to the parameters of a method, it can be considered as a data clump. This method could be in the same or in the same or in another class. In the former case, it should be noted that constructors or similar initialization method can easily be flagged as data clumps because they require similar parameters to existing fields. In the following, these data clumps are referred to as \textbf{parameters-to-fields data clumps}
 
 To conclude, the core definition of a data clump is clear. However, this definition still leaves out some edge cases that require a semantic understanding of the source code. 
 
 
 
-In the following, the definition by \cite{zhangImprovingPrecisionFowler2008} will be used. However,  instead of requiring at least four parameters or fields for a data clump, more than two are required. The reasons for this change is that also Fowler believes that three variables can be sufficient for a data clump. Additionally due to the looser definition , a higher number of data clumps will be found in a software project which can help to better statistically analyze data clumps. In the end, these are subjective thresholds that are open for discussion. The thresholds for fields-to-fields, parameters-to-fields, and parameters-to-parameters should therefore be parameterized.
+In the following, the definition by \cite{zhangImprovingPrecisionFowler2008} will be used. However,  instead of requiring at least four parameters or fields for a data clump, more than two are required. The reasons for this change is that also Fowler believes that three variables can be sufficient for a data clump. Additionally due to the looser definition , a higher number of data clumps will be found in a software project which can help to better statistically analyze data clumps. In the end, these are subjective thresholds that are open for discussion. The thresholds for fields-to-fields, parameters-to-fields, and parameters-to-parameters data clumps should therefore be parameterized.
+
+
 
 \begin{figure}
     \centering
@@ -41,8 +42,7 @@ In the following, the definition by \cite{zhangImprovingPrecisionFowler2008} wil
     \label{fig:company_bill_tax}
 \end{figure}
 Figure \ref{fig:company_bill_tax} depicts as an UML-diagram a parameters-to-*parameters data clump. The class \textit{Company} has two methods dealing with financial payments. Both methods  receives three parameters, namely an IBAN, a monetary amount, and a transaction date. While this example is comparably small, there could be more classes and methods in a real-world application that receives these three parameters to perform financial operations. As a result, changing the method signature can be time-consuming. For instance, adding a description to a transaction requires changing all affected method signatures and their associated calls. Also changing the datatype of the monetary value (e.~g. a custom Money class) requires similar changes. Additionally, the readability of these methods might be not ideal as a reader would not know what a \textit{IBAN} is or what currency \textit{amount} represents. These facts must be outlined in the documentation which therefore needs to be duplicated for each method. 
-
-
+ 
 \subsection{Identifying data clumps}
 
 The difficulty of identifying data clumps can vary strongly dependent of how many files are affected by a data clump. If a data clump resides in only one file (e.~g. many methods in the same file share parameter), a trained eye can spot them and apply the necessary refactoring. This \textbf{manual approach} requires however that the developer is willing to spend time detecting a data clump and removing it. 
@@ -123,6 +123,16 @@ Data clumps can be represented as a graph, so that clusters or pattern can be de
 For instance, a graph can be constructed that contains nodes for each class and additionally each method in the software project. If two methods form a data clump, they are connected by an edge in the graph representation. Similarly, two classes connected by an edge if there is a data clump relationship, or a class and a method   
 
 Another approach is proposed by Baumgartner et al. Here, only the classes that contain data clumps are represented as nodes, and two nodes are connected by an edge if there is a data clump relationship between those two classes. For instance, an edge exists if a method in one class and another method in a separate class are part of a parameters-to-parameters data clump. \cite{data_clumps_baumgartner}.
+
+
+To discern one data clump from another, a \textbf{types-names-identifier} is used in this master thesis. This identifier is created by sorting the data clump items by identifier, then joining the data type and identifier of each data clump with a white space, and concatenating these strings with a semicolon. For instance given a data clump \textit{boolean sign}, \textit{int exponent}, and \textit{double mantissa}. The respective types-names-identifier is \textit{int exponent;double mantissa;boolean sign}. This key identifies a data clump based on its types and names thereby helping to find related data clumps. 
+
+
+
+One approach to represent and serialize data clumps for reporting purposes is the \textbf{Data clumps Type Context} \cite{dataclump_type_context} is developed by Baumgartner et al. Each data clump is described by the affected files, classes and methods (if applicable). Additional, the precise location of each data clump is given Hence,  it employs the first graph representation mentioned in this section meaning that individual classes and methods are forming the data clump graph. However, the second variant can be re-constructed as well using this information. 
+
+A full description of the format can be found in appendix \ref{sec:data_clump_format}
+
 
 
 
