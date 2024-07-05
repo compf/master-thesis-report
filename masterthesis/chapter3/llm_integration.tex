@@ -12,7 +12,7 @@ Issue 1 and 2 will be addressed in section \ref{sec:llm_interface}. The issue 2 
 
 Since the market for large language model is constantly expanding in just a few years, designing a interface for communication is challenging. As a result, only the core functionality can be modeled by an interface in order to keep compatibility and ease extendability. 
 
-An interface to a \ac{LLM} should support providing messages. These messages are provided by the user and can be a instruction (see  section \ref{llm_msg_storage}), data or any other relevant information.
+An interface to a \ac{LLM} should support providing messages. These messages are provided by the user and can be a instruction (see  section \ref{llm_msg_storage}), data or any other relevant information. This message is stored without any modification which means that necessary text transformation must occur earlier. 
 
 Providing a message does not mean that the message is processed by the \ac{LLM} but is kept until further instruction. Thus, a user can prepare multiple messages before sending them to the model.
 
