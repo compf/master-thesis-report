@@ -2,26 +2,47 @@
 \label{sec:data_clump_filtering}
 
 As noted in section \ref{sec:pipeline_steps}, data clump filtering can be used to reduce the data size of the refactoring process and only refactor those data clumps that are worthy to refactor. Two concepts to  reduce the number of data clumps can be distinguished.
-\subsection{Ranking}
+\subsection{Ranking} \label{sec:metrics}
 In the ranking approach, each data clump is scored using a metric. A higher score is better than a lower score.  Then, the data clumps are sorted based upon their score in a descending order. Finally, the first  \textit{n} data clumps are retained while the remaining data clumps are filtered out. With this ranking approach only important data clumps are retained. The importance of a data clump is determined by a metric, and the \enquote{survival} of a data clump depends on how many other data clumps with better scores exists.
 
-In the following list, some metrics for scoring a data clump are explained
+In the following, the implemented metrics are discussed:
 
-\begin{enumerate}
+\subsubsection{Size of a data clump}
 
-    \item The number of occurrences of data clump. For instance, if there is a data clump with the variables \textit{x}, \textit{y}, and  \textit{z}, it is counted how many methods have these parameters and how many classes have these fields
+The size of a data clump means the number of variables associated with it. For instance, a data clump with the variables \textit{x}, \textit{y}, and \textit{z} has the size 3. 
 
-     \item The number of data clump items. For instance, the \enquote{xyz}-data-clump has three data clump items.
-     
-    \item The number of affected files. Every file that is affected by a data clump. 
-    
-\end{enumerate}
+Prioritizing data clumps with large sizes can be beneficial because removing them reduces the code size more significantly which helps to improve readability. Additionally, they are more likely to be perceived as a data clump because it is easier to notice two methods that share more than three parameters in contrast to methods sharing only three parameters. 
 
-Note that any metric mentioned can also be used by a binary filter. For instance, one can filter out data clumps that have only three items.
-Whether any filter or metric method is suitable for a project is an open research topic which this master thesis does not attempt to solve. 
+On the other hand,  it can become more difficult to find a suitable name for the extracted class the more parameters are shared because the probability of a common topic can be lower. 
+
+\subsubsection{ Data clump occurrence}
+
+The occurrence metric describes how often a type name key of a data clump appears throughout the software project to be analyzed. A high value is a strong indicator that refactoring is necessary because it demonstrates how strongly the code size can be reduced. Additionally, this metric is hard to measure manually because no developer will have an overview on the whole project and can count this occurrence making it more difficult to realize that a data clump has a high occurrence.  
+
+On the other hand, refactoring these data clumps require that more lines of the project must be changes which needs to be verified and tested. 
+
+\subsubsection{Affected Files}
+
+The number of files affected by a data clump is somewhat  similar to the occurrence metric. However, in this metric each file is counted exactly once. If a data clump occurs in one file ten times and in another file 5 times, the occurrence metric would count all occurrences while the affected files metric would return two as only those both files are affected. 
+
+Especially, if complete files are transmitted to an \ac{LLM}, this metric should be inverted meaning that low values should be ranked higher than higher scores. An \ac{LLM} only has a limited context window and the more files are transmitted the higher are the chances for errors.  
+
+\subsubsection{Update time}
+
+The time or frequency of when a particular file is updated can also be a metric to ascertain whether a refactoring is warranted. These information can be obtained from \ac{VSC} like Git as they are part of commits.
+
+Files that have been recently updated can have new data clumps that should be refactored. These data clumps can be refactored more easily because it is more improbable that they have manifested so that other parts of the project or outside project depend on the existence of the data clump. 
+
+On the other hand, files that were untouched for longer times might also contain data clumps that exist but are not refactored. One reason can be that developers are not familiar with these source files and are afraid to change them. Depending on the concrete type of data clumps, they can nevertheless be refactored by automatic tools so that developers do not need to read this unknown source code.
+
+
+
 
 \subsection{Filtering}
 In the filtering approach, a binary condition is tested on each data clump individually. if the data clump does not meet the criterion, it is removed from further consideration. hence, each data clump is analyzed independently. Theoretically, this could mean that all data clumps are filtered out if the filtering conditions are too lax and apply to all data clumps. 
+
+These filters can be combined by logical operation (and, or), so that more complex filtering rules are possible. 
+
 The following subsections presents some  criteria for filtering data clumps
 \subsubsection{Ignore abstract methods}
 
@@ -31,7 +52,9 @@ Hence, changing the signature of abstract methods is often avoided as derived cl
 
 Hence, it can be useful to exclude abstract methods for purpose of data clump refactoring to prevent these issues. 
 
-\subsubsection{}
+\subsubsection{Metric based filtering}
+
+These filters use the metric described in section \ref{sec:metrics}, a comparison operator, and a threshold value. If the metric applied to a data clump compared with the threshold value using the comparison function returns true, the data clump remains, otherwise it is filtered out. For instance, the metric can be the data clump size, comparison function can be the greater-than function, and the threshold value can be three. In this example only data clumps with more than three variables will remain for further consideration. 
 
 \begin{enumerate}
     \item Ignore interfaces or abstract classes as there is a risk that the refactoring will be incomplete because the source code of derived classes or classes implementing the interface is not available. 
