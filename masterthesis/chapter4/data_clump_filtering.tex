@@ -1,0 +1,43 @@
+\section{Data clump filtering approaches}
+\label{sec:data_clump_filtering}
+
+As noted in section \ref{sec:pipeline_steps}, data clump filtering can be used to reduce the data size of the refactoring process and only refactor those data clumps that are worthy to refactor. Two concepts to  reduce the number of data clumps can be distinguished.
+\subsection{Ranking}
+In the ranking approach, each data clump is scored using a metric. A higher score is better than a lower score.  Then, the data clumps are sorted based upon their score in a descending order. Finally, the first  \textit{n} data clumps are retained while the remaining data clumps are filtered out. With this ranking approach only important data clumps are retained. The importance of a data clump is determined by a metric, and the \enquote{survival} of a data clump depends on how many other data clumps with better scores exists.
+
+In the following list, some metrics for scoring a data clump are explained
+
+\begin{enumerate}
+
+    \item The number of occurrences of data clump. For instance, if there is a data clump with the variables \textit{x}, \textit{y}, and  \textit{z}, it is counted how many methods have these parameters and how many classes have these fields
+
+     \item The number of data clump items. For instance, the \enquote{xyz}-data-clump has three data clump items.
+     
+    \item The number of affected files. Every file that is affected by a data clump. 
+    
+\end{enumerate}
+
+Note that any metric mentioned can also be used by a binary filter. For instance, one can filter out data clumps that have only three items.
+Whether any filter or metric method is suitable for a project is an open research topic which this master thesis does not attempt to solve. 
+
+\subsection{Filtering}
+In the filtering approach, a binary condition is tested on each data clump individually. if the data clump does not meet the criterion, it is removed from further consideration. hence, each data clump is analyzed independently. Theoretically, this could mean that all data clumps are filtered out if the filtering conditions are too lax and apply to all data clumps. 
+The following subsections presents some  criteria for filtering data clumps
+\subsubsection{Ignore abstract methods}
+
+Abstract methods or non-implemented methods in interfaces only describe a contract without functionality which must be implemented by derived classes. Therefore, the signature of such operations is essential because it describes the contract which must be obliged to by derived classes.
+
+Hence, changing the signature of abstract methods is often avoided as derived classes or classes implementing the interface must be modified too. These classes may reside outside the scope of the abstract class or interface. Therefore, refactoring the signature of abstract methods has a higher chance of errors because the derived classes may not be known or cannot be changed. 
+
+Hence, it can be useful to exclude abstract methods for purpose of data clump refactoring to prevent these issues. 
+
+\subsubsection{}
+
+\begin{enumerate}
+    \item Ignore interfaces or abstract classes as there is a risk that the refactoring will be incomplete because the source code of derived classes or classes implementing the interface is not available. 
+
+    \item Choose randomly with a given probability whether to filter out a data clump
+    \item Ignore data clumps with specific annotation such as \enquote{@injected} because they are filled via dependency injection thereby complicating refactoring.
+ 
+\end{enumerate}
+

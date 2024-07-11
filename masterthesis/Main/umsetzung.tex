@@ -4,136 +4,18 @@
 \renewcommand{\clearpage}{}
 \chapter{Implementation}\label{chapter:implementation}
 \endgroup
-In this chapter, the the design choices and considerations discussed in chapter \ref{chapter:conception} will be implemented. Firstly, in section \ref{sec:config}, the configuration of the tool is explained. After that experiments are performed in order to find out how ChatGPT can be integrated for data clump finding ( see section \ref{sec:prompt_engineering_impl}). In section \ref{sec:step_impl} an overview will be given which combination of tools can be used together to find and refactor data clumps and the limitation and strengths of each combination will be outlined. 
-\section{Configuration}\label{sec:config}
-An important aspect for the usability of the tool is the possibility to configure the tool for the user's need. 
-
-Since the goal of the tool is to allow the combination of multiple services and other tools in order to find and refactor data clumps, the user must be able to define which handler deals with which step (see section \ref{sec:pipeline}).
-
-The configuration is provided by a \ac{JSON} file whose location needs to be provided to the tool via a command line argument. It might be argued that providing the configuration directly via the command line is better suited than a separate configuration file because they do not require the creations of files and are easier for users who start the tool just once. Nevertheless, configuration files are persistent and especially \ac{JSON} can be more easily structured so that they are easier to understand. As a result, only \ac{JSON} files will be used  for the configuration. 
-
-
-Listing \ref{lst:config} shows an example configuration file:
-  \begin{figure} [htbp!]
-			\lstinputlisting
-			[caption={ Example configuration file},
-			label={lst:config},
-			captionpos=b, basicstyle=\footnotesize, tabsize=2, showstringspaces=false,  numbers=left]
-			{figures/chapter4/config.json}
-		\end{figure}
-
-
-In the beginning, the programming language is defined (l.~1). Then, the user can specify which handler should handle which step (l.~3-26). In this example, there are two steps. 
-
-The first step (l.~4-9) establishes the project location and therefore the code obtaining context.
-
-The second step (l.~ 10-26), deals with the detection of data clumps. Here a handler is used that allows detection and refactoring of data clumps via ChatGPT. This specific handler requires sub-handlers that perform intermediate task. For instance, the \textit{SimpleInstructionHandler} loads an instruction from a file path. The \textit{PairOfFileContent} handler submits pairs of file contents to ChatGPT (see section \ref{sec:initial_experiments}).
-
-It should be noted that the order of the handlers in the configuration  does not matter because the execution order is constant and in most cases, each step requires the context of a previous step so that parallel execution or vice-versa execution of steps is not possible. Only in the case of usage finding and name finding would a parallel execution make sense because none of these steps is dependent on the other.  However, this exception is not implemented.
-
-Not all relevant objects are part of the pipeline. Some are outside of the pipeline and can be referenced by all handlers. Here, the large language model \ac{API} is initialized with ChatGPT(l.~ 28).
-
-Each object that appears in the \ac{JSON} is instantiated using dependency injection. This means that the objects initially are registered at a central location but not fully instantiated until they are really needed. The general approach is as follows:
-\begin{enumerate}
-    \item The main program loads the \ac{JSON} and iterates over all objects
-    \item Each object has a category (e.~g. \textit{LanguageModelInterface} (see l.~ 28)) and a name (e.~g. ChatGPTInterface). The name and its category might be identical if only one instance of the respective is needed. 
-    \item The name of the object and it parameters are registered at the central dependency manager under the category given
-    \item If a handler or other object needs another object of a specific category, it can ask the central manager. If the respective object has  yet not been created, it will be created. Otherwise, the already instantiated object will be returned. 
-\end{enumerate}
-With this approach, a looser coupling can be achieved. The main program and the handlers does not need to know the exact details of the configuration but provide and receive them from a central dependency manager. Only the handler-specific configuration (e.~g. loading the project location  for the \textit{CodeObtaining} handler is still required and must be performed by each handler. These parameters are stored by the dependency manager. 
-\section{Data clump filtering approaches}
-\label{sec:data_clump_filtering}
-
-As noted in section \ref{sec:pipeline_steps}, data clump filtering can be used to reduce the data size of the refactoring process and only refactor those data clumps that are worthy to refactor. Two concepts to  reduce the number of data clumps can be distinguished.
-
-In the filtering approach, a binary condition is tested on each data clump individually. if the data clump does not meet the criterion, it is removed from further consideration. For instance, all data clumps that have only three variables can be filtered out. 
-The following list presents some criteria for filtering data clumps
-\begin{enumerate}
-    \item Ignore interfaces or abstract classes as there is a risk that the refactoring will be incomplete because the source code of derived classes or classes implementing the interface is not available. 
-
-    \item Choose randomly with a given probability whether to filter out a data clump
-    \item Ignore data clumps with specific annotation such as \enquote{@injected} because they are filled via dependency injection thereby complicating refactoring.
- 
-\end{enumerate}
-
-In the ranking approach, each data clump is scored using a metric. Then, the data clumps are sorted based upon their score in a descending order. Finally, the first  \textit{n} data clumps are retained while the remaining data clumps are filtered out. With this ranking approach only important data clumps are retained. The importance of a data clump is determined by a metric, and the \enquote{survival} of a data clump depends on whether other data clumps with better scores exists.
-
-In the following list, some metrics for scoring a data clump are explained
-
-\begin{enumerate}
-
-    \item The number of occurrences of data clump. For instance, if there is a data clump with the variables \textit{x}, \textit{y}, and  \textit{z}, it is counted how many methods have these parameters and how many classes have these fields
-
-     \item The number of data clump items. For instance, the \enquote{xyz}-data-clump has three data clump items.
-     
-    \item The number of affected files. Every file that is affected by a data clump. 
-    
-\end{enumerate}
-
-Note that any metric mentioned can also be used by a binary filter. For instance, one can filter out data clumps that have only three items.
-Whether any filter or metric method is suitable for a project is an open research topic which this master thesis does not attempt to solve. 
 
 
 
 
 
 
-\label{sec:implementation_tools}
 
 
 
-\section{Integration of large language models}
-Integrating large language models to detect and refactor data clumps poses the challenge of transmitting source code to the model, and afterwards integrating the changes and  feedback back to the source code. Difficulties arise of how to submit the source code to the \ac{LLM} and  the model should reply so that such integration runs as seamlessly as possible. 
-
-\subsection{Input processing}
-Providing the complete source code is the most natural manner to give ChatGPT the relevant information. Since ChatGPT is language-agnostic, it can deal with many programming languages and therefore is able to process the source code files to find data clumps. However, source code files can be large as they can contain comments, method bodies or other parts of the programming language that are not relevant for detecting data clumps. This leads to higher costs.
-
-Another possible approach is to only provides those lines of code that relate to data clumps. These lines are lines where data clump items are declared or used: In case of data clumps affecting parameters, the respective method calls are also code lines related to data clumps. Additionally, a set of lines above and beyond a relevant line can be included to give an \ac{LLM} more context. This reduces the file sizes strongly and helps the \ac{LLM} to focus more on the important parts. Any line that might be relevant to data clump refactoring (but does not necessarily have to be) is referred to as \textbf{line of interest}
-
-The major issue with this strategy is to choose which lines of code to transmit. Only if the data clumps are already known, all relevant lines can be found and transmitted to the model. This does not work if it is the purpose of the model to also detect data clumps. 
-
-If information about the location of fields and method parameter is given (i.~e. by an \ac{AST}), those lines can be transmitted which reduce the transmission size, but to a lesser extent. In this case, there will be more relevant. In this case, the number of lines of interest will be larger, which can degrade the quality of the results. 
-
-On the other hand, the \ac{AST} can be provided. The \ac{AST} only contains a reduced structure of the source code and will therefore cost not as much. However, the \ac{AST} is usually not available but must be produced by other tools or ChatGPT (which means the source code has to be sent to the \ac{LLM} nevertheless). Additionally, there is no fixed format for the \ac{AST} which might complicate parsing and processing the \ac{AST} or the results by ChatGPT.
-
-
-In case ChatGPT should also perform the refactoring, the \ac{AST} becomes not as useful. Refactoring data clumps always include updating method calls or variable usages which might not be available in the \ac{AST}. One could submit the \ac{AST} and the source code so that ChatGPT uses the \ac{AST} for detecting and the source code for refactoring, but this creates more costs and whether it may worsen the quality is an open question as ChatGPT needs to process more data and create a connection between source code and \ac{AST}.
-
-
-\subsection{Output processing}
-Accurately processing the response by the \ac{LLM} can also cause difficulties.
-
-The choice of output format depends on how the \ac{LLM} is integrated into the refactoring process. In one case, the \ac{LLM} should perform the refactoring as autonomous as possible by modifying existing files or creating new files. This reduces human intervention to a minimum and is therefore the least time-consuming strategy. The drawback of this method is that the \ac{LLM} will likely make errors. For instance, the modified files are not compilable as the file might not be complete or the  overwritten files contain explanatory text. A human in the loop must then apply the necessary corrections on the overwritten file.
-
-Another approach is to create a mirror file. This means that the original file is untouched but the changes are written to a similar named but new file. A human in the loop must then manually apply the refactoring suggested in the mirror file to the original file. While this is a more time-consuming task, it allows for more control by the developer. Additionally, \acs{LLM} tend to omit unchanged code. Directly overwriting files will therefore result in much smaller files that have lost much of their contents. Moreover, creating multiple mirror file would be possible allowing to the developer to have multiple refactoring option suggested by one or multiple models with various parameters so that there is more flexibility. 
 
 
 
-Two output formats are often employed by large language models. The \ac{JSON} format allows for easeier automatic processing of the response as \ac{JSON} data can be parsed without major obstacles and can contain all relevant information. For instance, \ac{JSON} data that contains the path to a file as the key, and the file content as its value can be parsed and the file content can be written to the given location. Some \acs{LLM} also allow to force the \ac{JSON} format so that the response is always valid \ac{JSON}, although it might not be in the requested format. 
-
-The disadvantage of \ac{JSON} is that it is harder to read by the human in the loop. Because JSON strings do not support new lines and code files contain many new lines, they are hard to read and understand.
-
-On the other hand, Markdown can be an alternative. It is less structured but allows for clearer separation of code and normal text which eases readability for human. Nevertheless, parsing the markdown is more difficult. 
-
-
-
-\subsection{Proposal handling}
-
-One issue that might occur while working with \ac{LLM} is that their output quality can vary. The same prompt can generate various outputs of which some might be useful and some are not useful. This however is also an advantage of \acs{LLM}. Refactoring data clumps can be performed in many different ways and therefore, the first output might not be the best output. 
-
-Two approaches should be distinguished:
-\subsubsection{Parallel Proposals}
-The model generates multiple independent proposals. This means that in each proposal the model has no memory of its previous proposals. At the end, the best proposal is chosen and applied to the source code.
-
-The issue is determine the \enquote{best} proposal. One approach could be to determine the proposal that causes the least compiler errors. While this idea might be helpful to reduce the manual work to correct errors, it also can tend to produce proposals that change as few code as possible. For instance, refactoring nothing can cause no compiler errors.
-
-As an alternative, one could count the number of changed lines in a proposal and rate proposals with more changes higher than those with fewer changes. This idea rewards proposals that refactor all lines of interests more than proposals that only refactor only a small part of the program while the data clump exists in other known parts too. 
-
-\subsubsection{Sequential proposals}
-
-With sequential proposals, one conversation is hold and the context is kept meaning that the \ac{LLM} does not forget its previous output. Using this idean, not the first proposal is choosen but the last one after the \ac{LLM} has been given enough chances to correct errors.  To facilitate this, build errors from the refactoring proposal can be gathered and presented to the model so that it can improve its refactoring. This represents the chain of thought idea discussed in section \ref{sec:chain of thought}
-
-It should be noted that at some point a proposal should be finally chosen as the \ac{LLM} might not always find a solution that compiles immediately. 
 
 
 \section{Extent of large language model integration}
@@ -398,64 +280,6 @@ These result can be explained that detecting and refactoring data clumps is more
 
 It is interesting that providing a data clump definition worsens the results. On explanation for this observation could be that the definition of this master thesis conflicts with other definitions known by ChatGPT or that the definition is not precise enough.
 
-\section{Implementation of tools (excluding large language models} \label{sec:step_impl}
-
-\subsubsection{Data Clump Doctor}
-
-The data clump doctor introduced in section \ref{sec:data_clump_doctor} is used for detecting data clumps. As it is developed in Typescript and uses the data clump type context format discussed in section \ref{sec:data_clump_format}, it can be easily integrated into the pipeline so that the handler directly calls the relevant methods of the data clump doctor to detect data clumps. 
-
-\subsubsection{IntellIJ} \label{sec:intellij_refactoring}
-
-For refactoring data clumps, the  \ac{API} from IntelliJ mentioned in section \ref{sec:psi} can be used because it allows for easy modification of the source code that does not result in faulty code. 
-
-
-\begin{comment}The reasons for this are difficult to determine and the documentation is scarce, so the the PSI approach seems to be only suitable for projects created via IntelliJ or correctly initialized by IntelliJ with the required meta data. Gradle and maven projects are therefore not suitable for the full refactoring step. 
-\end{comment}
-
-
-The basic approach for refactoring is based on modifying references. A  reference is an information about the usage of an element. Element in this context could mean a class, a method, or a variable. Four kinds of references are relevant for data clump refactoring.
-
-\begin{enumerate}
-     \item A field is declared
-    \item A variable (field or method parameter) is read from or assigned to
-   
-    \item A method is declared or overridden
-    \item A method is called
-\end{enumerate}
-In many cases , IntelliJ can find all references automatically and categorize them.
-
-However, this does not always happen. A project can be loaded wrongly so that  finding references of a method or field can lead to undefined behavior. Sometimes all references are correctly found, sometimes only a subset of the references are found, and sometimes no even no references are detected. This could be explained by invalid caches or unsupported projects although it is difficult to determine whether there are reference errors as no ground truth exists.
-
-To solve this issue, two approaches can be considered.
-
-In the first approach,, the \ac{LSP} as described in section \ref{sec:lsp} is used to find all references of the methods, fields, and variables that are part of the data clump. For instance, the \ac{LSP} server finds all references of a method parameter that is part of a data clump. This approach represents the pipeline idea that many tools need to work together to achieve a common goal.
-
-The second approach uses IntelliJ alone. Since not all references can be detected, the syntax tree must be traversed to find all occurrences where a relevant reference is used. For method parameters, the search can be shortened because their scope is very limited. 
-
-Whether such manual search is faster than the combined use of \ac{LSP} and IntelliJ is difficult to determine. On the one hand, can external services be faster because they are implemented better (i.~e. more sophisticated algorithms). On the other hand, starting two services leads to more overhead. 
-
-
-
-Regardless of how the reference issue is solved, IntelliJ can now perform the refactoring. Depending of the category of a reference , IntelliJ needs to perform distinct step. 
-\begin{enumerate}
-    \item In case of a declared field, the field can be deleted because it is part of a field data clump. Now it can be determined whether the class contains already the new field that replaces the fields of the data clump.
-    \item If a method is declared, IntelliJ can modify the signature of the method. This can be the original method or an overridden one. IntelliJ needs to remove the parameters that are part of the data clump and add a new method parameter which replaces the method parameters of the data clump. 
-    \item If a variable is used it can be replaced by a getter or setter call. For instance if the variable \textit{var} is read, and the name of the extracted class is \textit{Object}, any reading of the variable can be replaced by  \textit{object.getVar()} where \textit{object} is a variable of type \textit{Object} and \textit{getVar} is the getter of \textit{var}. Similarly, an assignment can be replaces by the setter.
-    \item If a method is used, several substeps are needed.
-    \begin{enumerate}
-        \item First, for each argument provided in a method call it is determined whether the argument is connected to a data clump variable (i.~e. it provides a value to a parameter that is part of a data clump) 
-        \item The position of those arguments is stored and a reference to the argument is stored for further processing.
-        \item Since the extracted class is known and existing, a matching constructor is determined to support all arguments to the data clump variables of the method call. 
-        \item For each argument to a data clump variable, the argument is inserted into the matching position of the constructor, and the argument is deleted in the original method call. 
-        \item the constructor call is added at the position of the method  where the parameter of the extracted class is expected. 
-        
-    \end{enumerate}
-    
-\end{enumerate}
-
-This approach requires some coordination. For instance, the order of operation is important. Method and field declarations must be updated first because they are needed to perform the refactoring of variable usages and method calls successfully. 
-
-Another aspect, where the order of the operation matters, is the hierarchy in the abstract syntax tree. Consider the assignemt \textit{x=x+1}. In an abstract syntax tree, the reading of the value \textit{x} and the addition of 1 is executed first. It is also at a deeper level of the tree than the assignment. If the assignment were to be replaced by a setter, the syntax tree of the reading expression can be out of sync because it is not linked to the original assignment. Therefore, it is vital to refactor parts of a code with higher depth in the syntax tree before parts with lower depths. 
 
 \begin{comment}
 \subsection{ChatGPT}
