@@ -107,10 +107,15 @@ Since follow-up requests make only sense if ChatGPT has already responded, the w
 A related issue occurring for some \acs{LLM} other than ChatGPT is the context window. Large language models like ChatGPT can only stores a limited amount of information during a conversation. If the amount of information is too large,  a model can react differently. ChatGPT will throw an error such that the user must reduce the amount of information transmitted to ChatGPT.
 
 Other models will forget some parts of it even though they might be relevant for the use case of the \ac{LLM}.
-Assuming, an \ac{LLM} has only a very small context window, which every modern model should easily handle, figure \ref{} demonstrates the issues that arises  A model is instructed to find and refactor data clumps in java files, and those java files are submitted as well. The response of the model at the bottom of the figure is however unexpected as it only explains the content of the files submitted. The reason for this response is not some misunderstanding of the prompt but a lack of prompt. The transparent rectangle displays the context window only covering the bottom part of the figure while the instruction is not covered.  
+Assuming, an \ac{LLM} has only a very small context window, which every modern model should easily handle, figure \ref{fig:llm_loose_context} demonstrates the issues that arises  A model is instructed to find and refactor data clumps in java files, and those java files are submitted as well. The response of the model at the bottom of the figure is however unexpected as it only explains the content of the files submitted. The reason for this response is not some misunderstanding of the prompt but a lack of prompt. The transparent rectangle displays the context window only covering the content of the transmitted files while the instruction is not covered. 
 Because of the context window limitation, transmitting the third file overwrites the content of the prompt so that the model forgets the initial instruction and cannot reasonably process the files, giving instead a description of the files. The problem also arises on greater context window if multiple files or large files are involved as it may be the case while refactoring data clumps.
 
-
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.6\columnwidth]{figures/chapter2/chat_dialog.pdf}
+    \caption{Example of model loosing context}
+    \label{fig:llm_loose_context}
+\end{figure}
 
 \subsection{Advantages and Challenges on using Large Language Models}\label{sec:llm_challenges}
 

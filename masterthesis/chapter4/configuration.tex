@@ -20,7 +20,7 @@ In the beginning, the programming language is defined (l.~1). Then, the user can
 
 The first step (l.~4-9) establishes the project location and therefore the code obtaining context.
 
-The second step (l.~ 10-26), deals with the detection of data clumps. Here a handler is used that allows detection and refactoring of data clumps via ChatGPT. This specific handler requires sub-handlers that perform intermediate task. For instance, the \textit{SimpleInstructionHandler} loads an instruction from a file path. The \textit{PairOfFileContent} handler submits pairs of file contents to ChatGPT (see section \ref{sec:initial_experiments}).
+The second step (l.~ 10-26), deals with the detection of data clumps. Here a handler is used that allows detection and refactoring of data clumps via ChatGPT. This specific handler requires sub-handlers that perform intermediate task. For instance, the \textit{SimpleInstructionHandler} loads an instruction from a file path. The \textit{PairOfFileContent} handler submits pairs of file contents to ChatGPT.
 
 It should be noted that the order of the handlers in the configuration  does not matter because the execution order is constant and in most cases, each step requires the context of a previous step so that parallel execution or vice-versa execution of steps is not possible. Only in the case of usage finding and name finding would a parallel execution make sense because none of these steps is dependent on the other.  However, this exception is not implemented.
 
