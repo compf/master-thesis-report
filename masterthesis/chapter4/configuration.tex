@@ -29,7 +29,7 @@ Not all relevant objects are part of the pipeline. Some are outside of the pipel
 Each object that appears in the \ac{JSON} is instantiated using dependency injection. This means that the objects initially are registered at a central location but not fully instantiated until they are really needed. The general approach is as follows:
 \begin{enumerate}
     \item The main program loads the \ac{JSON} and iterates over all objects
-    \item Each object has a category (e.~g. \textit{LanguageModelInterface} (see l.~ 28)) and a name (e.~g. ChatGPTInterface). The name and its category might be identical if only one instance of the respective is needed. 
+    \item Each object has a category (e.~g. \textit{LanguageModelInterface} (see l.~ 28)) and a name (e.~g. ChatGPTInterface). The name and its category might be identical if only one instance of the respective class is needed. 
     \item The name of the object and it parameters are registered at the central dependency manager under the category given
     \item If a handler or other object needs another object of a specific category, it can ask the central manager. If the respective object has  yet not been created, it will be created. Otherwise, the already instantiated object will be returned. 
 \end{enumerate}

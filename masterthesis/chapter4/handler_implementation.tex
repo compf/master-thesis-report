@@ -35,7 +35,7 @@ Generating the actual class is a task that can be done manually if the names and
 
 Other issues should also be taken into consideration. For instance, whether the class body at first contains the declaration of fields, then the getters, setters, and then the constructor, or another order is better depends on the project's style. For instance, the constructor could be declared directly after the fields.
 
-Additionally, not every part of the extracted class might be mandatory. For instance, some fields will never be modified so that a setter would be unnecessary. Furthermore, the extracted class should conform to styling guidelines. 
+Additionally, not every part of the extracted class might be mandatory. For instance, some fields will never be modified so that a setter would be unnecessary. Furthermore, the extracted class should conform to code styles guidelines. 
 
 Two approaches are implemented. In the manual method, the class is extracted using simple text manipulation. The order of the members of the class can be configured.  However it would be challenging to determine whether a setter for a field is needed. Hence, in the manual approach all getters and setters are generated.
 

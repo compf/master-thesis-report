@@ -1,7 +1,19 @@
-\section{Data clump filtering approaches}
+\section{Fltering approaches for files and data clumps}
 \label{sec:data_clump_filtering}
 
-As noted in section \ref{sec:pipeline_steps}, data clump filtering can be used to reduce the data size of the refactoring process and only refactor those data clumps that are worthy to refactor. Two concepts to  reduce the number of data clumps can be distinguished.
+As noted in section \ref{sec:pipeline_steps}, filtering can be used to reduce the data size of the refactoring process and only refactor those data clumps that are worthy to refactor. It is important to note that the filtering process happens at two stages.
+
+In the first stage, no data clumps have been detected yet, and only file paths are known. Therefore, only a limited set of information is available. 
+
+In the second phase, data clumps have already  been detected given the (possibly shrunk) set of files. Now, information about the data clumps can be used  to decide which data clump will be refactored in later phases.
+
+In both phases, the same type of filtering objects are used because  a separate design for file filtering objects and data clump filtering objects would be over-engineering. A file filtering object could work with data clumps becaus ethe have an associated file path, however because a data clump could have two different file paths, the filtering object must take care of that issue. Conversely, a data clump filtering object might work for files only in some circumstances where the file path is sufficient. 
+
+Hence, each filtering objects must indicate whether it supports file paths, data clumps or both, so that the filtering objects can be correctly used. 
+
+In this section, file paths and data clumps are generalized as \textbf{items}.
+
+Two concepts to  reduce the number of items can be distinguished.
 \subsection{Ranking} \label{sec:metrics}
 In the ranking approach, each data clump is scored using a metric. A higher score is better than a lower score.  Then, the data clumps are sorted based upon their score in a descending order. Finally, the first  \textit{n} data clumps are retained while the remaining data clumps are filtered out. With this ranking approach only important data clumps are retained. The importance of a data clump is determined by a metric, and the \enquote{survival} of a data clump depends on how many other data clumps with better scores exists.
 
@@ -36,7 +48,9 @@ Files that have been recently updated can have new data clumps that should be re
 On the other hand, files that were untouched for longer times might also contain data clumps that exist but are not refactored. One reason can be that developers are not familiar with these source files and are afraid to change them. Depending on the concrete type of data clumps, they can nevertheless be refactored by automatic tools so that developers do not need to read this unknown source code.
 
 
+\subsubsection{Combining metrics}
 
+One special metric is dependent on other metrics because it only creates a weighted sum of other metrics therefore allowing multiple metrics to be combined. 
 
 \subsection{Filtering}
 In the filtering approach, a binary condition is tested on each data clump individually. if the data clump does not meet the criterion, it is removed from further consideration. hence, each data clump is analyzed independently. Theoretically, this could mean that all data clumps are filtered out if the filtering conditions are too lax and apply to all data clumps. 
@@ -52,15 +66,12 @@ Hence, changing the signature of abstract methods is often avoided as derived cl
 
 Hence, it can be useful to exclude abstract methods for purpose of data clump refactoring to prevent these issues. 
 
-\subsubsection{Metric based filtering}
 
-These filters use the metric described in section \ref{sec:metrics}, a comparison operator, and a threshold value. If the metric applied to a data clump compared with the threshold value using the comparison function returns true, the data clump remains, otherwise it is filtered out. For instance, the metric can be the data clump size, comparison function can be the greater-than function, and the threshold value can be three. In this example only data clumps with more than three variables will remain for further consideration. 
+\subsection{Combining metrics and filters}
 
-\begin{enumerate}
-    \item Ignore interfaces or abstract classes as there is a risk that the refactoring will be incomplete because the source code of derived classes or classes implementing the interface is not available. 
+The differentiation between filters and metrics can be relaxed by using metrics as a filters, and filters as metrics thereby enabling the construction complex filtering methods. 
 
-    \item Choose randomly with a given probability whether to filter out a data clump
-    \item Ignore data clumps with specific annotation such as \enquote{@injected} because they are filled via dependency injection thereby complicating refactoring.
- 
-\end{enumerate}
+In the first case, filters employ the metrics described in section \ref{sec:metrics}, a comparison operator, and a threshold value. If the metric applied to a data clump compared with the threshold value using the comparison function returns true, the data clump remains, otherwise it is filtered out. For instance, the metric can be the data clump size, comparison function can be the greater-than function, and the threshold value can be three. In this example only data clumps with more than three variables will remain for further consideration. 
+
+Vice versa, a filter can be used as a metric. If a filter returns true on a specific item, the metric returns a different value than it would if the filter returns false. As result, the binary classification by a filter is still employed, but items that do not fulfill the criteria of the filter still has a chance not be filtered out. 
 
