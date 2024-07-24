@@ -45,7 +45,7 @@ In the following, the definition by \cite{zhangImprovingPrecisionFowler2008} wil
 \end{figure}
 Figure \ref{fig:company_bill_tax} depicts as an UML-diagram a parameters-to-*parameters data clump. The class \textit{Company} has two methods dealing with financial payments. Both methods  receives three parameters, namely an IBAN, a monetary amount, and a transaction date. While this example is comparably small, there could be more classes and methods in a real-world application that receives these three parameters to perform financial operations. As a result, changing the method signature can be time-consuming. For instance, adding a description to a transaction requires changing all affected method signatures and their associated calls. Also changing the datatype of the monetary value (e.~g. a custom Money class) requires similar changes. Additionally, the readability of these methods might be not ideal as a reader would not know what a \textit{IBAN} is or what currency \textit{amount} represents. These facts must be outlined in the documentation which therefore needs to be duplicated for each method. 
  
-\subsection{Identifying data clumps}
+\subsection{Identifying data clumps}\label{sec:data_clump_detection}
 
 The difficulty of identifying data clumps can vary strongly dependent of how many files are affected by a data clump. If a data clump resides in only one file (e.~g. many methods in the same file share parameter), a trained eye can spot them and apply the necessary refactoring. This \textbf{manual approach} requires however that the developer is willing to spend time detecting a data clump and removing it. 
 
@@ -119,6 +119,9 @@ Also over-engineering can be an issue. As noted in \ref{sec:data_clump_def}, one
 
 In modular software projects, extracting a class can cause unwanted or even impossible dependencies.  Suppose a software project has a component for server-related code and for client-related code. Neither of this code is dependent of the other (i.~e. classes in one component are not visible in the other). A data clump connecting those components can only be refactored if the extracted class is located somewhere else. For instance, one could create a \textit{util} package. However, this creates an indirect dependency between server and client code and also might overload the \textit{util} package because it should not contain domain-specific code. 
 
+\begin{comment}
+	Inhalt...
+
 \subsection{Representation of data clumps}\label{sec:data_clump_graph}
 
 Data clumps can be represented as a graph, so that clusters or pattern can be detected to further evaluate whether a specific data clump is worth refactoring. 
@@ -135,6 +138,6 @@ To discern one data clump from another, a \textbf{types-names-identifier} is use
 One approach to represent and serialize data clumps for reporting purposes is the \textbf{Data clumps Type Context} \cite{dataclump_type_context} developed by Baumgartner et al. Each data clump is described by the affected files, classes and methods (if applicable). Additional, the precise location of each data clump is given Hence,  it employs the first graph representation mentioned in this section meaning that individual classes and methods are forming the data clump graph. However, the second variant can be re-constructed as well using this information. 
 A full description of the format can be found in appendix \ref{sec:data_clump_format}
 
-
+\end{comment}
 
 

@@ -8,7 +8,15 @@ In this chapter, the background of data clumps will be discussed. A formal defin
 \input{chapter2/lllm}
 \input{chapter2/research}
 
-\section{Language Server Protocol} \label{sec:lsp}
+\section{Related work}
+Since refactoring code smells is becoming increasingly important for developers, a variety of research has been conducted to study how the refactoring process can be improved.
+
+Furthermore, tools have been developed that on their own cannot refactor code smells but can be adapted and used to ease developing refactoring tools.
+
+Additionally, the use of \ac{LLM} in software development has recently gained widespread attention and has become a focus of several studies which analyzes the potential and challenges in practice. 
+
+\subsection{Tools to assists data clump refactoring}
+\subsubsection{Language Server Protocol} \label{sec:lsp}
 The \ac{LSP}  \cite{lsp_website} is a protocol developed by Microsoft to create a language-independent interface for code-related operations. 
 The \ac{LSP}  describes a server and a client who communicate to each other using the JSON-Remote-Process-Call protocol \cite{json_rpc}. 
 
@@ -16,9 +24,9 @@ The client can generally be anything that works with source code but has no deta
 
 The client starts a server based on a programming language. The server has a inherent knowledge of one ore more programming languages and can provide source-code-related functionality. For instance, the server can rename a variable, find the usages of a method, or inform the client about compiler errors. 
 
-Initially, client and server share some information to set up. This includes the path to the project that the server should load and information about what functionality each of them supports. These functionalities are named \textit{Capabilities}. For example, the server can announce that it supports renaming variables while the client shows error messages. Hence, server and client can interact in a manner such that no unsupported messages are transferred.
+Initially, client and server share some information to set up. This includes the path to the project that the server should load and information about what functionality each of them supports. These functionalities are named \textit{Capabilities}. For example, the server can announce that it supports renaming variables while the client is capable of showing error messages. Hence, server and client can interact in a manner such that no unsupported messages are transferred.
 
-Figure \ref{fig:lsp_usage} illustrates how the \ac{LSP} works in practice after the initialization process. 
+The sequence diagram in figure \ref{fig:lsp_usage} illustrates how the \ac{LSP} works in practice after the initialization process. 
 \begin{figure}
     \centering
     \includegraphics{figures/chapter2/language-server-sequence.png}
@@ -35,19 +43,20 @@ Afterward, the client requests the definition of a method or variable, and the s
 
 In the end, the client can save the document and notify the server that the document was closed which means that the physical file of the document represents the current version of the document again. 
 
+The \ac{LSP} can hence be used to simplify refactoring-related task. For instance, a mandatory part of refactoring is to find all references of a symbol (e.~g. variable). The \ac{LSP} can perform this step so that the detected references can be processed further. It should however be noted that functionality of the protocol is limited to maximize the support for many programming languages. Thus, the an \ac{LSP} server is not a refactoring tool per-se. 
 
-\section{PSI}\label{sec:psi}
-The Program Structure Interface provided by IntelliJ is an \ac{API} to analyze projects that IntelliJ can load. As a result, the various classes, methods etc. can be obtained which allows for the detection of data clumps. Also modifications are possible so that data clumps can be refactored.
+\subsubsection{ Program Structure Interface}\label{sec:psi}
+The Program Structure Interface provided by IntelliJ is an \ac{API} to analyze and modify  projects that the \ac{IDE} \textit{IntelliJ} can load. As a result, the various classes, methods etc. can be obtained which allows for the detection of data clumps. Also modifications are possible so that data clumps can be refactored.
 
 In order to use this API, an instance of IntelliJ must be started. IntelliJ can be started in a headless mode to reduce loading times and improve the performance so that no GUI is initialized. Nevertheless, IntelliJ requires many resources and much overhead, so that  the initialization needs some time.
 
 
 
-\section{Data clump doctor} \label{sec:data_clump_doctor}
+\subsection{Data clump doctor} \label{sec:data_clump_doctor}
 
 The  \textit{Data Clump Doctor} is NodeJS command line tool developed by Nils Baumgartner in preparation of this master thesis. It employs \textit{PMD} to find all classes, methods, and fields in a Java project to generate an \ac{AST}. This syntax tree is saved as a \ac{JSON}. 
 
-In a second step, the generated \ac{AST} can be loaded again to find data clumps. This multi-step approach results in better performance since the detection of data clumps requires many nested for-loops so that any reduction in data size has a measurable effect on the performance.
+In a second step, the generated \ac{AST} can be loaded again to find data clumps. by using the algorithmic approach discussed in section \ref{sec:data_clump_detection}. With this two-step methodology, a greater programming language in dependency can be achieved as the data clump detection has no access to the original source code. 
 
 
 
