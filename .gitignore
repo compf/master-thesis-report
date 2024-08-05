@@ -1,0 +1,6 @@
+*.bbl
+*.blg
+**svg-tex*
+**svg-raw.pdf
+*.toc
+main.*
