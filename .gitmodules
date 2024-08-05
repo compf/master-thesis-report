@@ -1,0 +1,3 @@
+[submodule "data_clump_solver"]
+	path = data_clump_solver
+	url = git@github.com:compf/data_clump_solver.git
