@@ -1,4 +1,4 @@
-\section{ChatGPT and other large large language models}
+\section{Large Language Models}
 
 The term \enquote{large language models} refers to a machine learning model that can generate and understand texts in an all-purpose manner. 
 
@@ -7,7 +7,7 @@ A \ac{LLM} is trained on a large data set of texts. These texts can come from bo
 
 Then, the training process is performed. By word embedding, the relationship between words is trained such that the model learns the semantic relationship between words. For instance it can learn that cats are animals  or that there is a relationship between men and women. This relationship can be represented as vectors so that for example the relationship \enquote{men to women} can be applied to the term \enquote{king} which results in \enquote{queen}.
 
-Which this training, the model is able to generate coherent texts based on an input that attempts to satidfy any query
+Which this training, the model is able to generate coherent texts based on an input that attempts to satisfy any query
 
 
 For instance, given the text \enquote{How are}, the model  has a access to a corpus of texts where this sentence ends with \enquote{you} so that it is likely to finish the sentence with this word. 
@@ -45,14 +45,13 @@ In the main panel that encompasses the most area of the figure, a chat is visual
 
     On the right side, all conversations with ChatGPT are listed. For instance, there is a conversation about \enquote{IntelliJ PSI Modification Fix}. A user can have multiple independent conversations where each has it own context. 
 
-\subsection{API}
+\subsubsection{API}
 In order to use the ChatGPT \ac{API}, a user has to create an OpenAI account and deposit financial information so that the user can be charged. Each request to the API consumes a certain amount of tokens dependent on the query. 
 
 A token is the smallest unit used by ChatGPT to process a query. For instance, a token could be one english word, a syntactical part of a programming language, a number, or a similar independent part of a query. According to OpenAI, a token is 3/4 of a word, so 100 tokens are about 75 words. However, this is just an estimate for natural language texts in the English language. 
 
 The \ac{API} itself used JSON combined with \ac{HTTP}. For the purpose of this master thesis, only a subset of the available means to use the \ac{API} will be explained because the whole \ac{API} would be too complex and irrelevant. 
 
-\subsubsection{Query}
 Listing \ref{lst:chatgpt_api} shows how an \ac{API} query may look like if it used via \textit{curl} which is a tool to  perform \ac{HTTP} requests:
  \begin{figure} [htbp!]
 			\lstinputlisting
@@ -70,7 +69,6 @@ Then, the actual query is defined (l. 4-24.). Firstly, the model is defined (l. 
 Afterward, the actual messages are provided (l. 6-24). Each message is a tuple of a \textbf{role} and a \textbf{content}. The content of a message is the input or output provided to or by ChatGPT. 
 
 The role of a message indicates the source of a message. If the content of the messages comes from a user, the role should be \enquote{user} (l. 12). A reply for a query is defined as the role \enquote{assistant} (l. 16). The system role is a more specific and can be used to include further context for ChatGPT without eliciting a response (l. 8)
-\subsubsection{Response}
 
 The response of the ChatGPT \ac{API} based on listing \ref{lst:chatgpt_api} is displayed in listing \ref{lst:chatgpt_api_response}.
  \begin{figure} [htbp!]
@@ -94,8 +92,8 @@ ChatGPT is stateless. This means that the token id explained above is solely use
 
 \begin{figure}
     \centering
-    \includegraphics[width=\columnwidth]{figures/chapter2/chatgpt_stateless.png}
-    \caption{Visualization of statelessness of ChatGPT. Rectangles are queries by the user. Ellipses are replies by ChatGPT}
+    \includesvg[width=\columnwidth]{figures/chapter2/chatgpt_stateless.drawio.svg}
+    \caption{Visualization of statelessness of an \ac{LLM}}
     \label{fig:chatgpt_stateless}
 \end{figure}
 
@@ -104,7 +102,7 @@ Figure \ref{fig:chatgpt_stateless} visualize this issue. Here, the user asks the
 
 Since follow-up requests make only sense if ChatGPT has already responded, the whole original request, the reply by ChatGPT, and any previous conversation must be provided which can have a significant impact on costs and rate limits. 
 
-A related issue occurring for some \acs{LLM} other than ChatGPT is the context window. Large language models like ChatGPT can only stores a limited amount of information during a conversation. If the amount of information is too large,  a model can react differently. ChatGPT will throw an error such that the user must reduce the amount of information transmitted to ChatGPT.
+A related issue occurring for some \acp{LLM} other than ChatGPT is the context window. Large language models like ChatGPT can only stores a limited amount of information during a conversation. If the amount of information is too large,  a model can react differently. ChatGPT will throw an error such that the user must reduce the amount of information transmitted to ChatGPT.
 
 Other models will forget some parts of it even though they might be relevant for the use case of the \ac{LLM}.
 Assuming, an \ac{LLM} has only a very small context window, which every modern model should easily handle, figure \ref{fig:llm_loose_context} demonstrates the issues that arises  A model is instructed to find and refactor data clumps in java files, and those java files are submitted as well. The response of the model at the bottom of the figure is however unexpected as it only explains the content of the files submitted. The reason for this response is not some misunderstanding of the prompt but a lack of prompt. The transparent rectangle displays the context window only covering the content of the transmitted files while the instruction is not covered. 
@@ -113,7 +111,7 @@ Because of the context window limitation, transmitting the third file overwrites
 \begin{figure}[ht!]
     \centering
     \includegraphics[width=0.6\columnwidth]{figures/chapter2/chat_dialog.pdf}
-    \caption{Example of model loosing context}
+    \caption{Example of model forgetting context}
     \label{fig:llm_loose_context}
 \end{figure}
 
@@ -149,7 +147,11 @@ There are also security issues with using  \ac{LLM} like ChatGPT. If a model is 
 
 Furthermore, it is not out of the question that a malicious attacker might change the query or the reply of a \ac{LLM}. Therefore, using such a model might be a feasible way to hack systems or create damage which is difficult to detect and prevent. \cite{not_what_you_signed_for}
 
+Another significant aspect are the legal implications of using \acp{LLM}. Since these models have only recently become mainstream, there are still unresolved legal issues. For instance, since most \acp{LLM} are trained using publicly available data, there are copyright issues as the idea of a particular line of code might come from somebody unknown. Also there are responsibility questions. What happens if the output of the model is malicious or faulty and who is legally responsible for making sure that no damage is done if the output of a model is used. The answers to these issues depend strongly on the jurisdiction. For instance, in the European Union the EU AI Act (Regulation (EU) 2024/1689), requires  transparency for using \acp{LLM} and bans the use of them in situation critical for human safety.  \cite{eu-ai-act}
+
+
 Lastly, also costs and capacity considerations needs to be observed. For large projects, a \ac{LLM} might be too costly because  the costs are often dependent on the input size. Therefore, the use of large language models should be adequately prepared so that as many costs as possible can be saved.  \cite{chen2023frugalgpt}
+
 
 
 

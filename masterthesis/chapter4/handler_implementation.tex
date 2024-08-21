@@ -1,5 +1,5 @@
 \section{Implementation of handlers} \label{sec:step_impl}
-
+In this section, the implementation of the handlers is discussed. These handlers do not or only scarcely the features by \ac{LLM}. 
 \subsection{Data Clump Doctor}
 
 The main tool to detect  data clumps is the \textit{DataClumpDoctor}. It can be directly integrated into the main program as it is written in TypeScript.
@@ -39,10 +39,11 @@ Additionally, not every part of the extracted class might be mandatory. For inst
 
 Two approaches are implemented. In the manual method, the class is extracted using simple text manipulation. The order of the members of the class can be configured.  However it would be challenging to determine whether a setter for a field is needed. Hence, in the manual approach all getters and setters are generated.
 
-Here also, the creativity of an \ac{LLM} can be useful. Given a suitable context, an \ac{LLM} can return the source code of the extracted class without being restricted to a template as the manual approach is. For instabce, instead of generating a class, the model could create a Java record which is a simplified version of a class. 
+Here also, the creativity of an \ac{LLM} can be useful. Given a suitable context, an \ac{LLM} can return the source code of the extracted class without being restricted to a template as the manual approach is. For instance, instead of generating a class, the model could create a Java record which is a simplified version of a class. 
 
 \subsection{Reference Finding}
 
+Other relevant handlers deal the finding of references. Only if all references are correctly resolved, the data clump refactoring can proceed smoothly. 
 
 \subsubsection{Via \ac{LSP}}
 In order to refactor data clumps, all relevant locations of interests (references) must be identified. If the IntelliJ plugin discussed in the next subsection is used for refactoring, this step can sometimes be left out. However, since this plugin has some issues and the refactoring might be performed by an \ac{LLM}, it is beneficial to implement a service for reference finding. 
@@ -62,7 +63,14 @@ To facilitate the use of \ac{LSP}, the server is started and initialized. After 
 Any reply by the \ac{LSP} is intertwined with the associated data clump thereby creating the reference context.
 
  
+\subsubsection{Primitive reference finding}
+This handler works with all programming language as it does not parse the source code at all. Instead, it searches for the identifiers that are part of a data clump (e.~g. method name, variable names). 
 
+This simple approach has two issues. First of all, one must determine where to search. searching the whole project will require a significant amount of time. Alternatively, only only the file containing the data clump or the respective folder can be traversed.
+
+Moreover, this method will lead to more false positives. For instance, searching for the variable name \textit{foo} will also match local variables named \textit{foo}. Therefore, a match might not be part of a data clump and refactoring this match can lead to more harm than good. 
+
+This handler works best if combined with an \ac{LLM}. The model can decide for each reference whether it is truly relevant for data clump refactoring purposes. It might also propose a more sophisticated refactoring idea by using these non-data-clump references. 
 
 \subsection{Refactoring by IntelliJ} \label{sec:intellij_refactoring}
 
@@ -108,4 +116,4 @@ Regardless of how the reference issue is solved, IntelliJ can now perform the re
 
 This approach requires some coordination. For instance, the order of operation is important. Method and field declarations must be updated first because they are needed to perform the refactoring of variable usages and method calls successfully. 
 
-Another aspect, where the order of the operation matters, is the hierarchy in the abstract syntax tree. Consider the assignemt \textit{x=x+1}. In an abstract syntax tree, the reading of the value \textit{x} and the addition of 1 is executed first. It is also at a deeper level of the tree than the assignment. If the assignment were to be replaced by a setter, the syntax tree of the reading expression can be out of sync because it is not linked to the original assignment. Therefore, it is vital to refactor parts of a code with higher depth in the syntax tree before parts with lower depths. 
+Another aspect, where the order of the operation matters, is the hierarchy in the abstract syntax tree. Consider the assignment \textit{x=x+1}. In an abstract syntax tree, the reading of the value \textit{x} and the addition of 1 is executed first. It is also at a deeper level of the tree than the assignment. If the assignment were to be replaced by a setter, the syntax tree of the reading expression can be out of sync because it is not linked to the original assignment. Therefore, it is vital to refactor parts of a code with higher depth in the syntax tree before parts with lower depths. 

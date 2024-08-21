@@ -1,22 +1,23 @@
 \label{sec:introduction}
-A major part of software development happens not before the release of the software but afterwards. Maintaining software so that it is compatible with new requirements, environments and related changes is leading to huge costs.
 
-One issue that complicates maintenance are code smells. Code smell are parts of the source code that tend to make the source code hard to read without directly causing any functional issues. Refactoring and removing code smells has a positive impact on the maintainability  of a software project and reduces cost associated wuth development in the long-term.\cite{mealyEvaluatingSoftwareRefactoring2006}.
-
-Many code smells and how to refactor them are discussed in the literature. One particular code smell named \textbf{data clumps} is however often not considered as a real code smell and not refactored. Data clumps refer to the duplication of fields or method parameter across the source code which increases the code size and makes the source code harder to read because the variables have a oblivious connection that is not obvious.  \cite{BaumgartnerAP23}  \cite{data_clumps_refactoring_guru} \cite{join_data_items}..
+A significant portion of the cost associated with software development incur not before the release but afterwards. Most software needs to be improved in the future because of new requirements, improving the performance or adapting to external changes, so that maintenance is becoming a major step in the life cycle of software. 
 
 
+One issue that complicates maintenance are code smells. Code smell are parts of the source code that tend to make the source code hard to read without directly causing any functional issues. Refactoring and removing code smells has a positive impact on the maintainability  of a software project and reduces cost associated with development in the long-term.\cite{mealyEvaluatingSoftwareRefactoring2006}.
 
-There are many approaches to detecting code smells (e.g. SonarCloud,  PMD, Checkstyle) that can be integrated into the development process but these do not automatically fix them  \cite{vidalApproachPrioritizeCode2016}.  Additionally, data clumps are not a typical code smell detected by these tools. 
-Since developers are often distracted with implementing new features, fixing bugs, or doing similar tasks, the refactoring of code smells gets pushed back so that many code smells (even if detected) remain unfixed   \cite{10.1145/2393596.2393655}.
+
+
+There are many approaches to detecting code smells (e.g. SonarCloud,  PMD, Checkstyle) that can be integrated into the development process but these do not automatically fix them  \cite{vidalApproachPrioritizeCode2016}. Since developers are often distracted with implementing new features, fixing bugs, or doing similar tasks, the refactoring of code smells gets pushed back so that many code smells (even if detected) remain unfixed   \cite{10.1145/2393596.2393655}.
+
+Additionally, there are code smells that remain often unnoticed and hence unfixed because they are are harder to detect and fix. One particular code smell named \textbf{data clumps} will be the focus of this master thesis. Data clumps refer to the duplication of fields or method parameter across the source code which increases the code size and makes the source code harder to read because the variables have a oblivious connection that is not obvious.  \cite{BaumgartnerAP23}  \cite{data_clumps_refactoring_guru} \cite{join_data_items}.
+ 
+
 
 
 One approach to solve this issue is to automatically fix certain code smells that are easy to define so that human intervention is minimized. This automation can be regularly applied, allowing code smells to be gradually addressed without distracting developers from their primary tasks but profiting from cleaner code. 
 However,  automatic refactoring  is more difficult than a simple detection because it requires changes to the source code that have the potential to induce bugs or even make the software project unable to build \cite{9796303}. Hence, the tools used must be carefully assessed. 
 
 The data clump example mentioned above is one of those code smells that can be clearly defined. For instance, one can propose that a group of at least three variables that appear in more than one part of the source code constitutes a data clump \cite{zhangImprovingPrecisionFowler2008}.
-
-
 
 
 However, a successful re-factorization of data clumps requires several steps. This includes renaming of identifiers, removing symbols, and extracting a class. Also a class name for the extracted class (e.g. \textit{Vector3}) must be determined. To minimize human intervention, a suitable identifier of the class must be found that accurately describes the purpose of these variables and their connection. Hence, domain knowledge and some creativity are necessary to fully perform the refactoring process.
@@ -34,42 +35,41 @@ The goal of this master thesis is to develop a tool that  combines ChatGPT and o
 
 
 
-\section{Approach}
 
 To facilitate the integration of tools and services, a pipeline architecture is used. Given a software project, the pipeline is gradually filled with information from the tools and services that are used so that each tool and service can contribute to the target of refactoring data clumps.
 
 A major part of the master thesis will deal with how to use and integrate ChatGPT into the refactoring pipeline. 
 ChatGPT is an AI language model developed by OpenAI that uses a Generative Pre-trained Transformer (GPT) model to process textual input data (i.e. natural language or source code). Users can provide queries, questions, or other textual material to ChatGPT and the model responds with a textual reply attempting to satisfy the user's request \cite{yetistirenEvaluatingCodeQuality2023}. It also employs a conversation feature so that previous requests and replies can be referred to by future requests and responses \cite{sobania2023analysis}.
 
-Given ChatGPT's capability to process  source code \cite{sadik2023analysis}\cite{guo2023exploring}, one this master thesis attempts to explore to what extent it can help developers find data clumps and refactor them. Different extents of ChatGPT inclusion will be tested  
+Given ChatGPT's capability to process  source code \cite{sadik2023analysis}\cite{guo2023exploring}, one goal of this master thesis attempts to explore to what extent it can help developers find data clumps and refactor them. Different extents of ChatGPT inclusion will be tested  
 
-With a minimal ChatGPT inclusion approach,  data clumps will be found using traditional approaches and ChatGPT will be provided with a list of data clump variables and asked to suggest a suitable name for the extracted class, while the refactoring process will be executed using other refactoring tools.
-
-
-Conversely, it will be tested whether ChatGPT can execute the refactoring itself by providing the whole source code of a software project and providing specific queries to find the data clumps, refactor them, and output the refactored source code. \cite{White2023ChatGPTPP}.
+With a minimal ChatGPT inclusion approach,  data clumps will be found using algorithmically  and ChatGPT will be provided with a list of data clump variables and asked to suggest a suitable name for the extracted class, while the refactoring process will be executed using other refactoring tools.
 
 
-The goal is to find a ChatGPT usage that finds most data clumps, while ensuring that they are refactored correctly. Also possible costs for the usage of ChatGPT and other resources will be considered \cite{xia2023conversation}. \cite{4ef0b456377aafb68884e643779dffb36b8e7cc1}.
+Conversely, it will be tested whether ChatGPT can execute the refactoring itself by providing the pieces of the source code containing data clumps of a software project and providing specific queries to find the data clumps, refactor them, and output the refactored source code. \cite{White2023ChatGPTPP}.
 
 
-The methodology of this master thesis will be evaluated by sending  pull requests about discovered data clumps and a refactoring proposal to several public GitHub repositories and analyzing whether the pull request is accepted, rejected, or amended.   
+The goal is to assess in what way ChatGPT can be helpful in performing the data clump refactoring task. Also possible costs for the usage of ChatGPT and other resources will be considered \cite{xia2023conversation}. \cite{4ef0b456377aafb68884e643779dffb36b8e7cc1}.
+
+
+The methodology of this master thesis will be evaluated by sending  pull requests about discovered data clumps and a refactoring proposal to several public GitHub repositories and analyzing the feedback gathered from the responses. Also experiment will be conduct to measure the quality of ChatGPT with regard to several steps of the refactoring pipeline.  
 
 As a result, the following research question will be explored in this master thesis
 
 \begin{description}
-    \item [RQ1] To what extent can ChatGPT perform data clump refactoring on its own.
-    \item [RQ2] Can using multiple manual tools in cooperation with ChatGPT improve the results.
-    \item [RQ3] Are data clumps significant enough for developers to consider pull requests that only suggest refactoring data clumps. 
+    \item [RQ1] Do developers accept data clump refactoring via ChatGPT
+    \item [RQ2] How can ChatGPT be used to improve data clump refactoring
+    \item [RQ3] How can human intervention be minimized while ensuring a sufficient refactoring quality
 \end{description}
 
 \section{Organization}
 
-In chapter \ref{chapter:background}, the background of this master thesis  is outlined. To this end, data clumps are defined and refactoring proposals discussed. Additionally ChatGPT is introduced. This includes the usage of the ChatGPT \ac{API}, and the potentials and challenges of large language models. Other tools that can perform  steps of the data clump refactoring pipeline are also discussed 
+In chapter \ref{chapter:background}, the background of this master thesis  is outlined. To this end, data clumps are defined and refactoring proposals discussed. Additionally Large Language Models (such as ChatGPT) are introduced. This includes the usage of the ChatGPT \ac{API}, and the potentials and challenges of large language models.  Furthermore, related research concerning data clump refactoring and using Large Language Models for refactoring is discussed. 
 
 In chapter \ref{chapter:conception}, the design and structure of the tool is explained. A pipeline for combining multiple services and programs is introduced. Furthermore, the integration of large language models is discussed. 
 
-In chapter \ref{chapter:implementation}, the theoretical thoughts are implemented as a real program. Moreover, there is a discussion of how each tool and service can be used for the purpose of refactoring data clumps and what challenges exist. Also, the integration of ChatGPT is tested. A small initial evaluation is performed to test how ChatGPT can be used for detecting and refactoring data clumps. 
+In chapter \ref{chapter:implementation}, the prachtical implementation is outlined.  Moreover, there is a discussion of how each tool and service can be used for the purpose of refactoring data clumps and what challenges exist. 
 
-A larger evaluation is performed in chapter \ref{chapter:eval}.
+A full-scale evaluation is performed in chapter \ref{chapter:eval}.
 
 In chapter \ref{chapter:conclusion}, a conclusion is given. Open questions, possible improvements of the tool and the chances and drawbacks of large language models are discussed.

@@ -1,4 +1,4 @@
-\section{Fltering approaches for files and data clumps}
+\section{Filtering approaches for files and data clumps}
 \label{sec:data_clump_filtering}
 
 As noted in section \ref{sec:pipeline_steps}, filtering can be used to reduce the data size of the refactoring process and only refactor those data clumps that are worthy to refactor. It is important to note that the filtering process happens at two stages.
@@ -7,15 +7,14 @@ In the first stage, no data clumps have been detected yet, and only file paths a
 
 In the second phase, data clumps have already  been detected given the (possibly shrunk) set of files. Now, information about the data clumps can be used  to decide which data clump will be refactored in later phases.
 
-In both phases, the same type of filtering objects are used because  a separate design for file filtering objects and data clump filtering objects would be over-engineering. A file filtering object could work with data clumps becaus ethe have an associated file path, however because a data clump could have two different file paths, the filtering object must take care of that issue. Conversely, a data clump filtering object might work for files only in some circumstances where the file path is sufficient. 
+In both phases, the same type of filtering objects are used because  a separate design for file filtering objects and data clump filtering objects would be over-engineering. A file filtering object could work with data clumps because a data clump has two associated file paths. Hence, these file paths must be dealth separately and the filter must combine the two (possiblly different) results.
 
 Hence, each filtering objects must indicate whether it supports file paths, data clumps or both, so that the filtering objects can be correctly used. 
 
-In this section, file paths and data clumps are generalized as \textbf{items}.
 
-Two concepts to  reduce the number of items can be distinguished.
+Two concepts to  reduce the number of data clumps can be distinguished.
 \subsection{Ranking} \label{sec:metrics}
-In the ranking approach, each data clump is scored using a metric. A higher score is better than a lower score.  Then, the data clumps are sorted based upon their score in a descending order. Finally, the first  \textit{n} data clumps are retained while the remaining data clumps are filtered out. With this ranking approach only important data clumps are retained. The importance of a data clump is determined by a metric, and the \enquote{survival} of a data clump depends on how many other data clumps with better scores exists.
+In the ranking approach, each item is scored using a metric. A higher score is better than a lower score.  Then, the data clumps are sorted based upon their score in a descending order. Finally, the first  \textit{n} data clumps are retained while the remaining data clumps are filtered out. With this ranking approach only important data clumps are retained. The importance of an item is determined by a metric, and the \enquote{survival} of an item depends on how many other data clumps with better scores exists.
 
 In the following, the implemented metrics are discussed:
 
@@ -39,6 +38,12 @@ The number of files affected by a data clump is somewhat  similar to the occurre
 
 Especially, if complete files are transmitted to an \ac{LLM}, this metric should be inverted meaning that low values should be ranked higher than higher scores. An \ac{LLM} only has a limited context window and the more files are transmitted the higher are the chances for errors.  
 
+In a similar ways, instead of counting the files, the sum of the file size could be determined so that larger file sizes have a greater impact.
+
+\subsubsection{Data clumps per file}
+
+Instead of considering how many files are affected by a data clump, one could also question how many data clumps are in one file. If a file contains relatively many data clumps, it can be refactored by fewer transmission to the model. Therefore, this metric can reduce the number of transmissions while ensuring that many data clumps are fixed. 
+
 \subsubsection{Update time}
 
 The time or frequency of when a particular file is updated can also be a metric to ascertain whether a refactoring is warranted. These information can be obtained from \ac{VCS} like Git as they are part of commits.
@@ -50,10 +55,14 @@ On the other hand, files that were untouched for longer times might also contain
 
 \subsubsection{Combining metrics}
 
-One special metric is dependent on other metrics because it only creates a weighted sum of other metrics therefore allowing multiple metrics to be combined. 
+In many cases, one metric is not sufficient to evaluate the relevance of a data clump. Combining multiple metric is frequent tool to guarantee a more balanced view on code smells by weighting the importance of multiple metrics. The score of each metric is weighted by a constant factor provided in the configuration file, and the weighted average is calculated. 
+
+ In order for weighting to work, the metrics must be scaled uniformly. If one metric allows values from 0 to one million, and the other a value from 0 to 1, the former is more likely to outweigh the latter regardless of the weighting factor. 
+ 
+ Therefore, the metric combiner employs a two-step approach. In the first step and for each metric, the minimum and maximum value is calculated. Then, each metric value is scaled using the extrema resulting in a scaled metric ranging from zero to one.  
 
 \subsection{Filtering}
-In the filtering approach, a binary condition is tested on each data clump individually. if the data clump does not meet the criterion, it is removed from further consideration. hence, each data clump is analyzed independently. Theoretically, this could mean that all data clumps are filtered out if the filtering conditions are too lax and apply to all data clumps. 
+In the filtering approach, a binary condition is tested on each item individually. if the item does not meet the criterion, it is removed from further consideration. hence, each item is analyzed independently. Theoretically, this could mean that all data clumps are filtered out if the filtering conditions are too lax and apply to all data clumps. 
 
 These filters can be combined by logical operation (and, or), so that more complex filtering rules are possible. 
 
@@ -66,6 +75,28 @@ Hence, changing the signature of abstract methods is often avoided as derived cl
 
 Hence, it can be useful to exclude abstract methods for purpose of data clump refactoring to prevent these issues. 
 
+\subsubsection{Ignore specific identifiers}
+
+In many programming languages, convention have been established so that certain identifiers have a well-known meaning. For instance, the \textit{serialVersionUID} attribute in Java indicates a version of a class that should be changed if new fields are added in order to ease serialization. Because this field name is fixed, it is more probable to establish a data clump although the developer has few choices to prevent this data clump.
+
+To give another example, a class name ending with \enquote{Builder} indicates that the class builds or constructs something. Often this is related to another class (i.~e. the builder class constructs another class. This also has the potential to lead to data clumps because the builder class and the other class must have similiar fields or parameters. 
+
+In all these cases, the chance of getting false positive data clumps is higher. Therefore, filtering for these specific scenarios can be useful to receive only data clumps that are worth to refactor. 
+
+\subsubsection{Ignoring generic types}
+Generic types are types of which scarce information is available because the true type is only available at the run time. For instance, a generic list can be instantiated by providing a concrete type.
+
+Because of this lack of information, generic types are often named using  single-letter identifiers (e.~g. \enquote{T}). hence, the name of the type does not confer much semantic meaning and is not helpful for finding a suitable class name. 
+
+Additionally, because of the short identifiers, the risk of creating a possible data clump becomes greater as there is a higher chance of name collision.
+
+Hence, filtering these data clumps can be one strategy to focus on important data clumps. 
+
+\subsubsection{Ignore data clumps with specific annotations}
+
+Annotations are markers attached to a method, field, parameter etc. that convey additional functionality to the respective component. For instance, an annotation can provide the \ac{JSON} key name which a field is serialized to and deserialized from.  They exists in many programming languages, but the concrete syntax and applications differ.
+
+With regard to data clumps, annotation can pose challenges as they often need to be moved to the extracted class as well. This does not always work as some annotation are only compatible with specific types of components (e.~g. parameters). Even if they are compatible with fields of an extracted class, further changes is often necessary to make the software working again. For instancwe, an annotation might indicate the source of data passed to a method, and this source must be available to the extracted class too. 
 
 \subsection{Combining metrics and filters}
 
@@ -73,5 +104,5 @@ The differentiation between filters and metrics can be relaxed by using metrics 
 
 In the first case, filters employ the metrics described in section \ref{sec:metrics}, a comparison operator, and a threshold value. If the metric applied to a data clump compared with the threshold value using the comparison function returns true, the data clump remains, otherwise it is filtered out. For instance, the metric can be the data clump size, comparison function can be the greater-than function, and the threshold value can be three. In this example only data clumps with more than three variables will remain for further consideration. 
 
-Vice versa, a filter can be used as a metric. If a filter returns true on a specific item, the metric returns a different value than it would if the filter returns false. As result, the binary classification by a filter is still employed, but items that do not fulfill the criteria of the filter still has a chance not be filtered out. 
+Vice versa, a filter can be used as a metric. If a filter returns true on a specific item, the metric returns a different value than it would if the filter returns false. As result, the binary classification by a filter is still employed, but data clumps that do not fulfill the criteria of the filter still have a chance not be filtered out. 
 

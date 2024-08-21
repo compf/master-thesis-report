@@ -1,14 +1,46 @@
 \section{Integration of large language models}\label{sec:implementation_tools}
-Integrating large language models to detect and refactor data clumps poses the challenge of transmitting source code to the model, and afterwards integrating the changes and  feedback back to the source code. Difficulties arise of how to submit the source code to the \ac{LLM} and  the model should reply so that such integration runs as seamlessly as possible. 
+Integrating large language models for data clumps refactoring poses the challenge of transmitting source code to the model, and afterwards integrating the changes and  feedback back to the source code. Difficulties arise of how to submit the source code to the \ac{LLM} and  the model should reply so that such integration runs as seamlessly as possible. 
+
+The challenges differ between the concrete uses of the \ac{LLM}. The following applications of models are discussed in this section:
+\begin{enumerate}
+    \item Detecting data clumps
+    \item Choosing the best data clumps
+    \item Refactoring data clumps
+\end{enumerate}
+
+Each step can be performed independently from each other, but internally all previous steps must be conducted. For instance, a model instructed to refactor data clumps must find them first, then decide which data clumps are worthy to refactor (these could be all data clumps), and then refactor them. Similarly, a model instructed to filter data clumps must find them first, but does not need to refactor them.
 
 \subsection{Input processing}
+
+\begin{table}[]
+    \centering
+    \begin{tabular} {m{4cm} | m{4cm} | m{4cm}}
+        Detecting & Filtering & Refactoring  \\\hline
+         \begin{itemize}
+             \item AST
+             \item Full source code 
+             \item Snippets of methods with at least three parameters, classes with at least three fields
+         \end{itemize} & \begin{itemize}
+             \item Data Clump Type Context
+             \item Full source code
+             \item Snippets of source code of the data clumps
+         \end{itemize} & \begin{itemize}
+             \item Full source code 
+             \item Snippets of source code of the data clumps
+         \end{itemize}
+    \end{tabular}
+    \caption{Input categories for different scenarios regarding using \ac{LLM} in data clump refactoring}
+    \label{tab:data_clump_llm_input}
+\end{table}
+
+The input provided to a model is strongly dependent on the purpose of the model. Table \ref{tab:data_clump_llm_input} shows possible input types for each \ac{LLM} usage
 Providing the complete source code is the most natural manner to give ChatGPT the relevant information. Since ChatGPT is language-agnostic, it can deal with many programming languages and therefore is able to process the source code files to find data clumps. However, source code files can be large as they can contain comments, method bodies or other parts of the programming language that are not relevant for detecting data clumps. This leads to higher costs.
 
-Another possible approach is to only provides those lines of code that relate to data clumps. These lines are lines where data clump items are declared or used: In case of data clumps affecting parameters, the respective method calls are also code lines related to data clumps. Additionally, a set of lines above and beyond a relevant line can be included to give an \ac{LLM} more context. This reduces the file sizes strongly and helps the \ac{LLM} to focus more on the important parts. Any line that might be relevant to data clump refactoring (but does not necessarily have to be) is referred to as \textbf{location of interest}
+Another possible approach is to only provides those lines of code that relate to data clumps. These lines are lines where data clump items are declared or used: In case of data clumps affecting parameters, the respective method calls are also code lines related to data clumps. Additionally, a set of lines above and beyond a relevant line can be included to give an \ac{LLM} more context. This reduces the file sizes strongly and helps the \ac{LLM} to focus more on the important parts. Any line that might be relevant to data clump refactoring (but does not necessarily have to be) is referred to as a \textbf{location of interest}
 
 The major issue with this strategy is to choose which lines of code to transmit. Only if the data clumps are already known, all relevant location can be found and transmitted to the model. This does not work if it is the purpose of the model to also to detect data clumps. 
 
-If information about the location of fields and method parameter is given (i.~e. by an \ac{AST}), those lines can be transmitted which reduce the transmission size, but to a lesser extent. In this case, there will be more relevant. In this case, the number of lines of interest will be larger, which can degrade the quality of the results. 
+If information about the location of fields and method parameter is given (i.~e. by an \ac{AST}), those lines can be transmitted which reduce the transmission size, but to a lesser extent. In this case, the number of lines of interest will be larger, which can degrade the quality of the results. 
 
 Inc contrast to transmitting the whole or pieces of the source code, the \ac{AST} can be provided. The \ac{AST} only contains a reduced structure of the source code and will therefore cost not as much. However, the \ac{AST} is usually not available but must be produced by other tools or ChatGPT (which means the source code has to be sent to the \ac{LLM} nevertheless). Additionally, there is no fixed format for the \ac{AST} which might complicate parsing and processing the \ac{AST} or the results by ChatGPT.
 
@@ -17,7 +49,7 @@ In case ChatGPT should also perform the refactoring, the \ac{AST} becomes not as
 
 
 \subsection{Output processing}
-An \ac{LLM} on its own cannot change code or controls a system since, for the purpose of this master thesis, it  can only output textual information. Therefore, each output from the model must be received and interpreted so that the service by the model can be used. Two approaches are discussed. 
+An \ac{LLM} on its own cannot change code or controls a system since, for the purpose of this master thesis, it  can only output textual information. Therefore, each output from the model must be received and interpreted  in order to serialize them permanently. Two approaches are discussed. 
 
 \subsubsection{By human in the loop}
 Commonly, he refactoring is done by human beings who review the output, interpret it and use the gained knowledge to simplify the workflow. In the case of refactoring, the model can propose changes to the source code, but cannot change the source code directly. Instead, a human in the loop has to read the refactoring suggestion, determine whether they are reasonable, and perform the suggested refactoring. In the last step, this involves also finding the affected files, change them, and test the changes. Hence, while an \ac{LLM} can help to make decisions, manual work must still be performed. 
@@ -41,7 +73,29 @@ Therefore, the \ac{JSON} approach should be modified so that not full file conte
 
 
  
+To faciliate this change-based approach, a simple communication format was developed that details in which files which lines needs to be changed. Figure \ref{} outlines an example. Listing \ref{} shows source code that contains a data clump (although the second file containing the other end of the data clump is left out). Using the change-based approach, an \ac{LLM} generates an instruction. This instruction is hown in figure \ref{} although it is not valid \ac{JSON} as artificial newlines have been applied to improve readability
+\begin{itemize}
+    \item In file \enquote{Library.java}
+    \begin{itemize}
+        \item replace the \textit{oldContent} in line 13-15 of the original file with \textit{newContent}.
+        \item => This removes the data clump items
+       \item replace the \textit{oldContent} in line 13-15 of the original file with \textit{newContent}.
+        \item => This replaces the usages of the data clump item by an object of the extracted class 
+    \end{itemize}
+    \item Create a new class at the location \enquote{NumberProperties.java} with the specified content
+\end{itemize}
 
+The result of applying these changes can be seen in figure \ref{}.
+
+One major issue is how to apply the suggested changes. Two approaches are possible.
+In the first approach, the content at lines \enquote{fromLine} to \textit{toLine} is replaced by \enquote{newContent}. This can be challenging if \enquote{newContent} has more lines than \enquote{oldContent}. Additionally, even if these  changes are correctly applied, later changes in the same file can become more problematic as the line number information might be outdated. 
+
+ALternatively, a replace method can be used. This means that the string \enquote{oldContent} is replaced by \enquote{newContent} without considering the line number information. This method prevents the issues of the first approach. Additionally, it might refactor more lines that the \ac{LLM} did not refactor for some reasons. If two strings are equal and one string needs to be refactored, there is a high probability that the other string should be changed in the same manner. However, this does not work if \enquote{oldContent} for some reason does not exists in the file. For instance, the model might have added extra whitespaces to the old content so that a simple search-and-replace-strategy does not work. Furthermore, if oldContent is an empty string, replacing can lead to file corruption as the replacement operation are not developed for such an scenario. 
+
+In this master thesis both approaches are employed. The second approach is always tested first. If this approach does not work (e.~g. \enquote{oldContent} does not exists in the file, the line-by-line replacement method is used.  
+
+
+\input{chapter4/replace_diagram}
 
 
 \subsection{Proposal handling}
@@ -58,6 +112,6 @@ As an alternative, one could count the number of changed lines in a proposal and
 
 \subsubsection{Sequential proposals}
 
-With sequential proposals, one conversation is hold and the context is kept meaning that the \ac{LLM} does not forget its previous output. Using this idean, not the first proposal is choosen but the last one after the \ac{LLM} has been given enough chances to correct errors.  To facilitate this, build errors from the refactoring proposal can be gathered and presented to the model so that it can improve its refactoring. This represents the chain of thought idea discussed in section \ref{sec:chain of thought}
+With sequential proposals, one conversation is hold and the context is kept meaning that the \ac{LLM} does not forget its previous output. Using this idea, not the first proposal is chosen but the last one after the \ac{LLM} has been given enough chances to correct errors.  To facilitate this, build errors from the refactoring proposal can be gathered and presented to the model so that it can improve its refactoring. This represents the chain of thought idea discussed in section \ref{sec:chain of thought}
 
-It should be noted that at some point a proposal should be finally chosen as the \ac{LLM} might not always find a solution that compiles immediately. 
+It should be noted that at some point a proposal should be finally chosen as the \ac{LLM} might not always find a solution that compiles even if infinitive steps were available. Similar to a an optimization algorithm, it can be steuck into a local optimum and cannot suggets changes so that the program compiles again-  

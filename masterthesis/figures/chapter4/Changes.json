@@ -1,0 +1,35 @@
+{
+  "refactorings": {
+    "src/main/java/org/example/Library.java": [
+      {
+        "fromLine": 13,
+        "toLine": 15,
+        "oldContent": "
+          private boolean sign;
+          private double mantissa;
+          private int exponent;
+}",
+        "newContent": "
+         private NumberProperties numberProperties;
+}"
+      },
+      {
+        "fromLine": 8,
+        "toLine": 10,
+        "oldContent": "
+        System.out.println(sign);
+       System.out.println(mantissa);
+       System.out.println(exponent);
+}",
+        "newContent": "
+      System.out.println(numberProperties.getSign());
+       System.out.println(numberProperties.getMantissa());
+       System.out.println(numberProperties.getExponent());}"
+      }
+    ],
+  },
+  "extractedClasses": {
+    "src/main/java/org/example/NumberProperties.java": "..."
+  }
+  
+}

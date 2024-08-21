@@ -25,10 +25,6 @@ Figure \ref{fig:solver_gateway_service_overview} illustrates how the service-bas
 
 
 
-Some parts of the pipeline are mandatory because finding and refactoring data clumps would be defeated if these steps were not executed. For instance, obtaining the source code of the project to analyze, finding data clumps, finding a suitable name, and refactoring can be regarded as mandatory.
-
-
-
 A handler can also check whether it can be run in the given situation. For instance, a code obtaining handler can determine whether the project location does in fact exist or a validation handler for \textit{Gradle} can check whether the project is indeed \textit{Gradle}-based.
 
 The program, therefore, acts as an orchestrator. It starts every service and controls them. The steps and services are temporally coupled. A step cannot be started unless all previous mandatory steps have completed. In most cases, if a step was not successful, further execution of the pipeline makes no sense, so it can be aborted. 

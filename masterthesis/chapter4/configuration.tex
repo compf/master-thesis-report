@@ -33,4 +33,4 @@ Each object that appears in the \ac{JSON} is instantiated using dependency injec
     \item The name of the object and it parameters are registered at the central dependency manager under the category given
     \item If a handler or other object needs another object of a specific category, it can ask the central manager. If the respective object has  yet not been created, it will be created. Otherwise, the already instantiated object will be returned. 
 \end{enumerate}
-With this approach, a looser coupling can be achieved. The main program and the handlers does not need to know the exact details of the configuration but provide and receive them from a central dependency manager. Only the handler-specific configuration (e.~g. loading the project location  for the \textit{CodeObtaining} handler is still required and must be performed by each handler. These parameters are stored by the dependency manager. 
+With this approach, a looser coupling can be achieved. Each handler has access to the configuration it needs and does not have to deal with the creation of objects. 

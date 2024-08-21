@@ -1,0 +1,89 @@
+  \begin{figure}[h!]
+  \centering
+ \begin{tikzpicture}[scale=0.75, every node/.style={scale=0.75}]
+ \pgfmathsetlengthmacro\breite{6cm}
+\pgfmathsetlengthmacro\hoehe{2.567cm}
+\pgfmathsetlengthmacro\InnerSep{0.4cm}
+\node[draw,
+anchor=center, 
+inner sep=0pt, 
+minimum width=5cm, text width=8cm-\InnerSep,
+align=justify,minimum height=1.5cm] (java) {
+public class Library \{\newline
+    \hspace*{1cm}public void main() \{\newline
+      \hspace*{2cm} println(fp.sign);\newline
+     \hspace*{2cm}  println(fp.mantissa);\newline
+      \hspace*{2cm} println(fp.exponent);\newline
+     \hspace*{1cm}\}\newline
+    \hspace*{1cm} private FloatingPoint fp;\newline
+\}
+};
+\node[draw,text width=7cm, left = of java](java2){
+
+public class Library \{\newline
+    \hspace*{1cm}public void main() \{\newline
+      \hspace*{2cm} println(sign);\newline
+     \hspace*{2cm}  println(mantissa);\newline
+      \hspace*{2cm} println(exponent);\newline
+     \hspace*{1cm}\}\newline
+    \hspace*{1cm} private boolean sign;\newline
+    \hspace*{1cm} private double mantissa;\newline
+   \hspace*{1cm}  private int exponent;\newline
+\}
+
+};
+
+\draw[stealth-]    (java2) --(java) ;
+\draw [line width=0.05cm](java) -- (-4,-3.5);
+\draw[thick,line width=0.05cm] (-4,-3.5) -- (-4,-3.5);
+
+\node[above=-0.0 of java2,line width=0cm]{Program.java};
+
+\node[above=-0.0 of java,line width=0cm]{Main.java};
+
+
+\node [draw, text width=7cm, below left=2 of java ] {
+\{\newline
+  "refactorings": \{\newline
+    "src/main/java/org/example/Library.java": [\newline
+      \{\newline
+        "fromLine": 13,\newline
+        "toLine": 15,\newline
+        "oldContent": "\newline
+          private boolean sign;\newline
+          private double mantissa;\newline
+          private int exponent;\newline
+\}",\newline
+        "newContent": "\newline
+         private NumberProperties numberProperties;\newline
+\}"\newline
+      \},\newline
+      \{\newline
+        "fromLine": 8,\newline
+        "toLine": 10,\newline
+        "oldContent": "\newline
+        System.out.println(sign);\newline
+       System.out.println(mantissa);\newline
+       System.out.println(exponent);\newline
+\}",\newline
+        "newContent": "\newline
+      System.out.println(numberProperties.getSign());\newline
+       System.out.println(numberProperties.getMantissa());\newline
+       System.out.println(numberProperties.getExponent());\}"\newline
+     \}\newline
+    ],\newline
+  \},\newline
+  "extractedClasses": \{\newline
+    "src/main/java/org/example/NumberProperties.java": "..."\newline
+  \}\newline
+  \newline
+\}
+};
+
+
+    
+\end{tikzpicture}
+     
+     \caption{ Veranschaulichung der Bildung eines Gesamtergebnisses}
+     \label{fig:metric_weighting}
+ \end{figure}

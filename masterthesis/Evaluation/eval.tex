@@ -1,26 +1,46 @@
 
 In this chapter, the full-scale evaluation is discussed.
-\section{Goal of the evaluation}
-While the small-scale evaluation has shown that \acs{LLM} can be detect and refactor data clumps, the real usability is still hard to measure. Only two projects were tested and only a statistical analysis of the sensitivity, specificity and accuracy  is performed so that other factors are not considered.
+\section{Structure of the evaluation}
 
-Others factors are more subjective and cannot be tested  easily.  For instance, while data clumps can be detected with the DataClumpDoctor, each detected data clump might not be a data clump for every developer. For instance, developers may disagree about the required number of data clump items (three in this master thesis). Additionally, developers who have knowledge of the structure of a project can better determine whether a group of variables  constitutes a data clump. In some cases, they have written the method or class themselves and have introduced the data clump on purpose because they could not find a proper name for the extracted class, or the disadvantages discussed in section \ref{sec:data_clump_not_refactor} outweigh the advantages of introducing a code smell. 
+The evaluation is separated into two parts.
 
-Even if developers agree that a detected data clump constitutes a data clump  in their opinion, there could be arguments against refactoring them. These reasons include the points  discussed in section \ref{sec:data_clump_not_refactor}.Additionally, there are more grounds that are not specific to data clumps but code smells in general. For instance, the location of the code smell could be currently under heavy editing so that it might not be certain whether the methods or classes will exist in the long-term. On the other hand, parts of the source code that have been untouched for longer times, could be too risky to refactor as the knowledge on how the source code behaves or is structured is limited, so that developers would not refactor them even if it might make sense. 
+In the first par, the tool was used on multiple public GitHub repositories to measure the acceptance of \ac{LLM}-assisted refactoring.
 
-As a result, asking the opinion and ideas of developers on whether data clump refactoring is justified and can be performed by a \ac{LLM} is the basis of this evaluation .
-\section{Evaluation setup}
-To facilitate the evaluation, GitHub projects that uses Java  were selected. These were forked and analyzed by the DataClumpDetector. a particularly selected data clump was then refactored by a combination of tools. For each GitHub project, a pull request was created to as the contributors  of the project to merge the refactoring in their project. The contributors were asked to fill out a survey form and submit any feedback relating to the refactoring which was collected. 
+In the second part different applications of the tool were tested and compared with manual approaches to determine the usefulness and challenges of the tool while detecting and refactoring data clumps.
 
-\subsection{GitHub project selection}
+
+
+
+
+\section{GitHub project selection}\label{sec:github_projects}
+
+To facilitate the evaluation, GitHub projects must be chosen which will be analyzed in the two parts of the evaluation. 
+
+
 The projects are selected from the trending page of GitHub. This page list GitHub projects that have gained attention in a specific time period. For instance, they were forked comparatively often or received more stars in comparison, but the exact criteria is difficult to determine. Each project was tested on the following criteria
 \begin{enumerate}
     \item Whether the project contains at least  10,000 \ac{LOC} of Java
-        \item Whether the project uses has at least 100 stars
-    \item Whether the last closed pull request is newer than 30 days
+        \item Whether the project  has at least 100 stars
 
 \end{enumerate}
 
 With the first two criteria,  only larger projects are considered. This increases heuristically the chance of having a higher number of data clumps, and also the chance of getting more developers to respond to the survey as larger projects tend to be maintained by more people. The third criteria also influences the number of contributors and their willingness to work on the project. Only if pull request are frequently considered and closed (which does not necessarily mean that they are merged), the project is considered active enough. 
+
+
+\section{Pull request evaluation}
+In this section, the first evaluation about pull request related to data clump refactoring is discussed. 
+
+\subsection{Goal of the evaluation}
+
+To ascertain the quality of refactoring, human feedback is essential. While there are metrics to evaluate whether a given refactoring is useful, the metrics do not always align with the viewpoints of developers. 
+
+ For instance, while data clumps can be detected with the DataClumpDoctor, each detected data clump might not be a data clump for every developer. For instance, developers may disagree about the required number of data clump items (three in this master thesis). Additionally, developers who have knowledge of the structure of a project can better determine whether a group of variables  constitutes a data clump. In some cases, they have written the method or class themselves and have introduced the data clump on purpose because they could not find a proper name for the extracted class, or the disadvantages discussed in section \ref{sec:data_clump_not_refactor} outweigh the advantages of introducing a code smell. 
+
+Even if developers agree that a detected data clump constitutes a data clump  in their opinion, there could be arguments against refactoring them. These reasons include the points  discussed in section \ref{sec:data_clump_not_refactor}.Additionally, there are more grounds that are not specific to data clumps but code smells in general. For instance, the location of the code smell could be currently under heavy editing so that it might not be certain whether the methods or classes will exist in the long-term. On the other hand, parts of the source code that have been untouched for longer times, could be too risky to refactor as the knowledge on how the source code behaves or is structured is limited, so that developers would not refactor them even if it might make sense. 
+
+As a result, asking the opinion and ideas of developers on whether data clump refactoring is justified and can be performed by a \ac{LLM} is the basis of this evaluation .
+
+
 
 
 \subsection{Criteria for selecting data clumps}
@@ -49,7 +69,6 @@ For each combination of the weights described above, the five most-scored data c
 \end{itemize}
 All these criteria are more guidelines than strict requirement to allow flexibility 
 After considering all of these criteria, one final data clump was selected.
-
 \subsection{Assignment to a category}
 
 After a data clump is selected, the next step is to assign the project to a category to determine the extent \acs{LLM} are used to find and refactor data clumps. 
@@ -61,7 +80,7 @@ In this method, ChatGPT performs the refactoring completely. Because transmittin
 
 Then, ChatGPT is instructed to refactor all data clumps in the provided lines of interest. This instruction was repeated at least ten times, in each time the context of ChatGPT was cleared so it didn't know its previous answers. 
 
-From these ten proposal, one proposal was chosen that describes refactoring data clumps most acurately. For instance, the extracted class is valid, most usages of the data clump items are updated and all method signatures are refactored (if applicable). Generating multiple proposals in necessary because not every proposal will be correct.
+From these ten proposal, one proposal was chosen that describes refactoring data clumps most accurately. For instance, the extracted class is valid, most usages of the data clump items are updated and all method signatures are refactored (if applicable). Generating multiple proposals in necessary because not every proposal will be correct.
 
 \subsubsection{Refactoring by IntelliJ}
 
@@ -73,4 +92,88 @@ Afterwards, the proposal might not be fully correct. For instance, there might n
 
 As soon as this manual refactoring finished and the program compiles, the changes were squashed into one commit and a pull request was created in the respective repository. In this pull request, the maintainers were described the purpose of this pull request and  the definition of data clumps used in this master thesis. They were asked to give feedback by filling out a feedback form or by giving feedback via GitHub comments under the respective pull request. It was explicitly stressed that rejecting the pull request would not be perceived negatively. 
 
-The feedback by the form and comments were collected and evaluated as described in subsection ?
+The feedback by the form and comments were collected and evaluated as described in subsection \ref{sec:feedback_survey}
+
+\subsection{Feedback survey}\label{sec:feedback_survey}
+
+The feedback consists of two parts.
+\subsubsection{GitHub comments}
+One  natural way of providing feedback over Github is via comments. These commeent can be review comments that address specific parts of the code or general comments unrelated to any code that addresses the pull request as a whole. \cite{10.1145/3597208}. Therefore it is an important source of determining the acceptance of the proposed refactoring. However, since the comments are natural texts, obtaining meaningful results is more challenging. 
+
+\subsubsection{Likert scale}
+The likert scale is a common method in surveys. It consists of statements that claim a certain fact and the respondents have to express their opinion to each statement by choosing from one discrete attitude category. \cite{edmondson2005likert}
+
+For instance, a statement might be \enquote{refactoring data clumps is useful}, and the list of available attitudes can be
+\begin{itemize}
+    \item Strongly agree
+    \item Agree
+    \item Neutral
+    \item Disagree
+    \item Strongly disagree
+\end{itemize}
+
+Using the method evaluating the variance of opinion can be eased as the possible answers are discreet and easy to map on a numerical scale.(e.~g. 0 for strongly disagree to 5 for strongly agree).
+
+
+For this master thesis, the survey plattform \textit{lamapoll} \cite{lamapoll} was used.  The following statements should be addressed by the respondents:
+\begin{enumerate}
+\item Data clumps are a code smell that should be fixed, 
+\item Using LLMs in software development can be helpful to improve code quality,
+\item The proposed refactoring maintains or improves the quality of the code.,
+\item The proposed refactoring has  adequately identified and preserved the original functionality and intent of the code, 
+\item The name of the new extracted class(es), fields and methods are well-chosen
+ \item The location of the extracted class(es) are well-chosen,
+ \item For how long have you been contributing to this project?,
+\item For how long have you been a developer in Java ?, 
+\item Please input the URL of the GitHub project from where you got to this survey
+
+\end{enumerate}
+
+
+The statements 7--9 are actually questions not using the likert scale. Question 7 attempts to assess the experience of the developer about this project. Question 8 similarly is aimed to obtain the programming experience of the respondent in the Java language.
+
+The purpose of question 9 is to create a connection between the survey and the pull request of the project as the survey platform does not allow such a link easily. 
+
+
+\section{Data clump filtering by model}
+
+In this evaluation, it is tested whether the  \ac{LLM} is suitable for data clump filtering. As outlined in section \ref{sec:data_clump_filtering}, there are multiple approaches for filtering data clumps, which can already be implemented manually. 
+
+The question here is whether the \ac{LLM} uses novel filtering approaches or simply relies on the metric discussed in section \ref{sec:data_clump_filtering}. In the latter case, it is more useful to use the manual algorithm because they are reliable and do not incur the costs associated with Large Language Models. 
+
+In order to facilitate this experiment, the data clumps are evaluated on 3 metrics (size, occurrence, affected files. Then the ten most important data clumps are randomly shuffled and presented to the \ac{LLM} which chooses one data clump. 
+
+The following metrics are used to evaluate this experiment:
+\begin{itemize}
+    \item The rank of the chosen data clump with regard to each of the three metrics mentioned
+    \item the weighted combination of the three metrics
+    \item the easiness of refactoring this data clump
+\end{itemize}
+
+
+\section{Data clump refactoring}
+
+Evaluating how an \ac{LLM} performs data clump refactoring is another method to assess the suitability of the models for use in the pipeline. Here, especially the creativity is important. If a model merely refactors similary to a manual tool (e.~g. IntelliJ), it has less use.
+
+If however, the \ac{LLM} extracts more functionality by creating new methods ore solves the data clump in other ways, the advantages of the model become more obvious.
+
+
+The following metrics are used for evaluating this tests:
+
+\begin{itemize}
+    \item The number of attempts until the refactored program compiles
+    \item whether the extracted class are more than mere data classes
+    \item the existence of documentation/comments
+\end{itemize}
+
+\section{Data clump detection}
+
+While tools for detecting data clump are well implemented in the main program, using an \ac{LLM} can provide opportunities. For instance, data clumps can be detected if two variables are synonyms, also consideration like annotations, modifiers, or associated comments can be a possible indicator to assess whether a data clump does in fact exists. In this regard, data clump detection and prioritization can be very similar. 
+
+The following metrics are used for evaluating this tests:
+
+\begin{itemize}
+    \item The sensitivity and specificity compared to the \textit{DataClumpDoctor}
+    \item the completeness and correctness of the metadata (line numbers, modifiers, etc.)
+    \item the number of data clumps that have similar but not equal name)
+\end{itemize}
