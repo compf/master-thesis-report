@@ -64,11 +64,11 @@ Listing \ref{lst:chatgpt_api} shows how an \ac{API} query may look like if it us
 
 Since ChatGPT uses \ac{JSON} for communication, the content header of \ac{HTTP}  must be set to \enquote{application/json} (l. 2). Afterwards a token must be provided to ChatGPT (l. 23). This  token must be generated on the OpenAI website and will be used to connect the query to an OpenAI account so that the user can be charged properly- The token should remain secret and may not be disclosed (e.~g. via \ac{VCS}) 
 
-Then, the actual query is defined (l. 4-24.). Firstly, the model is defined (l. 5). OpenAI provides multiple models that have different advantages and disadvantages. For instance, a newer model like \textit{gpt-4} has more capabilities but is more expensive. 
+Then, the actual query is defined (l. 4-24.). Firstly, the model is defined (l. 5). OpenAI provides multiple models that have different advantages and disadvantages. For instance, a newer model like \textit{gpt-4} has more capabilities but is more expensive.  By providing a temperature, a user can configure the randomness of the response (l.6). A higher temperature results in more creative answers but this creativity might worsen the quality. 
 
-Afterward, the actual messages are provided (l. 6-24). Each message is a tuple of a \textbf{role} and a \textbf{content}. The content of a message is the input or output provided to or by ChatGPT. 
+Afterward, the actual messages are provided (l. 7-25). Each message is a tuple of a \textbf{role} and a \textbf{content}. The content of a message is the input or output provided to or by ChatGPT. 
 
-The role of a message indicates the source of a message. If the content of the messages comes from a user, the role should be \enquote{user} (l. 12). A reply for a query is defined as the role \enquote{assistant} (l. 16). The system role is a more specific and can be used to include further context for ChatGPT without eliciting a response (l. 8)
+The role of a message indicates the source of a message. If the content of the messages comes from a user, the role should be \enquote{user} (l. 13). A reply for a query is defined as the role \enquote{assistant} (l. 17). The system role is a more specific and can be used to include further context for ChatGPT without eliciting a response (l. 9)
 
 The response of the ChatGPT \ac{API} based on listing \ref{lst:chatgpt_api} is displayed in listing \ref{lst:chatgpt_api_response}.
  \begin{figure} [htbp!]
@@ -98,7 +98,7 @@ ChatGPT is stateless. This means that the token id explained above is solely use
 \end{figure}
 
 
-Figure \ref{fig:chatgpt_stateless} visualize this issue. Here, the user asks the ChatGPT API to find all data clump in a java file \textit{(request 1)}. ChatGPT responds with some data clumps. These might not be all data clumps, so a follow-up request might improve the results \cite{10062688}. Therefore, the user sends another request \textit{(request 2)} to instruct the model to find more data clumps. However, ChatGPT responds with a general message stating that it does not know the content of the file \enquote{MathStuff.java}. This is the result of the statelessness which requires that the user always send the whole context with each query. In \textit{request 3}, the context is provided so that ChatGPT accurately responds by finding another data clump.
+Figure \ref{fig:chatgpt_stateless} visualize this issue. Here, the user asks the ChatGPT API to find all data clump java files \textit{(request 1)}. ChatGPT responds with some data clumps. These might not be all data clumps, so a follow-up request might improve the results \cite{10062688}. Therefore, the user sends another completely new request \textit{(request 2)} to instruct the model to find more data clumps. However, ChatGPT responds with a general message stating that no files have been submitted. This is the result of the statelessness which requires that the user always send the whole context with each query. In \textit{request 3}, the context is provided so that ChatGPT accurately responds by finding another data clump.
 
 Since follow-up requests make only sense if ChatGPT has already responded, the whole original request, the reply by ChatGPT, and any previous conversation must be provided which can have a significant impact on costs and rate limits. 
 
@@ -110,7 +110,7 @@ Because of the context window limitation, transmitting the third file overwrites
 
 \begin{figure}[ht!]
     \centering
-    \includegraphics[width=0.6\columnwidth]{figures/chapter2/chat_dialog.pdf}
+    \includegraphics[width=0.6\columnwidth]{figures/chapter2/chatgpt_context_windows_size.drawio.pdf}
     \caption{Example of model forgetting context}
     \label{fig:llm_loose_context}
 \end{figure}
@@ -176,7 +176,7 @@ In the context of data clump refactoring, the query should include the content o
 An instruction for refactoring data clumps should state that only the refactored source code files should be returned without providing explanatory texts or other information, as they can hinder the parsing of the output. 
 
 When using the \enquote{gpt-4-1106-preview} or \enquote{gpt-3.5-turbo-1106} model of the OpenAI-\ac{API}, developers can force the model to respond in \ac{JSON}. Hence, the output can be made more predictable and easier to control. A request using this mode must include the term \enquote{\ac{JSON}}. It should however be noted, that the precise structure of the \ac{JSON} returned may still differ from the request. 
-
+\begin{comment}
 \subsubsection{Politeness is not necessary}
 
 Polite words like \enquote{please} or \enquote{thank you} are expected in human conversations. However, a  \ac{LLM} will ignore these words that are often referred to as \enquote{filler} words, or their effect will be marginal. Since costs are an important part of the usage of \ac{LLM}, these words are often unnecessary. \cite{bsharat2023principled}.
@@ -194,7 +194,6 @@ For instance, instructing a \ac{LLM} to not write informally can result in worse
 While a \ac{LLM} is not a human, its result can be influenced by rewards or punishments. For instance, the authors in \cite{bsharat2023principled} claim that promising the model a monetary amounts, can lead to better results. 
 
 Similarly, informing the model that certain results will be punished, can decrease the likelihood that these results will be returned. \cite{bsharat2023principled}
-\begin{comment}
 \subsection{Cost reduction}
 
 Many \ac{LLM} are not for free but must be paid based on usage or other factors. Even if a \ac{LLM} is free, there are many restrictions for the data to be processed by the model, so special care needs to be taken to reduce the data size as well as possible.  The cost might already be reduced by following the steps in section \ref{sec:prompt_engineering}. Nevertheless, there are other factors that will be outlined:
@@ -202,7 +201,7 @@ Many \ac{LLM} are not for free but must be paid based on usage or other factors.
 
 \subsubsection{Chain-of-Thought Prompting}\label{sec:chain of thought}
 
-Another approach to improve the results from \ac{LLM} like ChatGPT is to separate a query into interconnected sub-queries that lead to a chain of thought. This can be compared to the human thinking process because a human alone tries not to solve a problem at once but breaks it down into simpler problems that are still connected to but easier to solve. \cite{Wei2022ChainOT}
+One way to improve the results from \acp{LLM} like ChatGPT is to separate a query into interconnected sub-queries that lead to a chain of thought. This can be compared to the human thinking process because a human alone tries not to solve a problem at once but breaks it down into simpler problems that are still connected to but easier to solve. \cite{Wei2022ChainOT}
 
 For instance, a query to find and refactor data clumps can be separated into a detection query and a refactoring query. These sub-queries can be further divided into a query for each file or for all files in a single directory. As a result, not one a single query is needed but multiple queries. 
 
@@ -219,17 +218,22 @@ With this approach, costs can be saved. Instead of being dependent on the price 
 
 Moreover, privacy is more preserved since data does not flow to OpenAI but remains in the control of the user. This is especially important in regions with stricter privacy laws (e.~g. European Union).
 
-A self-hosted \ac{LLM} is also more configurable. There a specific models that have been more intensively trained on coding tasks so that the quality of the results can be improved. The models from OpenAI are more generally trained. 
+A self-hosted \ac{LLM} is also more configurable. There a specific models that have been more intensively trained on coding tasks so that the quality of the results can be improved. The models from OpenAI are more generally trained.  For instance, the \textit{Llama2} model is specialized for human interaction while the \textit{Codellama} is specialized for discussing and generating source code. The \textit{Phind CodeLlama} model is based on the Codellama model and is focused more on the code generation task. 
 
 However, this configuration requires effort and time. Finding a suitable model for a task, installing it, and configuring it is not trivial. For instance, a server needs to be set up that  runs the model, receives queries (e.~g. over a network) and respond back. 
 
 This server must be suitable equipped. In general, at least 32 GB of RAM are necessary. Also video RAM and storage requirements must be met to gain useful performance. These are requirements that cannot be achieved by some users. 
 
+Self-hosting \acfp{LLM} should not be confused with self-trained \acp{LLM}. In the latter case, a user must train its own model which requires extensive amount of data, even more processing power and the need to properly design the training process to prevent typical issues of machine learning like over-fitting.
+
+\begin{comment}
+Another problem with self-hosted \acfp{LLM} is that they might have lower standards regarding output control. For instance, generating malicious or illegal content is easier with these models than those from OpenAI as they are more censored. 
+\end{comment}
 \subsubsection{Hosting a large language server}
 
 One method to host a \ac{LLM} is via \textit{Ollama} \cite{ollama}. Ollama is a program to download, configure, and host a local \ac{LLM}. Users can set up a large language model with one command and query the model via the command line or a \ac{HTTP} interface.
 
-After installing Ollama, a user can use the command \textit{ollama pull <model>} to download a compatible model. The list of compatible models is provided on the official website \cite{ollama}. Each model can be used for general task but they are also specialized in specific task. For instance, the \textit{Llama2} model is specialized for human interaction while the \textit{Codellama} is specialized for discussing and generating source code. The \textit{Phind CodeLlama} model is based on the Codellama model and is focused more on the code generation task. 
+
 
 After a model has been downloaded, a user can execute the command \textit{ollama run <model>} to submit queries 
 

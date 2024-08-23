@@ -4,7 +4,7 @@ In this chapter, the full-scale evaluation is discussed.
 
 The evaluation is separated into two parts.
 
-In the first par, the tool was used on multiple public GitHub repositories to measure the acceptance of \ac{LLM}-assisted refactoring.
+In the first part, the tool was used on multiple public GitHub repositories to measure the acceptance of \ac{LLM}-assisted refactoring.
 
 In the second part different applications of the tool were tested and compared with manual approaches to determine the usefulness and challenges of the tool while detecting and refactoring data clumps.
 
@@ -28,7 +28,7 @@ With the first two criteria,  only larger projects are considered. This increase
 
 
 \section{Pull request evaluation}
-In this section, the first evaluation about pull request related to data clump refactoring is discussed. 
+In this section, the first evaluation about pull request (PR) related to data clump refactoring is discussed. 
 
 \subsection{Goal of the evaluation}
 
@@ -133,6 +133,32 @@ For this master thesis, the survey plattform \textit{lamapoll} \cite{lamapoll} w
 The statements 7--9 are actually questions not using the likert scale. Question 7 attempts to assess the experience of the developer about this project. Question 8 similarly is aimed to obtain the programming experience of the respondent in the Java language.
 
 The purpose of question 9 is to create a connection between the survey and the pull request of the project as the survey platform does not allow such a link easily. 
+\subsection{Threats to validity}
+
+The survey evaluation has some threats to its validly that should not be disregarded.
+
+To begin with, the selection of GitHub project is not completely unbiased. For instance, currently trending GitHub projects were chosen although it is not certain why they were popular. Therefore, the maintainers of the project might not be fully prepared to deal with associated surge in pull requests associated with trending projects. This can increase the chance that a pull request (even though reasonable and we-meant) is summarily rejected. \cite{10.1145/3366423.3380272}
+
+Additionally, only projects that do build flawlessly were considered. Usually, this should be case for every project, but the reality differs. For instance, the operating system, the installed libraries, the Java version, and other components can have a significant impact on whether all unit tests complete without errors and the project compiles.  While every effort was made to give each project a chance to compile, st some point, time constraints prevented endless consideration of a project. Hence, if even after testing on multiple system, reading the associated documentation, and testing multiple Java version, no fully functional build was achieved, the project war disregarded.
+
+The manual correction process should also be taken into account as it could induce mistakes or bugs by human error instead of by an \ac{LLM}. Feedback regarding these errors must be filtered out as they are not relevant. 
+
+
+Additionally, it should be considered that the decision on whether to consider a pull request or reject it immediately can depend on many factors. For instance,  the current mood of participating developers can influence the rejection rate.\cite{detecting_emotional}, 
+
+For larger project, burecaucy was also a factor that prevented the creation of pull requests. For instance, some projects require that pull request must always relate to an existing issue so that the general idea can be discussed without providing source code. For usual contributors, this might be beneficial as they do not need to spend time on writing code that is rejected in the end because the developers do not like the general approach. For the purpose of this evaluation, the actual source generated is essential, so creating an issue first would be possible,  but more burdensome  and would add much value. Nevertheless, the existence of such rules was not a criterion to filter out a project. 
+
+\subsection{Ethical consideration}
+As this survey contains interaction with human-beings, a small analysis of the ethical implications is in order. Many precautions are undertaken to address any ethical concerns. 
+
+First of all, full transparency is provided  with regard to the pull request. The pull request message explicitly states the purpose of the PR as a part of a scientific project. Also the use of an \ac{LLM} is explicitly stressed so that no misunderstand can occur. However, the participants are not aware of the extent \acp{LLM} have been used and do not know which model was used. Such details have however been revealed during discussion of the PR if further feedback from new participants was unlikely.
+
+Additionally, the requests were not sent en masse but after careful consideration. Only if it is thought that a pull request does compile, passes all unit test and otherwise does not have major issues, the pull request is submitted. Of course, mistakes can happen so that this approach cannot guarantee hundred percent fault-free code. Since many projects needs to be considered, the extensive knowledge of the software project, which a regular contributor has, is missing, so that the chance of faults are higher. Nevertheless, pull requests can be created by anyone and the review process by continuous integration and deployment tools and human beings is a safeguard to limit the risk of faulty code added to the code base. 
+
+Last but not least, it was attempted to minimize the burden on the reviewers. For instance, data clumps affecting a significant number of files were not refactored. Also only one pull request per project was created, thereby minimizing the chance that a participant might review multiple pull requests. 
+
+At one instance, an ethical complaint was filled because of the use of \acfp{LLM} and the perceived spamming of pull requests. These complaints were however dismissed by the competent organizations of the University of Osnabrück.  
+
 
 
 \section{Data clump filtering by model}
