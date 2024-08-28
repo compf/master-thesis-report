@@ -19,7 +19,7 @@ Figure \ref{fig:solver_gateway_service_overview} illustrates how the service-bas
     \item The handler registered to that step is used. It is provided with the current context containing the results from previous steps.
     \item The handler starts or employs a specific service. This service might be dependent on the current step or might be constant. The handler knows how to start or use the service and sends all relevant information to the service (e.g. via files, network streams etc.). 
     \item The service processes the requests submitted by the handler. For instance, ChatGPT can suggest a suitable class name. The service might be outside of the control of the developer. For example, it might be programmed in a different programming language or the source code might not be available. At some point it will create a response and send it back to the handler. 
-    \item The handler reads the response and processed it. It then creates a new context based on the previous context and the response from the service. 
+    \item The handler reads the response and processes it. It then creates a new context based on the previous context and the response from the service. 
     \item The new context is returned to the program and can be used for successive steps (e.~g. the suggested name can be used for creating a respective class) 
 \end{enumerate}
 

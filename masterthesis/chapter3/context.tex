@@ -52,7 +52,7 @@ If files are sent to an \ac{LLM}, the filtering can be performed directly on the
 
 Because the pipeline design separates the context from the handlers, the context has limited information about the handlers and does not know which handler will be executed later. Therefore, the filtering context must be very general to maximize compatibility with all possible handlers. 
 
-Therefore, as a design decision, the file filtering context contain only file inclusion and exclusion rules that can be applied by subsequent handlers. This means that a more complex filtering rule (e.~g. by commit date), must be resolved to a list files to be included and excluded. 
+Therefore, as a design decision, the file filtering context contain only file inclusion and exclusion rules that can be applied by subsequent handlers. This means that a more complex filtering rule (e.~g. by commit date), must be resolved to a list of files to be included and excluded. 
 
 It should also be noted that inclusion and exclusion rules might conflict, and these conflicts can be handled differently. In the case of PMD, if a file is included and excluded according to the rules, the inclusion prevails so that it is included. This makes it easier to only include a limited set of files and exclude a large number of other files. Vice versa, it is more challenging to exclude a very limited amount of files while including more files. The file filtering context does not attempt to resolve these issues. 
 

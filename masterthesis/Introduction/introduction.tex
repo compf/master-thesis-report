@@ -20,7 +20,7 @@ However,  automatic refactoring  is more difficult than a simple detection becau
 The data clump example mentioned above is one of those code smells that can be clearly defined. For instance, one can propose that a group of at least three variables that appear in more than one part of the source code constitutes a data clump \cite{zhangImprovingPrecisionFowler2008}.
 
 
-However, a successful re-factorization of data clumps requires several steps. This includes renaming of identifiers, removing symbols, and extracting a class. Also a class name for the extracted class (e.g. \textit{Vector3}) must be determined. To minimize human intervention, a suitable identifier of the class must be found that accurately describes the purpose of these variables and their connection. Hence, domain knowledge and some creativity are necessary to fully perform the refactoring process.
+However, a successful re-factorization of data clumps requires several steps. This includes renaming of identifiers, removing symbols, and extracting a class. To minimize human intervention, a suitable identifier of the class must be found that accurately describes the purpose of these variables and their connection. Hence, domain knowledge and some creativity are necessary to fully perform the refactoring process.
 
 As a result,  additional tools (such as ChatGPT \cite{ChatGPT_url}) are needed to fully automate the refactoring pipeline while minimizing the need for manual changes. 
 
@@ -41,13 +41,14 @@ To facilitate the integration of tools and services, a pipeline architecture is 
 A major part of the master thesis will deal with how to use and integrate ChatGPT into the refactoring pipeline. 
 ChatGPT is an AI language model developed by OpenAI that uses a Generative Pre-trained Transformer (GPT) model to process textual input data (i.e. natural language or source code). Users can provide queries, questions, or other textual material to ChatGPT and the model responds with a textual reply attempting to satisfy the user's request \cite{yetistirenEvaluatingCodeQuality2023}. It also employs a conversation feature so that previous requests and replies can be referred to by future requests and responses \cite{sobania2023analysis}.
 
-Given ChatGPT's capability to process  source code \cite{sadik2023analysis}\cite{guo2023exploring}, one goal of this master thesis attempts to explore to what extent it can help developers find data clumps and refactor them. Different extents of ChatGPT inclusion will be tested  
+Given ChatGPT's capability to process  source code \cite{sadik2023analysis}\cite{guo2023exploring}, one goal of this master thesis attempts to explore to what extent it can help developers find data clumps and refactor them. Different methods for including ChatGPT will be tested  
 
 With a minimal ChatGPT inclusion approach,  data clumps will be found using algorithmically  and ChatGPT will be provided with a list of data clump variables and asked to suggest a suitable name for the extracted class, while the refactoring process will be executed using other refactoring tools.
 
 
 Conversely, it will be tested whether ChatGPT can execute the refactoring itself by providing the pieces of the source code containing data clumps of a software project and providing specific queries to find the data clumps, refactor them, and output the refactored source code. \cite{White2023ChatGPTPP}.
 
+In addition, the usability for ChatGPT with regard to other steps of the pipeline will be examined. For instance, whether ChatGPT can be used to rank data clumps and hence to refactor only the important ones. 
 
 The goal is to assess in what way ChatGPT can be helpful in performing the data clump refactoring task. Also possible costs for the usage of ChatGPT and other resources will be considered \cite{xia2023conversation}. \cite{4ef0b456377aafb68884e643779dffb36b8e7cc1}.
 
@@ -58,8 +59,8 @@ As a result, the following research question will be explored in this master the
 
 \begin{description}
     \item [RQ1] Do developers accept data clump refactoring via ChatGPT
-    \item [RQ2] How can ChatGPT be used to improve data clump refactoring
-    \item [RQ3] How can human intervention be minimized while ensuring a sufficient refactoring quality
+    \item [RQ2] In what ways can ChatGPT be used to improve data clump refactoring
+    \item [RQ3] How do different parameters of ChatGPT affect the quality of the results if it is used on different parts of the pipeline. 
 \end{description}
 
 \section{Organization}
@@ -69,7 +70,7 @@ In chapter \ref{chapter:background}, the background of this master thesis  is ou
 
 In chapter \ref{chapter:conception}, the design and structure of the tool is explained. A pipeline for combining multiple services and programs is introduced. Furthermore, the integration of large language models is discussed. 
 
-In chapter \ref{chapter:implementation}, the prachtical implementation is outlined.  Moreover, there is a discussion of how each tool and service can be used for the purpose of refactoring data clumps and what challenges exist. 
+In chapter \ref{chapter:implementation}, the practical implementation is outlined.  Moreover, there is a discussion of how each tool and service can be used for the purpose of refactoring data clumps and what challenges exist. 
 
 A full-scale evaluation is performed in chapter \ref{chapter:eval}.
 

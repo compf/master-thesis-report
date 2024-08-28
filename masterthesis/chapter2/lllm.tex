@@ -98,19 +98,19 @@ ChatGPT is stateless. This means that the token id explained above is solely use
 \end{figure}
 
 
-Figure \ref{fig:chatgpt_stateless} visualize this issue. Here, the user asks the ChatGPT API to find all data clump java files \textit{(request 1)}. ChatGPT responds with some data clumps. These might not be all data clumps, so a follow-up request might improve the results \cite{10062688}. Therefore, the user sends another completely new request \textit{(request 2)} to instruct the model to find more data clumps. However, ChatGPT responds with a general message stating that no files have been submitted. This is the result of the statelessness which requires that the user always send the whole context with each query. In \textit{request 3}, the context is provided so that ChatGPT accurately responds by finding another data clump.
+Figure \ref{fig:chatgpt_stateless} visualize this issue. Here, the user asks the ChatGPT API to find all data clump java files \textit{(request a)}. ChatGPT responds with some data clumps. These might not be all data clumps, so a follow-up request might improve the results \cite{10062688}. Therefore, the user sends another completely new request \textit{(request b)} to instruct the model to find more data clumps. However, ChatGPT responds with a general message stating that no files have been submitted. This is the result of the statelessness which requires that the user always send the whole context with each query. In \textit{request c)}, the context is provided so that ChatGPT accurately responds by finding another data clump.
 
 Since follow-up requests make only sense if ChatGPT has already responded, the whole original request, the reply by ChatGPT, and any previous conversation must be provided which can have a significant impact on costs and rate limits. 
 
-A related issue occurring for some \acp{LLM} other than ChatGPT is the context window. Large language models like ChatGPT can only stores a limited amount of information during a conversation. If the amount of information is too large,  a model can react differently. ChatGPT will throw an error such that the user must reduce the amount of information transmitted to ChatGPT.
+A related issue occurring for some \acp{LLM} other than ChatGPT is the context window. Large language models like ChatGPT can only stores a limited amount of information during a conversation. If the amount of information is too large,  a model can react differently. ChatGPT will throw an error so that the user must reduce the amount of information transmitted to ChatGPT.
 
 Other models will forget some parts of it even though they might be relevant for the use case of the \ac{LLM}.
-Assuming, an \ac{LLM} has only a very small context window, which every modern model should easily handle, figure \ref{fig:llm_loose_context} demonstrates the issues that arises  A model is instructed to find and refactor data clumps in java files, and those java files are submitted as well. The response of the model at the bottom of the figure is however unexpected as it only explains the content of the files submitted. The reason for this response is not some misunderstanding of the prompt but a lack of prompt. The transparent rectangle displays the context window only covering the content of the transmitted files while the instruction is not covered. 
+Assuming, an \ac{LLM} has only a very small context window, which every modern model should easily handle, figure \ref{fig:llm_loose_context} demonstrates the issues that arises  A model is instructed to find and refactor data clumps in java files, and those java files are submitted as well. The response of the model at the bottom of the figure is however unexpected as it only explains the content of the files submitted. The reason for this response is not some misunderstanding of the prompt but a lack of prompt. The transparent rectangle represents the context window, only covering the content of the transmitted files while the instruction is not covered. 
 Because of the context window limitation, transmitting the third file overwrites the content of the prompt so that the model forgets the initial instruction and cannot reasonably process the files, giving instead a description of the files. The problem also arises on greater context window if multiple files or large files are involved as it may be the case while refactoring data clumps.
 
 \begin{figure}[ht!]
     \centering
-    \includegraphics[width=0.6\columnwidth]{figures/chapter2/chatgpt_context_windows_size.drawio.pdf}
+    \includesvg[width=0.6\columnwidth]{figures/chapter2/chatgpt_context_windows_size.drawio.svg}
     \caption{Example of model forgetting context}
     \label{fig:llm_loose_context}
 \end{figure}
@@ -208,10 +208,13 @@ For instance, a query to find and refactor data clumps can be separated into a d
 This is useful if a human is reviewing the output from a \ac{LLM} since obvious errors can be spotted more easily if the task is divided into multiple steps. However, it is more challenging for an automated tool since it cannot find errors in the same way. 
 
 Furthermore, one should consider that each queries requires further overhead so that the performance might be impacted more negatively. 
-\subsection{Self-hosted large language models}
+\subsection{Other Large Language Models}
 
-As an alternative to commercial  \ac{LLM}s projects like ChatGPT, several other models exists. Some of them can be self-hosted.  
+As an alternative to ChatGPT, there are several alternatives. This section gives only a broad overview as the focus will be on ChatGPT.
 
+Some recent commercial \acp{LLM} services are Claude or Gemini. Compared to ChatGPT, they differ in their training data, context window limitation, or maximum output size. Additionally, their pricing and API usage limits might be more favorable for some users.
+
+A different method  is to use self-hosted \acp{LLM}.
 Self-hosting means that the user of a \ac{LLM} has to provide for the infrastructure and resources to run and employ the model. For instance, a separate server could be configured that runs a large language model and listens to requests. This server could be directly set up by the user or rented from another organization (e.g virtual private server). 
 
 With this approach, costs can be saved. Instead of being dependent on the price model of OpenAI which can be subject to changes, the user has to pay for the actual costs (e.g. the monthly rent for a server, the power bills, hardware etc). These might amortize after some years but this is not certain.
@@ -226,9 +229,9 @@ This server must be suitable equipped. In general, at least 32 GB of RAM are nec
 
 Self-hosting \acfp{LLM} should not be confused with self-trained \acp{LLM}. In the latter case, a user must train its own model which requires extensive amount of data, even more processing power and the need to properly design the training process to prevent typical issues of machine learning like over-fitting.
 
-\begin{comment}
+
 Another problem with self-hosted \acfp{LLM} is that they might have lower standards regarding output control. For instance, generating malicious or illegal content is easier with these models than those from OpenAI as they are more censored. 
-\end{comment}
+\begin{comment}
 \subsubsection{Hosting a large language server}
 
 One method to host a \ac{LLM} is via \textit{Ollama} \cite{ollama}. Ollama is a program to download, configure, and host a local \ac{LLM}. Users can set up a large language model with one command and query the model via the command line or a \ac{HTTP} interface.
@@ -255,3 +258,5 @@ Moreover, another model is used (l.~4) as the ChatGPT models are not available.
 			captionpos=b,language=json, basicstyle=\footnotesize, tabsize=2, showstringspaces=false,  numbers=left]
 			{figures/chapter2/ollama/ollama_request}
 		\end{figure}
+
+  \end{comment}

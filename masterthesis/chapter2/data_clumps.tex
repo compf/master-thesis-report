@@ -43,7 +43,7 @@ In the following, the definition by \cite{zhangImprovingPrecisionFowler2008} wil
 
 \begin{figure}
     \centering
-    \includegraphics[scale=0.9]{figures/chapter2/dataClump/refactor_simple_case.pdf}
+    \includegraphics[width=0.75\columnwidth]{figures/chapter2/dataClump/refactor_simple_case.png}
     \caption{A simple data clump and a proposed refactoring}
     \label{fig:company_bill_tax}
 \end{figure}
@@ -54,8 +54,8 @@ In contrast to localized code smells like large methods or missing documentation
 
 The difficulty of identifying data clumps, hence, can vary strongly dependent of how many files are affected by a data clump. If a data clump resides in only one file (e.~g. many methods in the same file share parameter), a trained eye can spot them and apply the necessary refactoring. This \textbf{manual approach} requires however that the developer is willing to spend time detecting a data clump and removing it. 
 
-In contrast, an algorithmic method for finding can be defined as follows:
-\begin{figure}
+
+\begin{figure}[ht!]
 \begin{lstlisting}[numbers=left]
     holders := all potential data clump holders 
             with at least three items inside the project
@@ -84,7 +84,7 @@ Afterwards, all distinct tuples of data clump holders are compared. If two data 
 
 
 
-If a data clump is detected, it can be reported for further processing. For instance, a warning could be displayed in an \ac{IDE} or the detected data clumps can be stored to a file. Here also, the concrete implementation is dependent on how the data clumps will be processed later.
+If a data clump is detected, it can be reported for further processing. For instance, a warning could be displayed in an \ac{IDE} or the detected data clumps can be refactored. Here also, the concrete implementation is dependent on how the data clumps will be processed later.
 
 This algorithm has some drawbacks. It has a time complexity of $\Theta(n^2)$ where $n$ is the number of potential data clump holders. Therefore, analyzing  large projects can be time-consuming unless the set of potential data clump holders is reduced beforehand. Nevertheless, it accurately finds every data clump and is deterministic.
 

@@ -73,24 +73,36 @@ Therefore, the \ac{JSON} approach should be modified so that not full file conte
 
 
  
-To faciliate this change-based approach, a simple communication format was developed that details in which files which lines needs to be changed. Figure \ref{} outlines an example. Listing \ref{} shows source code that contains a data clump (although the second file containing the other end of the data clump is left out). Using the change-based approach, an \ac{LLM} generates an instruction. This instruction is hown in figure \ref{} although it is not valid \ac{JSON} as artificial newlines have been applied to improve readability
+To facilitate this diff-based approach, a simple communication formatis used that details in which files which lines needs to be changed. Figure \ref{} outlines an example. Listing \ref{} shows source code that contains a data clump (although the second file containing the other end of the data clump is left out). Using the diff-based approach, an \ac{LLM} generates an instruction. This instruction is hown in figure \ref{} although it is not valid \ac{JSON} as artificial newlines have been applied to improve readability
+
+
+
+Figure \ref{fig:json_based_changes} illustrates how the diff-based approach works on a small example. The original source code on the top-left is changed by applying the JSON in the bottom-center. The modified file is shown in the top-right of the figure. The red color indicates removed lines. The concrete changes are as follows:
+\begin{figure}
+    \centering
+    \includegraphics[width=\columnwidth]{figures/chapter4/diff_original_changed_vscode_cmp.png}
+    \caption{Diff-based approach applied on a small example}
+    \label{fig:json_based_changes}
+\end{figure}
+
+
 \begin{itemize}
     \item In file \enquote{Library.java}
     \begin{itemize}
-        \item replace the \textit{oldContent} in line 13-15 of the original file with \textit{newContent}.
+        \item replace the \textit{oldContent} in line 8-10 of the original file with \textit{newContent}.
         \item => This removes the data clump items
-       \item replace the \textit{oldContent} in line 13-15 of the original file with \textit{newContent}.
+       \item replace the \textit{oldContent} in line 3-5 of the original file with \textit{newContent}.
         \item => This replaces the usages of the data clump item by an object of the extracted class 
     \end{itemize}
-    \item Create a new class at the location \enquote{NumberProperties.java} with the specified content
+    \item Create a new class at the location \enquote{NumberProperties.java} with the specified content. The content is ommitted for brevity
 \end{itemize}
 
-The result of applying these changes can be seen in figure \ref{}.
+
 
 One major issue is how to apply the suggested changes. Two approaches are possible.
 In the first approach, the content at lines \enquote{fromLine} to \textit{toLine} is replaced by \enquote{newContent}. This can be challenging if \enquote{newContent} has more lines than \enquote{oldContent}. Additionally, even if these  changes are correctly applied, later changes in the same file can become more problematic as the line number information might be outdated. 
 
-ALternatively, a replace method can be used. This means that the string \enquote{oldContent} is replaced by \enquote{newContent} without considering the line number information. This method prevents the issues of the first approach. Additionally, it might refactor more lines that the \ac{LLM} did not refactor for some reasons. If two strings are equal and one string needs to be refactored, there is a high probability that the other string should be changed in the same manner. However, this does not work if \enquote{oldContent} for some reason does not exists in the file. For instance, the model might have added extra whitespaces to the old content so that a simple search-and-replace-strategy does not work. Furthermore, if oldContent is an empty string, replacing can lead to file corruption as the replacement operation are not developed for such an scenario. 
+Alternatively, a replace method can be used. This means that the string \enquote{oldContent} is replaced by \enquote{newContent} without considering the line number information. This method prevents the issues of the first approach. Additionally, it might refactor more lines that the \ac{LLM} did not refactor for some reasons. If two strings are equal and one string needs to be refactored, there is a high probability that the other string should be changed in the same manner. However, this does not work if \enquote{oldContent} for some reason does not exists in the file. For instance, the model might have added extra whitespaces to the old content so that a simple search-and-replace-strategy does not work. Furthermore, if oldContent is an empty string, replacing can lead to file corruption as the replacement operations are not developed for such an scenario. 
 
 In this master thesis both approaches are employed. The second approach is always tested first. If this approach does not work (e.~g. \enquote{oldContent} does not exists in the file, the line-by-line replacement method is used.  
 
@@ -110,8 +122,10 @@ The issue is determine the \enquote{best} proposal. One approach could be to det
 
 As an alternative, one could count the number of changed lines in a proposal and rate proposals with more changes higher than those with fewer changes. This idea rewards proposals that refactor all lines of interests more than proposals that only refactor only a small part of the program while the data clump exists in other known parts too. 
 
+
+If interaction is possible, there is also an option to let the user decide.
 \subsubsection{Sequential proposals}
 
-With sequential proposals, one conversation is hold and the context is kept meaning that the \ac{LLM} does not forget its previous output. Using this idea, not the first proposal is chosen but the last one after the \ac{LLM} has been given enough chances to correct errors.  To facilitate this, build errors from the refactoring proposal can be gathered and presented to the model so that it can improve its refactoring. This represents the chain of thought idea discussed in section \ref{sec:chain of thought}
+With sequential proposals, one conversation is hold and the context is kept so that that the \ac{LLM} does not forget its previous output. Using this idea, not the first proposal is chosen but the last one after the \ac{LLM} has been given enough chances to correct errors.  To facilitate this, build errors from the refactoring proposal can be gathered and presented to the model so that it can improve its refactoring. This represents the chain of thought idea discussed in section \ref{sec:chain of thought}
 
-It should be noted that at some point a proposal should be finally chosen as the \ac{LLM} might not always find a solution that compiles even if infinitive steps were available. Similar to a an optimization algorithm, it can be steuck into a local optimum and cannot suggets changes so that the program compiles again-  
+It should be noted that at some point a proposal should be finally chosen as the \ac{LLM} might not always find a solution that compiles even if infinitive steps were available. Similar to a an optimization algorithm, it can be struck into a local optimum and cannot suggest reasonable changes so that the program compiles again.  

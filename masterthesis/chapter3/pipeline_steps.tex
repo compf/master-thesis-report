@@ -7,24 +7,22 @@ In most cases, this is trivial since a developer needing to find and fix data cl
 
 However, there might be more complex cases. For instance, the source code could be located on a \ac{VCS} or must be downloaded elsewhere so that the newest changes can be considered. Therefore, defining a specific step for obtaining the source code before executing the rest of the pipeline is useful. 
 
-The context created by this step contains the absolute path to the project to analyze and founds the basis for the succeeding context
-\subsubsection{Detecting data clumps}\label{subsec:chap3_data_clump_detection}
-It is widely acknowledged that addressing data clumps is only possible after they have been identified. As such, detecting data clumps should be prioritized as one of the initial steps in the pipeline.
 
-The data clump detection process itself can be further divided into the sub-steps filtering, \ac{AST} generation, similarity detection, data-clump detection, and data clump filtering.
-\subsubsection{Filtering}\label{subsub:filtering_files}
-First of all, all programming language files need to be detected. Usually, there are specific file extensions (e.g., \textit{.java}) for a source code file, simplifying the finding of files. It is also common for software projects to have a root folder that contains all source code files. Therefore, one can recursively iterate through all files and directories of a given root folder with a matching extension. 
+\subsubsection{File filtering}\label{subsub:filtering_files}
+After retrieving the project files, a file filtering process is important. A software project consists of many artifacts like actual source code, images, libraries, or other resources. Only source code files are relevant for data clump detection int his master thesis. 
+
 
 However, not every source code file might be analyzed for data clumps. For instance, parts of the projects must not be refactored, or a re-factorization would be too time-consuming. As outlined in chapter \ref{sec:introduction}, the cost of detecting data clumps might need to be lowered. Therefore, filtering rules might be necessary to reduce the size of the relevant files for the subsequent steps.  
 
-These filtering rules can be subdivided into inclusion rules and exclusion rules.  To faciliate these rules, globs are common.  Globs are filenames that contain wildcard patterns (e.~g. \textbf{*}). Each inclusion glob specifies which file must be included, and each exclusion glob specifies files that must be excluded. For instance, consider \textit{includeGlobs=[\enquote{*.java}]} and \textit{excludeGlobs=\enquote{*Main.java}}. In this case, all Java files are included, if however a file ends with \enquote{Main.java} it is excluded. 
+File filtering can be achieved in multiple ways:
 
+With pattern-based filtering inclusion rules and exclusion rules can be used to filter out irrelevant files.  To faciliate these rules, regex patterns can be used.  Each inclusion glob specifies which file must be included, and each exclusion glob specifies files that must be excluded. For instance, consider \textit{includeGlobs=[\enquote{.*\.java}]} and \textit{excludeGlobs=\enquote{.*Main.java}}. In this case, all Java files are included, if however a file ends with \enquote{Main.java} it is excluded. 
 The precedence between include and exclude rules can have a major impact on defining the correct rules. In the example above, exclusion rules prevail over inclusion rules.  This means that single files can be excluded with few exclusion rules. If however only a small set of files should be considered and a larger set of files be excluded, this prevalence should be reversed so that inclusion rules prevail over exclusion rules. In this master thesis, the latter approach will be chosen because it is more compatible with programs like PMD and simplifies analyzing only parts of the software project. 
 
+More complex filters can also be used. For instance, only considering files changed by the latest commit or rank the files given a specific metric and keep the best files. Details of these more complex filtering methods can be found in section \ref{sec:data_clump_filtering}
 \subsubsection{Extraction of AST}
 Then,  the source code needs to be simplified as comments, the method bodies, and other language parts are irrelevant for detecting data clumps. This could be achieved by extracting a subset of the \ac{AST} from the source code, which includes all the relevant information to identify data clumps.
 
-The associated context contains the \ac{AST} of every analyzed class.
 \begin{comment}
 \subsubsection{Similarity detection}
 
@@ -36,22 +34,13 @@ From this, a graph can be constructed that visualizes the relationship of the se
 This step is one of the most critical steps of the pipeline. 
 The handler finds all data clumps given the filter constraints established before and returns a new context with the description of the detected data clump in the format suggested by the \textit{DataClumpDoctor}. 
 
-If the \textit{DataClumpDoctor} is used, it also creates an \ac{AST} context if none exists yet so that the syntax tree information can be used for the next steps if they them. 
-
-For the data clump definition, the rules from section \ref{sec:data_clump_def} can be used. However, defining one's own rules can lead to better results, so flexibility is essential, too. 
+The handler should take care that it only finds data clumps, and not related part of the source code. For instance, finding where a data clump method is called is not part of this steps and should ne be saved yet. 
 
 \subsubsection{Data clump filtering or prioritization} \label{subsub:filtering_data_clumps}
 In section \ref{subsub:filtering_files}, a filtering by files is performed. However, even if many data clumps were detected, they do not always need to be refactored. One can decide to ignore certain data clumps and refactor them later or even never. 
 
 There can be many reasons for this approach. For instance, parts of the source code that are infrequently updated might be too risky for refactoring since any automatic tool might cause bugs or invalid code that is hard to fix because the developers are unfamiliar with this part of the source code. On the contrary, a part of the source code that is updated more frequently might be in an intermittent state, so that refactoring is currently not recommendable. Also, as noted in section  \ref{subsub:filtering_files}, if a service like ChatGPT is used, the cost of transferring many source code files with data clumps might be too high. 
 
-In the case of field data clumps, we also have to consider the worst case, namely that at least one of the data clump fields is public. This is regarded as a bad design as fields should always be encapsulated by getters and setters \cite{5680918}. Nevertheless, it is still prevalent \cite{5076631}.
-
-A subsequent refactoring of these fields is more complicated than that of less accessible fields because they might be used by external programs or libraries that are beyond the control of the developer, which might induce bugs or non-compilable software. 
-
-One can argue that refactoring should never affect the public interface since the issues as mentioned earlier can occur \cite{10.1145/1352678.1352681}.
-
-On the other hand, one can argue that those changes are still significant because they can improve readability, and the source code may be in the early stages to make such breaking changes feasible. 
 
 Therefore, filtering out certain data clumps considered not worthy of refactoring can be suggested.
 
