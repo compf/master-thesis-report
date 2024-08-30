@@ -51,10 +51,7 @@ In the end, the client can save the document and notify the server that the docu
 
 The \ac{LSP} can hence be used to simplify refactoring-related task. For instance, a mandatory part of refactoring is to find all references of a symbol (e.~g. variable). The \ac{LSP} can perform this step so that the detected references can be processed further. It should however be noted that functionality of the protocol is limited to maximize the support for many programming languages. Thus, the an \ac{LSP} server is not a refactoring tool per-se. 
 
-\subsubsection{ Program Structure Interface}\label{sec:psi}
-The Program Structure Interface provided by IntelliJ is an \ac{API} to analyze and modify  projects that the \ac{IDE} \textit{IntelliJ} can load. As a result, the various classes, methods etc. can be obtained which allows for the detection of data clumps. Also modifications are possible so that data clumps can be refactored.
 
-In order to use this API, an instance of IntelliJ must be started. IntelliJ can be started in a headless mode to reduce loading times and improve the performance so that no GUI is initialized. Nevertheless, IntelliJ requires many resources and much overhead, so that  the initialization needs some time.
 
 
 

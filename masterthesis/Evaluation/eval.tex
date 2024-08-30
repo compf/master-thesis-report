@@ -69,7 +69,7 @@ For each combination of the weights described above, the five most-scored data c
 \end{itemize}
 All these criteria are more guidelines than strict requirement to allow flexibility 
 After considering all of these criteria, one final data clump was selected.
-\subsection{Assignment to a category}
+\subsection{Refactoring process}
 
 After a data clump is selected, the next step is to assign the project to a category to determine the extent \acs{LLM} are used to find and refactor data clumps. 
 
@@ -87,6 +87,8 @@ From these ten proposal, one proposal was chosen that describes refactoring data
 The second approach for refactoring was via IntelliJ. In this case, ChatGPT only suggest as suitable name for the extracted class, but is otherwise not involved in the refactoring. Instead, IntelliJ, performs all refactoring in the manner described in section  \ref{sec:intellij_refactoring} is applied. This results in a very consistent refactoring without any creativity. Hence, this refactoring needs only to be executed once and the first proposal can be selected immediately. 
 
 After selecting a proposal, the proposal is applied and saved on a separate branch.
+
+\subsubsection{Manual refinement}
 
 Afterwards, the proposal might not be fully correct. For instance, there might none-updated method calls, missing semicolons etc. An additional problem occurs if codestyle tools like SpotBugs or Checkstyle are employed. If the refactoring by the \ac{LLM} does not conform to the required codestyle, the code might not compile because the developers of the project force a certain style. All these are issues that can still arise and require additional handling. Therefore, a manual correction step is performed. The project is  manually changed in such a way that it fully compiles. However, no creative refactoring is performed. For instance, if one part of the source code was not refactored, it was refactored like another part regardless of whether another refactoring might have make more sense. This reduces human intervention to a minimum and ensures that the creative part of the refactoring is done by the \ac{LLM}. 
 
@@ -135,23 +137,23 @@ The statements 7--9 are actually questions not using the likert scale. Question 
 The purpose of question 9 is to create a connection between the survey and the pull request of the project as the survey platform does not allow such a link easily. 
 \subsection{Threats to validity}
 
-The survey evaluation has some threats to its validly that should not be disregarded.
+The survey evaluation has some threats to its validity that should not be disregarded.
 
-To begin with, the selection of GitHub project is not completely unbiased. For instance, currently trending GitHub projects were chosen although it is not certain why they were popular. Therefore, the maintainers of the project might not be fully prepared to deal with associated surge in pull requests associated with trending projects. This can increase the chance that a pull request (even though reasonable and we-meant) is summarily rejected. \cite{10.1145/3366423.3380272}
+To begin with, the selection of GitHub project is not completely unbiased. For instance, currently trending GitHub projects were chosen although it is not certain why they were popular. Therefore, the maintainers of the project might not be fully prepared to deal with associated surge in pull requests associated with trending projects. This can increase the chance that a pull request (even though reasonable and well-meant) is summarily rejected. \cite{10.1145/3366423.3380272}
 
-Additionally, only projects that do build flawlessly were considered. Usually, this should be case for every project, but the reality differs. For instance, the operating system, the installed libraries, the Java version, and other components can have a significant impact on whether all unit tests complete without errors and the project compiles.  While every effort was made to give each project a chance to compile, st some point, time constraints prevented endless consideration of a project. Hence, if even after testing on multiple system, reading the associated documentation, and testing multiple Java version, no fully functional build was achieved, the project war disregarded.
+Additionally, only projects that do build flawlessly were considered. Usually, this should be case for every project, but the reality differs. For instance, the operating system, the installed libraries, the Java version, and other components can have a significant impact on whether all unit tests complete without errors and the project compiles.  While every effort was made to give each project a chance to compile, at some point, time constraints prevented endless consideration of a project. Hence, if even after testing on multiple system, reading the associated documentation, and testing multiple Java version, no fully functional build was achieved, the project war disregarded.
 
 The manual correction process should also be taken into account as it could induce mistakes or bugs by human error instead of by an \ac{LLM}. Feedback regarding these errors must be filtered out as they are not relevant. 
 
 
 Additionally, it should be considered that the decision on whether to consider a pull request or reject it immediately can depend on many factors. For instance,  the current mood of participating developers can influence the rejection rate.\cite{detecting_emotional}, 
 
-For larger project, burecaucy was also a factor that prevented the creation of pull requests. For instance, some projects require that pull request must always relate to an existing issue so that the general idea can be discussed without providing source code. For usual contributors, this might be beneficial as they do not need to spend time on writing code that is rejected in the end because the developers do not like the general approach. For the purpose of this evaluation, the actual source generated is essential, so creating an issue first would be possible,  but more burdensome  and would add much value. Nevertheless, the existence of such rules was not a criterion to filter out a project. 
+For larger project, bureaucracy was also a factor that prevented the creation of pull requests. For instance, some projects require that pull request must always relate to an existing issue so that the general idea can be discussed without providing source code. For usual contributors, this might be beneficial as they do not need to spend time on writing code that is rejected in the end because the developers do not like the general approach. For the purpose of this evaluation, the actual source generated is essential, so creating an issue first would be possible,  but more burdensome  and would not add much value. Nevertheless, the sole existence of such rules was not a criterion to filter out a project. 
 
 \subsection{Ethical consideration}
 As this survey contains interaction with human-beings, a small analysis of the ethical implications is in order. Many precautions are undertaken to address any ethical concerns. 
 
-First of all, full transparency is provided  with regard to the pull request. The pull request message explicitly states the purpose of the PR as a part of a scientific project. Also the use of an \ac{LLM} is explicitly stressed so that no misunderstand can occur. However, the participants are not aware of the extent \acp{LLM} have been used and do not know which model was used. Such details have however been revealed during discussion of the PR if further feedback from new participants was unlikely.
+First of all, full transparency is provided  with regard to the pull request. The pull request message explicitly states the purpose of the PR as a part of a scientific project. Also the use of an \ac{LLM} is explicitly stressed so that no misunderstanding can occur. However, the participants are not aware of the extent \acp{LLM} have been used and do not know which model was used. Such details have however been revealed during discussion of the PR if further feedback from new participants was unlikely.
 
 Additionally, the requests were not sent en masse but after careful consideration. Only if it is thought that a pull request does compile, passes all unit test and otherwise does not have major issues, the pull request is submitted. Of course, mistakes can happen so that this approach cannot guarantee hundred percent fault-free code. Since many projects needs to be considered, the extensive knowledge of the software project, which a regular contributor has, is missing, so that the chance of faults are higher. Nevertheless, pull requests can be created by anyone and the review process by continuous integration and deployment tools and human beings is a safeguard to limit the risk of faulty code added to the code base. 
 
@@ -159,12 +161,37 @@ Last but not least, it was attempted to minimize the burden on the reviewers. Fo
 
 At one instance, an ethical complaint was filled because of the use of \acfp{LLM} and the perceived spamming of pull requests. These complaints were however dismissed by the competent organizations of the University of Osnabrück.  
 
+\section{ChatGPT suitability evaluation}
+
+In the second experiment, test were conducted to assess the suitability of ChatGPT performing steps of the pipeline.
+\subsection{Data clump detection}
+
+Detecting data clumps is an essential part to refactor them. Because it happens at a very early state, it is even more important that the data clump detection data is accurate and conforms to the specification. The question is here is whether the model can perform this task so that subsequent steps of the pipeline (e.~g. a manual refactoring tool) can rely on the data.
+
+The format presented in appendix \ref{sec:data_clump_format} is used as the output format because subsequent handlers have been adapted on this context. 
 
 
-\section{Data clump filtering by model}
+\subsubsection{Methodology}
 
-In this evaluation, it is tested whether the  \ac{LLM} is suitable for data clump filtering. As outlined in section \ref{sec:data_clump_filtering}, there are multiple approaches for filtering data clumps, which can already be implemented manually. 
+For this experiment, either the \ac{AST}, code snippets or complete files are submitted, and the model is asked to find all data clumps and to report its result in the specified format.
+Because transmitting the full project is infeasible, the data clumps are previously detected using the \textit{DataClumpDoctor}. The relevant locations of the most important data clumps are then used as a basis to submit the request to the model. In case of code snippets, this would mean that the code snippets only contain data clumps and not other methods. As this might induce a bias, all other methods in the respective file having at least three parameters are included too so that the model is not given any hint about the location of data clumps. 
 
+
+The following metrics are used for evaluating this tests:
+
+\begin{description}
+    \item[Sensitivity and specificity] These describe the false negative and false positive rate of the detection. The model might miss a data clump so that it is not reported (false negative). It might also report  a data clump that is not detected as a data clump by the \textit{DataClumpDoctor}. In the latter case, cautiousness is warranted as the \ac{LLM} can detect more data clumps that a traditional algorithm. 
+
+    \item[Correctness of output format]
+
+    As already noted, the correctness of the output format representing the data clump is essential. If a wrong line number is given or the file path pointing to a data clump is wrong, subsequent handlers can have problems. Hence, the output of the \ac{LLM} needs to checked by comparing whether it contains all relevant files and the information is correct. 
+   
+\end{description}
+
+\subsection{Data clump filtering by model}
+The filtering experiment is somewhat similar to the detection experiment. However, here the model is told to return one data clump that is most relevant. Additionally, it does not need to use the data clump type context as the output format because this information already exists. 
+
+As outlined in section \ref{sec:data_clump_filtering}, there are multiple approaches for filtering data clumps, which can already be implemented manually. 
 The question here is whether the \ac{LLM} uses novel filtering approaches or simply relies on the metric discussed in section \ref{sec:data_clump_filtering}. In the latter case, it is more useful to use the manual algorithm because they are reliable and do not incur the costs associated with Large Language Models. 
 
 In order to facilitate this experiment, the data clumps are evaluated on 3 metrics (size, occurrence, affected files. Then the ten most important data clumps are randomly shuffled and presented to the \ac{LLM} which chooses one data clump. 
@@ -177,9 +204,9 @@ The following metrics are used to evaluate this experiment:
 \end{itemize}
 
 
-\section{Data clump refactoring}
+\subsection{Data clump refactoring}
 
-Evaluating how an \ac{LLM} performs data clump refactoring is another method to assess the suitability of the models for use in the pipeline. Here, especially the creativity is important. If a model merely refactors similary to a manual tool (e.~g. IntelliJ), it has less use.
+Evaluating how an \ac{LLM} performs data clump refactoring is another method to assess the suitability of the models for use in the pipeline. Here, especially the creativity is important. If a model merely refactors similarly to a manual tool (e.~g. IntelliJ), it has less use.
 
 If however, the \ac{LLM} extracts more functionality by creating new methods ore solves the data clump in other ways, the advantages of the model become more obvious.
 
@@ -192,14 +219,3 @@ The following metrics are used for evaluating this tests:
     \item the existence of documentation/comments
 \end{itemize}
 
-\section{Data clump detection}
-
-While tools for detecting data clump are well implemented in the main program, using an \ac{LLM} can provide opportunities. For instance, data clumps can be detected if two variables are synonyms, also consideration like annotations, modifiers, or associated comments can be a possible indicator to assess whether a data clump does in fact exists. In this regard, data clump detection and prioritization can be very similar. 
-
-The following metrics are used for evaluating this tests:
-
-\begin{itemize}
-    \item The sensitivity and specificity compared to the \textit{DataClumpDoctor}
-    \item the completeness and correctness of the metadata (line numbers, modifiers, etc.)
-    \item the number of data clumps that have similar but not equal name)
-\end{itemize}

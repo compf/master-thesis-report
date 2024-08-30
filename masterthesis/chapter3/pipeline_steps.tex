@@ -16,7 +16,7 @@ However, not every source code file might be analyzed for data clumps. For insta
 
 File filtering can be achieved in multiple ways:
 
-With pattern-based filtering inclusion rules and exclusion rules can be used to filter out irrelevant files.  To faciliate these rules, regex patterns can be used.  Each inclusion glob specifies which file must be included, and each exclusion glob specifies files that must be excluded. For instance, consider \textit{includeGlobs=[\enquote{.*\.java}]} and \textit{excludeGlobs=\enquote{.*Main.java}}. In this case, all Java files are included, if however a file ends with \enquote{Main.java} it is excluded. 
+With pattern-based filtering, inclusion rules and exclusion rules can be used to filter out irrelevant files.  To facilitate these rules, regex patterns can be used.  Each inclusion glob specifies which file must be included, and each exclusion glob specifies files that must be excluded. For instance, consider \textit{includeGlobs=[\enquote{.*\.java}]} and \textit{excludeGlobs=\enquote{.*Main.java}}. In this case, all Java files are included, if however a file ends with \enquote{Main.java} it is excluded. 
 The precedence between include and exclude rules can have a major impact on defining the correct rules. In the example above, exclusion rules prevail over inclusion rules.  This means that single files can be excluded with few exclusion rules. If however only a small set of files should be considered and a larger set of files be excluded, this prevalence should be reversed so that inclusion rules prevail over exclusion rules. In this master thesis, the latter approach will be chosen because it is more compatible with programs like PMD and simplifies analyzing only parts of the software project. 
 
 More complex filters can also be used. For instance, only considering files changed by the latest commit or rank the files given a specific metric and keep the best files. Details of these more complex filtering methods can be found in section \ref{sec:data_clump_filtering}
@@ -34,7 +34,7 @@ From this, a graph can be constructed that visualizes the relationship of the se
 This step is one of the most critical steps of the pipeline. 
 The handler finds all data clumps given the filter constraints established before and returns a new context with the description of the detected data clump in the format suggested by the \textit{DataClumpDoctor}. 
 
-The handler should take care that it only finds data clumps, and not related part of the source code. For instance, finding where a data clump method is called is not part of this steps and should ne be saved yet. 
+The handler should take care that it only finds data clumps, and not related part of the source code. For instance, finding where a data clump method is called is not part of this steps and should not be saved yet. 
 
 \subsubsection{Data clump filtering or prioritization} \label{subsub:filtering_data_clumps}
 In section \ref{subsub:filtering_files}, a filtering by files is performed. However, even if many data clumps were detected, they do not always need to be refactored. One can decide to ignore certain data clumps and refactor them later or even never. 

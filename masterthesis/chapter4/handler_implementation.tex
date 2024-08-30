@@ -66,7 +66,7 @@ Any reply by the \ac{LSP} is intertwined with the associated data clump thereby 
 \subsubsection{Primitive reference finding}
 This handler works with all programming language as it does not parse the source code at all. Instead, it searches for the identifiers that are part of a data clump (e.~g. method name, variable names). 
 
-This simple approach has two issues. First of all, one must determine where to search. searching the whole project will require a significant amount of time. Alternatively, only only the file containing the data clump or the respective folder can be traversed.
+This simple approach has two issues. First of all, one must determine where to search. Searching the whole project will require a significant amount of time. Alternatively, only the files containing the data clump or the respective folder can be traversed.
 
 Moreover, this method will lead to more false positives. For instance, searching for the variable name \textit{foo} will also match local variables named \textit{foo}. Therefore, a match might not be part of a data clump and refactoring this match can lead to more harm than good. 
 

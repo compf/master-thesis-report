@@ -1,7 +1,5 @@
 \section{Data clumps}\label{sec:data_clump_def}
 The term \enquote{Data Clump} was coined by Martin Fowler as one possible code smell that can occur in source code. 
-Data clumps can be classified as bloaters because they require a longer signature of a method or a larger class. Especially in the case of methods, one can also classify them as change preventers because if a new parameters are added (e.g. a Z-coordinate in the vector example), many method signatures and their associated calls must be modified. 
-
 Martin Fowlers originally describes data clumps as follows:
 
 \begin{displayquote}
@@ -31,6 +29,7 @@ Another relaxation worthy to consider is with respect to the type equality. If v
 
 Also, modification of a variable's identifier might not change its meaning. For instance, typos can happen, or synonyms can be used so that an automatic algorithm might not discover the connection between two variables but requires knowledge of the semantics of the source code. \cite{zhangImprovingPrecisionFowler2008}
 
+Data clumps can be classified as bloaters because they require a longer signature of a method or a larger class. Especially in the case of methods, one can also classify them as change preventers because if a new parameters are added (e.g. a Z-coordinate in the vector example), many method signatures and their associated calls must be modified.
 
 
 To conclude, the core definition of a data clump is clear. However, this definition still leaves out some edge cases that require a semantic understanding of the source code. 

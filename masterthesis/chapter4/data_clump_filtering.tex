@@ -48,7 +48,7 @@ Instead of considering how many files are affected by a data clump, one could al
 
 The time or frequency of when a particular file is updated can also be a metric to ascertain whether a refactoring is warranted. These information can be obtained from \ac{VCS} like Git as they are part of commits.
 
-Files that have been recently updated can have new data clumps that should be refactored. These data clumps can be refactored more easily because it is more improbable that they have manifested so that other parts of the project or outside project depend on the existence of the data clump. 
+Files that have been recently updated can have new data clumps that should be refactored. These data clumps can be refactored more easily because it is more improbable that they have manifested so that other parts of the project or external projects depend on the existence of the data clump. 
 
 On the other hand, files that were untouched for longer times might also contain data clumps that exist but are not refactored. One reason can be that developers are not familiar with these source files and are afraid to change them. Depending on the concrete type of data clumps, they can nevertheless be refactored by automatic tools so that developers do not need to read this unknown source code.
 
@@ -79,7 +79,7 @@ Hence, it can be useful to exclude abstract methods for purpose of data clump re
 
 In many programming languages, convention have been established so that certain identifiers have a well-known meaning. For instance, the \textit{serialVersionUID} attribute in Java indicates a version of a class that should be changed if new fields are added in order to ease serialization. Because this field name is fixed, it is more probable to establish a data clump although the developer has few choices to prevent this data clump.
 
-To give another example, a class name ending with \enquote{Builder} indicates that the class builds or constructs something. Often this is related to another class (i.~e. the builder class constructs another class. This also has the potential to lead to data clumps because the builder class and the other class must have similiar fields or parameters. 
+To give another example, a class name ending with \enquote{Builder} indicates that the class builds or constructs something. Often this is related to another class (i.~e. the builder class constructs another class. This also has the potential to lead to data clumps because the builder class and the other class must have similar fields or parameters. 
 
 In all these cases, the chance of getting false positive data clumps is higher. Therefore, filtering for these specific scenarios can be useful to receive only data clumps that are worth to refactor. 
 
@@ -94,13 +94,13 @@ Hence, filtering these data clumps can be one strategy to focus on important dat
 
 \subsubsection{Ignore data clumps with specific annotations}
 
-Annotations are markers attached to a method, field, parameter etc. that convey additional functionality to the respective component. For instance, an annotation can provide the \ac{JSON} key name which a field is serialized to and deserialized from.  They exists in many programming languages, but the concrete syntax and applications differ.
+Annotations are markers attached to a method, field, parameter etc. that convey additional functionality to the respective component. For instance, an annotation can provide the \ac{JSON} key name which a field is serialized to and de-serialized from.  They exists in many programming languages, but the concrete syntax and applications differ.
 
-With regard to data clumps, annotation can pose challenges as they often need to be moved to the extracted class as well. This does not always work as some annotation are only compatible with specific types of components (e.~g. parameters). Even if they are compatible with fields of an extracted class, further changes is often necessary to make the software working again. For instancwe, an annotation might indicate the source of data passed to a method, and this source must be available to the extracted class too. 
+With regard to data clumps, annotation can pose challenges as they often need to be moved to the extracted class as well. This does not always work as some annotation are only compatible with specific types of components (e.~g. parameters). Even if they are compatible with fields of an extracted class, further changes is often necessary to make the software working again. For instance, an annotation might indicate the source of data passed to a method, and this source must be available to the extracted class too. 
 
 \subsection{Combining metrics and filters}
 
-The differentiation between filters and metrics can be relaxed by using metrics as a filters, and filters as metrics thereby enabling the construction complex filtering methods. 
+The differentiation between filters and metrics can be relaxed by using metrics as a filters, and filters as metrics thereby enabling the construction of complex filtering methods. 
 
 In the first case, filters employ the metrics described in section \ref{sec:metrics}, a comparison operator, and a threshold value. If the metric applied to a data clump compared with the threshold value using the comparison function returns true, the data clump remains, otherwise it is filtered out. For instance, the metric can be the data clump size, comparison function can be the greater-than function, and the threshold value can be three. In this example only data clumps with more than three variables will remain for further consideration. 
 

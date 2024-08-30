@@ -33,19 +33,35 @@ Each usage can be performed independently from each other, but internally all pr
     \label{tab:data_clump_llm_input}
 \end{table}
 
-The input provided to a model is strongly dependent on the purpose of the model. Table \ref{tab:data_clump_llm_input} shows possible input types for each \ac{LLM} usage
-Providing the complete source code is the most natural manner to give ChatGPT the relevant information. Since ChatGPT is language-agnostic, it can deal with many programming languages and therefore is able to process the source code files to find data clumps. However, source code files can be large as they can contain comments, method bodies or other parts of the programming language that are not relevant for detecting data clumps. This leads to higher costs.
+The input provided to a model is strongly dependent on the purpose of the model. Table \ref{tab:data_clump_llm_input} shows possible input types for each \ac{LLM} usage. Each input type is discussed below:
 
-Another possible approach is to only provides those lines of code that relate to data clumps. These lines are lines where data clump items are declared or used: In case of data clumps affecting parameters, the respective method calls are also code lines related to data clumps. Additionally, a set of lines above and beyond a relevant line can be included to give an \ac{LLM} more context. This reduces the file sizes strongly and helps the \ac{LLM} to focus more on the important parts. Any line that might be relevant to data clump refactoring (but does not necessarily have to be) is referred to as a \textbf{location of interest}
+\subsubsection{AST}
 
-The major issue with this strategy is to choose which lines of code to transmit. Only if the data clumps are already known, all relevant location can be found and transmitted to the model. This does not work if it is the purpose of the model to also to detect data clumps. 
+The \ac{AST} is an effective method to give the model all relevant information about the source code.  The \ac{AST} only contains a reduced structure of the source code and will therefore help to reduce processing cost. However, the \ac{AST} is usually not directly available but must be produced by other tools or ChatGPT (which means the source code has to be sent to the \ac{LLM} nevertheless). Additionally, there is no fixed format for the \ac{AST} which might complicate parsing and processing the \ac{AST} or the results by ChatGPT.
 
-If information about the location of fields and method parameter is given (i.~e. by an \ac{AST}), those lines can be transmitted which reduce the transmission size, but to a lesser extent. In this case, the number of lines of interest will be larger, which can degrade the quality of the results. 
+If ChatGPT is also tasked with refactoring, using \ac{AST} may not be as beneficial. Refactoring often involves updating method calls or variable usages, which may not be fully represented in the \ac{AST}. One could hypothetically submit both the \ac{AST} and the source code, enabling ChatGPT to use the \ac{AST} for detection and the source code for refactoring. However, this approach increases costs and it is unclear whether it could degrade the quality since ChatGPT would need to process more data and establish a correlation between the source code and the \ac{AST}.
 
-Inc contrast to transmitting the whole or pieces of the source code, the \ac{AST} can be provided. The \ac{AST} only contains a reduced structure of the source code and will therefore cost not as much. However, the \ac{AST} is usually not available but must be produced by other tools or ChatGPT (which means the source code has to be sent to the \ac{LLM} nevertheless). Additionally, there is no fixed format for the \ac{AST} which might complicate parsing and processing the \ac{AST} or the results by ChatGPT.
+\subsubsection{Full source code}
+
+An expensive method that works with all three application of \acp{LLM} is providing the full source code. This means that the source code is transmitted to the model without any modification. While the overhead is large, this method gives the model the largest amount of information so that it might execute the detection, filtering, or refactoring step more reasonably. However, due to context size limitation and resource allocation, providing large files can have a detrimental  effect on the quality. 
+
+\subsubsection{Code snippets}
 
 
-In case ChatGPT should also perform the refactoring, the \ac{AST} becomes not as useful. Refactoring data clumps always include updating method calls or variable usages which might not be available in the \ac{AST}. One could submit the \ac{AST} and the source code so that ChatGPT uses the \ac{AST} for detecting and the source code for refactoring, but this creates more costs and whether it may worsen the quality is an open question as ChatGPT needs to process more data and create a connection between source code and \ac{AST}.
+Another possible approach is to only provides those lines of code that relate to data clumps. As a result, only parts of the source code are transmitted which can save many tokens and helps the model to focus on the relevant parts. These lines might be called \textbf{relevant locations}
+
+
+
+The major issue with this strategy is to choose which lines of code to transmit. Only if the data clumps are already known, all relevant location can be found and transmitted to the model. This does not work if it is the purpose of the model to also to detect data clumps. In this case, one strategy could be to define the locations of interest as lines where either a method with at least three parameters is declared, or a field in a class with at least three fields is declared. This ensures that only potentially relevant lines are considered.
+
+Artificially enlarging the number of locations of interest is also a method worth discussing. Instead of transmitting only the line of the data clump items,  a small neighborhood or margin around these lines is transmitted, too. This helps the model to gain a better overview about the source code. For instance, these additional lines could include documentation or the usage of variables, thereby helping the \ac{LLM} in its task.
+
+However, not only data clumps items could be used as the starting point of the additional lines. Many source code files contains a header file and import statements in the beginning. These information can be beneficial especially in case of refactoring as the model can better understand the types of the variables or the context of the source code.
+
+In this master thesis mainly a constant margin is considered. However, variable margins that depends on the programming language or statistics of the source code (average length of a method or documentation) could be considered too.
+
+
+
 
 
 \subsection{Output processing}
@@ -70,11 +86,6 @@ One challenging aspect of this method is that the \ac{LLM} will likely make erro
 
 
 Therefore, the \ac{JSON} approach should be modified so that not full file contents are returned but replacement instructions. These are instruction given by the model to replace specific lines by a given text, so that only specific lines of a file are modified.  As a result, code lines not related to data clumps can be left untouched minimizing the risk for mistakes. 
-
-
- 
-To facilitate this diff-based approach, a simple communication formatis used that details in which files which lines needs to be changed. Figure \ref{} outlines an example. Listing \ref{} shows source code that contains a data clump (although the second file containing the other end of the data clump is left out). Using the diff-based approach, an \ac{LLM} generates an instruction. This instruction is hown in figure \ref{} although it is not valid \ac{JSON} as artificial newlines have been applied to improve readability
-
 
 
 Figure \ref{fig:json_based_changes} illustrates how the diff-based approach works on a small example. The original source code on the top-left is changed by applying the JSON in the bottom-center. The modified file is shown in the top-right of the figure. The red color indicates removed lines. The concrete changes are as follows:
@@ -107,7 +118,6 @@ Alternatively, a replace method can be used. This means that the string \enquote
 In this master thesis both approaches are employed. The second approach is always tested first. If this approach does not work (e.~g. \enquote{oldContent} does not exists in the file, the line-by-line replacement method is used.  
 
 
-\input{chapter4/replace_diagram}
 
 
 \subsection{Proposal handling}

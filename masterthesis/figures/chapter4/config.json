@@ -1,32 +1,24 @@
 {
     "ProgrammingLanguageIdentifier": "Java",
+    "Objects": {
+        "AbstractLanguageModel": {
+            "type": "ChatGPTInterface",
+            "args": {
+                "model": "gpt-4-1106-preview",
+                "temperature": 0.9
+            }
+        },   
     "PipeLine": {
         "CodeObtaining": {
             "handler": "SimpleCodeObtainingStepHandler",
             "args": {
-                "path":"javaTest"
+                "useArgPath": true
             }
         },
-        "DataClumpDetection": {
-            "handler": "DetectAndRefactorWithLanguageModelStep",
-            "args": {
-                "handlers":[
-                    {
-                        "name":"SimpleInstructionHandler",
-                        "args":{
-                            "instructionPath":"chatGPT_templates/definitionBased/ast/instruction.template"                  
-                        }
-                    },         
-                    {
-                        "name":"PairOfFileContentHandler"           
-                    }
-                ]   
-            }
-        }
-    },
-    "Objects":{
-        "LanguageModelInterface":{"name":"ChatGPTInterface"}
+     
+      "DataClumpDetection": {
+            "handler": "LargeLanguageModelDetector"
+      }     
+ }
     }
 }
-       
-
