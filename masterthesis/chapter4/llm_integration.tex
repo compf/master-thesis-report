@@ -56,6 +56,16 @@ The major issue with this strategy is to choose which lines of code to transmit.
 
 Artificially enlarging the number of locations of interest is also a method worth discussing. Instead of transmitting only the line of the data clump items,  a small neighborhood or margin around these lines is transmitted, too. This helps the model to gain a better overview about the source code. For instance, these additional lines could include documentation or the usage of variables, thereby helping the \ac{LLM} in its task.
 
+\begin{figure}
+    \centering
+    \includesvg[width=0.4\columnwidth]{figures/chapter4/margin_effect.drawio.svg}
+    \caption{The effect of varying the margin on the available information}
+    \label{fig:margin_effect}
+\end{figure}
+
+Figure \ref{fig:margin_effect} illustrates the advantage of a larger margin size. The source code shows counters used for testing purposes and a possible way to reset them \footnote{This example is somewhat inspired by a JUnit5 data clump that was refactored as part of the evaluation in section \ref{sec:pull_request_eval}}. The first four fields are part of a data clump (the second class is not shown for brevity). Consider only the data clump item \enquote{afterAll}. If the margin is zero, only line 4 would be transmitted to the model (black rectangle). This means that the \ac{LLM} has only a scarce overview over the purpose of the variable.
+The green rectangle covers the area if a margin of three is used. Now, line 3 and 5 are also included. Since line 5 mentions something about tests, the model can infer where the data clump items are used and might improve its refactoring. The red rectangle represents a margin size of three. In this case, the full code block is transmitted, and the model can observe that it might be useful to include a reset method in the extracted class. 
+
 However, not only data clumps items could be used as the starting point of the additional lines. Many source code files contains a header file and import statements in the beginning. These information can be beneficial especially in case of refactoring as the model can better understand the types of the variables or the context of the source code.
 
 In this master thesis mainly a constant margin is considered. However, variable margins that depends on the programming language or statistics of the source code (average length of a method or documentation) could be considered too.
@@ -64,7 +74,9 @@ In this master thesis mainly a constant margin is considered. However, variable 
 
 
 
-\subsection{Output processing}
+
+
+\subsection{Output processing}\label{sec:output_processing}
 An \ac{LLM} on its own cannot change code or controls a system since, for the purpose of this master thesis, it  can only output textual information. Therefore, each output from the model must be received and interpreted  in order to serialize them permanently. Two approaches are discussed. 
 
 \subsubsection{By human in the loop}
@@ -113,7 +125,7 @@ Figure \ref{fig:json_based_changes} illustrates how the diff-based approach work
 One major issue is how to apply the suggested changes. Two approaches are possible.
 In the first approach, the content at lines \enquote{fromLine} to \textit{toLine} is replaced by \enquote{newContent}. This can be challenging if \enquote{newContent} has more lines than \enquote{oldContent}. Additionally, even if these  changes are correctly applied, later changes in the same file can become more problematic as the line number information might be outdated. 
 
-Alternatively, a replace method can be used. This means that the string \enquote{oldContent} is replaced by \enquote{newContent} without considering the line number information. This method prevents the issues of the first approach. Additionally, it might refactor more lines that the \ac{LLM} did not refactor for some reasons. If two strings are equal and one string needs to be refactored, there is a high probability that the other string should be changed in the same manner. However, this does not work if \enquote{oldContent} for some reason does not exists in the file. For instance, the model might have added extra whitespaces to the old content so that a simple search-and-replace-strategy does not work. Furthermore, if oldContent is an empty string, replacing can lead to file corruption as the replacement operations are not developed for such an scenario. 
+Alternatively, a replace method can be used. This means that the string \enquote{oldContent} is replaced by \enquote{newContent} without considering the line number information. This method prevents the issues of the first approach. Additionally, it might refactor more lines that the \ac{LLM} did not refactor for some reasons. If two code lines are equal and one code line needs to be refactored, there is a high probability that the other string should be changed in the same manner. However, this does not work if \enquote{oldContent} for some reason does not exists in the file. For instance, the model might have added extra whitespaces to the old content so that a simple search-and-replace-strategy does not work. Furthermore, if oldContent is an empty string, replacing can lead to file corruption as the replacement operations are not developed for such an scenario. 
 
 In this master thesis both approaches are employed. The second approach is always tested first. If this approach does not work (e.~g. \enquote{oldContent} does not exists in the file, the line-by-line replacement method is used.  
 

@@ -1,4 +1,7 @@
-\section{Configuration}\label{sec:config}
+\section{Configuration and usage of the main program}\label{sec:config}
+This section outlines how the main program can be configured and used.
+
+\subsubsection{Configuration}
 An important aspect for the usability of the tool is the possibility to configure the tool for the user's need. 
 
 Since the goal of the tool is to allow the combination of multiple services and other tools in order to find and refactor data clumps, the user must be able to define which handler deals with which step  as outlined in section \ref{sec:pipeline}.
@@ -41,3 +44,23 @@ Each object that appears in the \ac{JSON} is instantiated using dependency injec
     \item If a handler or other object needs another object of a specific category, it can ask the central manager. If the respective object has  yet not been created, it will be created. Otherwise, the already instantiated object will be returned. 
 \end{enumerate}
 With this approach, a looser coupling can be achieved. Each handler has access to the configuration it needs and does not have to deal with the creation of objects. 
+\subsubsection{Running the main program}
+
+
+If a valid configuration file has been created, the main program can be started via \textit{npm run run <config> <project-location>} where \textit{config} is the location of the configuration file and \textit{project-location} is the path to the project to be analyzed. The order of these arguments can be swapped. 
+
+With these arguments given, the following steps are executed
+
+\begin{enumerate}
+    \item the main program parses the configuration file and initializes the object with the given arguments. It also assigns the handlers to the respective steps.
+    \item  the validity of the pipeline is checked. For instance, it is tested whether all required programs are installed.
+    \item An initial code obtaining context is generated
+    \item The pipeline is executed. For each executed pipeline step
+    \begin{enumerate}
+        \item Checks whether there is a serialized context for this step and whether the handler accepts that this context is sufficient. In this case, the handler is not executed
+        \item If none of these conditions are met, the handler is executed
+        \item the context returned by the context is used as the new context.
+        \item If supported by the respective context, it is serialized
+    \end{enumerate}
+    \item The main program exits. The running time of each step is serialized for evaluation purposes. 
+\end{enumerate}

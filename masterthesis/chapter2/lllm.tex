@@ -1,8 +1,8 @@
-\section{Large Language Models}
+\section{Large language models}
 
-The term \enquote{large language models} refers to a machine learning model that can generate and understand texts in an all-purpose manner. 
+The term \ac{LLM} refers to a machine learning model that can generate and understand texts in an all-purpose manner. 
 
-A \ac{LLM} is trained on a large data set of texts. These texts can come from books, internet pages or other textual sources. The input data is then prepared and sanitized to avoid biases and factual errors.
+An \ac{LLM} is trained on a large data set of texts. These texts can come from books, internet pages or other textual sources. The input data is then prepared and sanitized to avoid biases and factual errors.
 
 
 Then, the training process is performed. By word embedding, the relationship between words is trained such that the model learns the semantic relationship between words. For instance it can learn that cats are animals  or that there is a relationship between men and women. This relationship can be represented as vectors so that for example the relationship \enquote{men to women} can be applied to the term \enquote{king} which results in \enquote{queen}.
@@ -46,11 +46,11 @@ In the main panel that encompasses the most area of the figure, a chat is visual
 On the right side, all conversations with ChatGPT are listed. For instance, there is a conversation about \enquote{IntelliJ PSI Modification Fix}. A user can have multiple independent conversations where each has it own context. 
 
 \subsubsection{API}
-In order to use the ChatGPT \ac{API}, a user has to create an OpenAI account and deposit financial information so that the user can be charged. Each request to the API consumes a certain amount of tokens dependent on the query. 
+In order to utilize the ChatGPT \ac{API}, a user has to create an OpenAI account and provide financial information for billing purposes. Each request to the API consumes a certain amount of tokens dependent on the query. 
 
-A token is the smallest unit used by ChatGPT to process a query. For instance, a token could be one english word, a syntactical part of a programming language, a number, or a similar independent part of a query. According to OpenAI, a token is 3/4 of a word, so 100 tokens are about 75 words. However, this is just an estimate for natural language texts in the English language. 
+A token is the smallest unit used by ChatGPT to process a query. For instance, a token could be one English word, a syntactical part of a programming language, a number, or a similar discrete segment of a query. According to OpenAI, a token roughly equates 3/4 of a word, so 100 tokens are about 75 words. However, this is just an estimate for natural language texts in the English language. 
 
-The \ac{API} itself used JSON combined with \ac{HTTP}. For the purpose of this master thesis, only a subset of the available means to use the \ac{API} will be explained because the whole \ac{API} would be too complex and irrelevant. 
+The \ac{API} itself used JSON combined with \ac{HTTP}. For the purpose of this master thesis, only a subset of the available means to use the \ac{API} will be explained because the whole \ac{API} would be too complex and outside the scope this master thesis. 
 
 Listing \ref{lst:chatgpt_api} shows how an \ac{API} query may look like if it used via \textit{curl} which is a tool to  perform \ac{HTTP} requests:
  \begin{figure} [htbp!]
@@ -62,9 +62,9 @@ Listing \ref{lst:chatgpt_api} shows how an \ac{API} query may look like if it us
 		\end{figure}
  
 
-Since ChatGPT uses \ac{JSON} for communication, the content header of \ac{HTTP}  must be set to \enquote{application/json} (l. 2). Afterwards a token must be provided to ChatGPT (l. 23). This  token must be generated on the OpenAI website and will be used to connect the query to an OpenAI account so that the user can be charged properly- The token should remain secret and may not be disclosed (e.~g. via \ac{VCS}) 
+Since ChatGPT uses \ac{JSON} for communication, the content header of \ac{HTTP}  must be set to \enquote{application/json} (l. 2). Subsequently, a token must be provided to ChatGPT (l. 23). which is generated on the OpenAI website, links the query to a specific OpenAI account for billing purposes. It is crucial that this token remains confidential and is not exposed (e.g., through version control systems).
 
-Then, the actual query is defined (l. 4-24.). Firstly, the model is defined (l. 5). OpenAI provides multiple models that have different advantages and disadvantages. For instance, a newer model like \textit{gpt-4} has more capabilities but is more expensive.  By providing a temperature, a user can configure the randomness of the response (l.6). A higher temperature results in more creative answers but this creativity might worsen the quality. 
+Then, the actual query is defined (l. 4-24.). Firstly, the model is defined (l. 5). OpenAI provides multiple models that have different advantages and disadvantages. For instance, a newer model like \textit{gpt-4} has more capabilities but is more expensive.  By providing a temperature, a user can configure the randomness of the response (l.6). A higher temperature results in more creative answers but this creativity might worsen the quality of the responses. 
 
 Afterward, the actual messages are provided (l. 7-25). Each message is a tuple of a \textbf{role} and a \textbf{content}. The content of a message is the input or output provided to or by ChatGPT. 
 
@@ -81,14 +81,14 @@ The response of the ChatGPT \ac{API} based on listing \ref{lst:chatgpt_api} is d
 
 In the bottom part of the listing (l. 13-19), meta information is provided. This includes the response generation time (l. 12), the used model for the response (l. 14), an id for the response (l. 13).
 
-In order for clients to calculate the costs of using ChatGPT, each response also includes how many tokens have been used by the prompt (l. 18), by the response (l. 17), and the total number of tokens (l. 19).
+To enable clients to calculate the costs of using ChatGPT, each response also includes how many tokens have been used by the prompt (l. 18), by the response (l. 17), and the total number of tokens (l. 19).
 
-In the upper part of the response (l. 1-11), the actual response is provided. The response is an array of so-called choices (l. 2~-~11). Each choice consists of the actual message (l.~ 6-8), which itself consists of the message content (l. 7) and the role of the content (in most cases, this would be \enquote{assistant}).
+In the upper part of the response (l. 1-11), the actual response is provided. The response is an array of so-called choices (l. 2~-~11). Each choice consists of the actual message (l.~ 6-8), which itself consists of the message content (l. 7) and the role of the content (usually \enquote{assistant}).
 
 The \enquote{finish\_reason} indicates how the \ac{LLM} has finished on the prompt. If the value is \enquote{stop}, the prompt was executed without faults so that the response is valid. If the value is \enquote{length}, the output would exceed the maximum token limit, so the output will be incomplete. The value \enquote{content\_filter} indicates that OpenAI censured the requests because it violates the terms of use of OpenAI. \cite{ChatGPT_url}
 
 
-\subsection{Advantages and Challenges on using Large Language Models}\label{sec:llm_challenges}
+\subsection{Advantages and challenges on using large language models}\label{sec:llm_challenges}
 
 While using  \ac{LLM} for refactoring brings many advantages  and possibilities, using \ac{LLM}  successfully can be challenging. The advantages and disadvantages will be discussed in this subsection. A \textbf{traditional algorithm} as used in this section means any manual refactoring algorithm (e.~g.,~ refactoring data clumps by extracting a class, removing and introducing parameters in methods, and updating all references)
 
@@ -193,7 +193,7 @@ When using the \enquote{gpt-4-1106-preview} or \enquote{gpt-3.5-turbo-1106} mode
 
 \subsubsection{Chain-of-Thought Prompting}\label{sec:chain of thought}
 
-One way to improve the results from \acp{LLM} like ChatGPT is to separate a query into interconnected sub-queries that lead to a chain of thought. This can be compared to the human thinking process because a human alone tries not to solve a problem at once but breaks it down into simpler problems that are still connected to but easier to solve. \cite{Wei2022ChainOT}
+One way to improve the results from \acp{LLM} like ChatGPT is to separate a query into interconnected sub-queries that lead to a chain of thought. This can be compared to the human thinking process because a human alone tries not to solve a problem at once but breaks it down into simpler problems that are still inter-connected to but easier to solve. \cite{Wei2022ChainOT}
 
 For instance, a query to find and refactor data clumps can be separated into a detection query and a refactoring query. These sub-queries can be further divided into a query for each file or for all files in a single directory. As a result, not one a single query is needed but multiple queries. 
 

@@ -5,36 +5,33 @@ Data clumps can only be found if access to the source code is given. This requir
 
 In most cases, this is trivial since a developer needing to find and fix data clumps should know where the source code is located.
 
-However, there might be more complex cases. For instance, the source code could be located on a \ac{VCS} or must be downloaded elsewhere so that the newest changes can be considered. Therefore, defining a specific step for obtaining the source code before executing the rest of the pipeline is useful. 
+However, there might be more complex cases. For instance, the source code could be located on a \ac{VCS} or must be fetched elsewhere so that the newest changes can be included. Therefore, defining a specific step for obtaining the source code before proceeding with the rest of the pipeline is useful. 
 
 
 \subsubsection{File filtering}\label{subsub:filtering_files}
-After retrieving the project files, a file filtering process is important. A software project consists of many artifacts like actual source code, images, libraries, or other resources. Only source code files are relevant for data clump detection int his master thesis. 
+After retrieving the project files, a file filtering process is important. A software project consists of many artifacts like actual source code, images, libraries, or other resources. For this master thesis, only source code files are pertinent for data clump detection. 
 
 
-However, not every source code file might be analyzed for data clumps. For instance, parts of the projects must not be refactored, or a re-factorization would be too time-consuming. As outlined in chapter \ref{sec:introduction}, the cost of detecting data clumps might need to be lowered. Therefore, filtering rules might be necessary to reduce the size of the relevant files for the subsequent steps.  
+However, not every source code file might be analyzed for data clumps. For instance, parts of the projects must not be refactored, or a re-factorization would be too time-consuming. As outlined in chapter \ref{sec:introduction}, the cost of detecting data clumps might need to be minimized. Therefore, filtering rules might be necessary to reduce the scope of the files that are considered in the the subsequent steps.  
 
-File filtering can be achieved in multiple ways:
+File filtering can be achieved through several methods:
 
-With pattern-based filtering, inclusion rules and exclusion rules can be used to filter out irrelevant files.  To facilitate these rules, regex patterns can be used.  Each inclusion glob specifies which file must be included, and each exclusion glob specifies files that must be excluded. For instance, consider \textit{includeGlobs=[\enquote{.*\.java}]} and \textit{excludeGlobs=\enquote{.*Main.java}}. In this case, all Java files are included, if however a file ends with \enquote{Main.java} it is excluded. 
-The precedence between include and exclude rules can have a major impact on defining the correct rules. In the example above, exclusion rules prevail over inclusion rules.  This means that single files can be excluded with few exclusion rules. If however only a small set of files should be considered and a larger set of files be excluded, this prevalence should be reversed so that inclusion rules prevail over exclusion rules. In this master thesis, the latter approach will be chosen because it is more compatible with programs like PMD and simplifies analyzing only parts of the software project. 
+With pattern-based filtering, inclusion rules and exclusion rules can be used to filter out irrelevant files.  To facilitate these rules, regex patterns can be used.  Each inclusion pattern specifies which file must be included, and each exclusion pattern specifies files that must be excluded. For instance, consider \textit{includeGlobs=[\enquote{.*\.java}]} and \textit{excludeGlobs=\enquote{.*Main.java}}. In this case, all Java files are included, if however a file ends with \enquote{Main.java} it is excluded.
+
+The precedence between include and exclude rules can have a major impact on defining the correct rules. In the example above, exclusion rules override inclusion rules.  This means that few files can be excluded with few exclusion rules. If however only a small set of files should be considered while excluding a larger set of files, this prevalence should be reversed so that inclusion rules dominates over exclusion rules. In this master thesis, the latter approach will be chosen due to its  compatibility with programs like PMD and its ability to simplify partial analysis of software projects. 
 
 More complex filters can also be used. For instance, only considering files changed by the latest commit or rank the files given a specific metric and keep the best files. Details of these more complex filtering methods can be found in section \ref{sec:data_clump_filtering}
 \subsubsection{Extraction of AST}
 Then,  the source code needs to be simplified as comments, the method bodies, and other language parts are irrelevant for detecting data clumps. This could be achieved by extracting a subset of the \ac{AST} from the source code, which includes all the relevant information to identify data clumps.
 
-\begin{comment}
-\subsubsection{Similarity detection}
 
-The next step is finding pairs of method parameters and pairs of identical or at least similar fields. For this, the identifier and the data type can be compared. Unequal variable names might not rule out a similarity between two variables. For instance, typos may happen, or synonyms may be used. Also, the type might be different. For instance, the data type \textit{double} can be seen as a super-set of the datatype \textit{int} because every 32-bit integer can be converted to a \textit{double}.
-
-From this, a graph can be constructed that visualizes the relationship of the several variables. A node represents a parameter or field value, while an edge exists if and only if a relationship between two variables is detected. 
-\end{comment}
 \subsubsection{Data clump detection}
-This step is one of the most critical steps of the pipeline. 
+This step is among the most critical of the pipeline. 
 The handler finds all data clumps given the filter constraints established before and returns a new context with the description of the detected data clump in the format suggested by the \textit{DataClumpDoctor}. 
 
-The handler should take care that it only finds data clumps, and not related part of the source code. For instance, finding where a data clump method is called is not part of this steps and should not be saved yet. 
+The handler should take care that it only finds data clumps, and not related part of the source code. For instance, finding where a data clump method is called is not part of this step and should not be saved yet. 
+
+Moreover, each data clump must receive an unique ID. While the structure of this ID is not relevant and does not need to be parsed, concatenating the available information of the data clump (e.~g. class name, data clump items) is a suitable way to generate such an ID
 
 \subsubsection{Data clump filtering or prioritization} \label{subsub:filtering_data_clumps}
 In section \ref{subsub:filtering_files}, a filtering by files is performed. However, even if many data clumps were detected, they do not always need to be refactored. One can decide to ignore certain data clumps and refactor them later or even never. 
@@ -57,7 +54,7 @@ Since English is the predominant language of identifiers, it will be assumed tha
 \subsubsection{Reference finding}
  Having detected a data clump, there is still information missing to refactor it. In particular, successful re-factorization requires that every method call, method definition, variable usage or variable definition that is connected to the data clump is updated in a later step. These so-called \textbf{references} need to be found so that they can be updated.
 
-Since the identifier of the data clump variables (or methods) is known, one could search for all occurrences of that identifier. This, however, is not enough because identifiers have a scope. A variable with the name \textit{var} can be declared as a field, as a parameter of a method or inside a block (e.~g. if-branch). All these names can refer to different variables although they have the same identifier. As a result, a textural replacement approach will not work consistently.
+Since the identifier of the data clump variables (or methods) is known, one could search for all occurrences of that identifier. This, however, is not enough because identifiers have a scope. A variable with the name \textit{var} can be declared as a field, as a parameter of a method or inside a block (e.~g. if-branch). Each these names can refer to different variables although they have the same identifier. As a result, a textural replacement approach will not work consistently.
 
 Therefore, additional tools will be needed to parse the source code and use the rules of the programming language to find where the data clump items are indeed used.
 \subsubsection{Class Extraction}\label{subsec:chap3_data_class_extraction}

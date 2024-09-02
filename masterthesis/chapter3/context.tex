@@ -3,11 +3,12 @@ In section \ref{sec:pipeline_steps}, the several steps of the data clump pipelin
 
 Therefore, a concept to store intermediate information needs to be developed. Such information might be called \textbf{context}.
 \subsection{Context structure}
-The context is a repository filled throughout the data clump refactoring pipeline. For instance, it might be stored in memory or a database if the context size is too large.The context can be represented as a linked list. Each node of the list represents a part of the context.
-Each context is an extension of a previous context. In the beginning, there is no context and the code obtaining context is created. If a handler needs to access information from a specific context, it needs to traverse the linked list until it finds the needed information. 
+The context is a  dynamic repository filled throughout the data clump refactoring pipeline.´The context can be represented as a linked list. Each node of the list encapsulates a distinct segment of the context which is an extension of the previous context. In the beginning, there is no context and the code obtaining context is created.
+
+When a handler needs to access information from a specific context, it needs to traverse the linked list until it finds the needed information. 
 
 
-Each step in the data clump refactoring pipeline can access the context and obtain such information as it may deem necessary for its use. A step may or may not update the context. For instance, if a service performs multiple step consecutively, it might not be able to store some information. To give a more concrete example, if a service can find data clumps and refactor them automatically, it might not be able to store the locations of each data clump so that respective context cannot be created. Also, a step can create multiple chained contexts if a step is capable of executing multiple steps. 
+Each step in the data clump refactoring pipeline can access the context and obtain such information as it may deem necessary for its use. A step may or may not update the context. For instance, if a service performs multiple step consecutively, it does not need to share  some information, or this would be harder to implement. To give a more concrete example, if a service can find data clumps and refactor them automatically, it might not be able to store the locations of each data clump so that respective context cannot be created. Also, a handler can create multiple chained contexts if it is capable of executing multiple steps. 
 
 \begin{figure}
    \includesvg{figures/chapter3/context_pipeline_drawio.svg}
@@ -61,12 +62,12 @@ It should also be noted that inclusion and exclusion rules might conflict, and t
 \end{comment}
 \subsubsection{Data clump detection and filtering}
 
-The format described in section \ref{sec:data_clump_format} can be used to store the detected data clump. While this format is relatively new, it contains all relevant information for storing data clump information and is extendable. The same format can be used for filtering too as all irrelevant data clumps can be removed easily. As a result, this context is an example of a context that might appear multiple times in the linked list. 
+The format described in appendix \ref{sec:data_clump_format} can be used to store the detected data clump. While this format is relatively new, it contains all relevant information for storing data clump information and is extendable. The same format can be used for filtering too as all irrelevant data clumps can be removed easily. As a result, this context is an example of a context that might appear multiple times in the linked list. 
 
 \subsubsection{Name finding}
-To store the determined names per found data clump, a dictionary can be used that maps a unique data clump to a name. For large instances, this could be done via a database. 
+To store the determined names per found data clump, a dictionary can be used that maps the types-names-identifier of the data clump to a name.
 
-Since there could be multiple name suggestions for a given data clump, multiple names might be stored so that a correct name may be chosen later. However, this is not part of the modeled pipeline as the benefits do not outweigh the increased complexity.
+One possible extension for this context could be to store multiple name suggestions for a given data clump. However, this is not part of the modeled pipeline as the benefits do not outweigh the increased complexity.
 
 \subsubsection{Class path choosing}
 

@@ -22,44 +22,6 @@ Furthermore, tools have been developed that on their own cannot refactor code sm
 Additionally, the use of \ac{LLM} in software development has recently gained widespread attention and has become a focus of several studies which analyzes the potential and challenges in practice. 
 
 \subsection{Tools to assists data clump refactoring}
-\subsubsection{Language Server Protocol} \label{sec:lsp}
-The \ac{LSP}  \cite{lsp_website} is a protocol developed by Microsoft to create a language-independent interface for code-related operations. 
-The \ac{LSP}  describes a server and a client who communicate to each other using the JSON-Remote-Process-Call protocol \cite{json_rpc}. 
-
-The client can generally be anything that works with source code but has no detailed knowledge of a specific programming language. For instance, an \ac{IDE}, an editor or a refactoring tool can be described as a client.
-
-The client starts a server based on a programming language. The server has a inherent knowledge of one ore more programming languages and can provide source-code-related functionality. For instance, the server can rename a variable, find the usages of a method, or inform the client about compiler errors. 
-
-Initially, client and server share some information to set up. This includes the path to the project that the server should load and information about what functionality each of them supports. These functionalities are named \textit{Capabilities}. For example, the server can announce that it supports renaming variables while the client is capable of showing error messages. Hence, server and client can interact in a manner such that no unsupported messages are transferred.
-
-The sequence diagram in figure \ref{fig:lsp_usage} illustrates how the \ac{LSP} works in practice after the initialization process. 
-\begin{figure}
-    \centering
-    \includegraphics{figures/chapter2/language-server-sequence.png}
-    \caption{Example usage of the Language Server Protocol}
-    \label{fig:lsp_usage}
-    \cite{lsp_website}
-\end{figure}
-
-After the server has been successfully started by the client, a user can open a document (e.g. source code file). The request to open the document is submitted to the server. From now one, the server may not rely on the file system since that might be not the current version of the opened document. 
-
-The client can now inform the server about some changes (e.g. adding a new method). The server can, in the meantime, inform the client about syntactical errors which the client might show to the user of the client.
-
-Afterward, the client requests the definition of a method or variable, and the server returns a response with the requested data.
-
-In the end, the client can save the document and notify the server that the document was closed which means that the physical file of the document represents the current version of the document again. 
-
-The \ac{LSP} can hence be used to simplify refactoring-related task. For instance, a mandatory part of refactoring is to find all references of a symbol (e.~g. variable). The \ac{LSP} can perform this step so that the detected references can be processed further. It should however be noted that functionality of the protocol is limited to maximize the support for many programming languages. Thus, the an \ac{LSP} server is not a refactoring tool per-se. 
-
-
-
-
-
-\subsection{Data clump doctor} \label{sec:data_clump_doctor}
-
-The  \textit{Data Clump Doctor} is NodeJS command line tool developed by Nils Baumgartner in preparation of this master thesis. It employs \textit{PMD} to find all classes, methods, and fields in a Java project to generate an \ac{AST}. This syntax tree is saved as a \ac{JSON}. 
-
-In a second step, the generated \ac{AST} can be loaded again to find data clumps. by using the algorithmic approach discussed in section \ref{sec:data_clump_detection}. With this two-step methodology, a greater programming language in dependency can be achieved as the data clump detection has no access to the original source code. 
 
 
 

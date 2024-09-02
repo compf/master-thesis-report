@@ -2,12 +2,15 @@
 In this section, the implementation of the handlers is discussed. These handlers do not or only scarcely use the features by \ac{LLM}. 
 \subsection{Data Clump Doctor}
 
-The main tool to detect  data clumps is the \textit{DataClumpDoctor}. It can be directly integrated into the main program as it is written in TypeScript.
+The main tool to detect  data clumps is the \textit{DataClumpDoctor}. As this program is written using the NodeJS platform it can be directly integrated into the main program blurring distinction between handler and service.
 
-The \textit{DataClumpDoctor} works by generating an \ac{AST} of every class in the project to analyze, so that the syntax tree of each class is stored in a different file.  This task can be performed by PMD.
+The \textit{DataClumpDoctor} performs both the \ac{AST} generation step and the data clump detection step although these two steps are internally separated.
+
+If a \ac{AST} context is already present, it re-used. Otherwise the \ac{AST} context is generated. Here, the file filtering inclusion and exclusion rules must be applied as only the generated \ac{AST} files form the foundation for the \textit{DataClumpDoctor} to detect data clumps. Files  not represented by an \ac{AST} file are ignored. Since the detector internally uses \textit{PMD}, inclusion and exclusion rules can be set by creating a \enquote{custom-java-ruleset.xml} file. This file is located inside the Java-Archive file used by the detector, and must be updated whenever \ac{AST} files are generated to apply the current filtering rules. 
 
 After that, the \textit{DataClumpDoctor} loads the \ac{AST} files and detects the data clump by comparing the identifier and types of variables that might constitute a data clump, thereby requiring strict equality. These detected data clumps are saved in a separate file and can be re-used in the pipeline. 
 
+One issue with the \textit{DataClumpDoctor} is its handling of large projects. While a concrete \ac{LOC} number cannot be given, at some points analyzing large projects becomes infeasible leading to crashes or prolonged running times. This can be explained by considering that  the number of detected data clumps grows quadratically with the actual number of data clump holders. Due to the structure of the reporting format as discussed in appendix \ref{sec:data_clump_format}, there is a significant amount of repetition. For sufficiently large projects, this can be a problem it the data clump information needs to be serialized as NodeJS is not optimized for these tasks. While changing the format is one solution to this problem, it can be argued that using previous file filters are more suitable as the data clump detection results from large projects are difficult to evaluate. 
 
 \subsection{Name finding}
 Finding a suitable name for the soon-to-be-extracted class is the next step  that must be implemented. Two approaches are chosen.
