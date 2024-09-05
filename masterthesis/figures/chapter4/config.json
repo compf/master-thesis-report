@@ -7,18 +7,11 @@
                 "model": "gpt-4-1106-preview",
                 "temperature": 0.9
             }
-        },   
-    "PipeLine": {
-        "CodeObtaining": {
-            "handler": "SimpleCodeObtainingStepHandler",
-            "args": {
-                "useArgPath": true
-            }
         },
-     
-      "DataClumpDetection": {
-            "handler": "LargeLanguageModelDetector"
-      }     
- }
+        "PipeLine": {
+            "DataClumpDetection": {
+                "handler": "LargeLanguageModelDetector"
+            }
+        }
     }
 }

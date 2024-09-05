@@ -12,7 +12,7 @@ Each usage can be performed independently from each other, but internally all pr
 
 \subsection{Input processing}
 
-\begin{table}[]
+\begin{table}[ht!]
     \centering
     \begin{tabular} {m{4cm} | m{4cm} | m{4cm}}
         Detecting & Filtering & Refactoring  \\\hline
@@ -129,6 +129,23 @@ Alternatively, a replace method can be used. This means that the string \enquote
 
 In this master thesis both approaches are employed. The second approach is always tested first. If this approach does not work (e.~g. \enquote{oldContent} does not exists in the file, the line-by-line replacement method is used.  
 
+\subsubsection{Handling invalid \ac{JSON} objects}
+
+When using the \ac{JSON} output format, it is essential to deal with edge cases where the ourput is not valid \ac{JSON}. This problem can happen in two scenarios.
+
+Firstly, not all \acp{LLM} support \ac{JSON}-only modes. This means that that the content of the model cannot be forced to contain only \ac{JSON} but might contain additional text that cannot be parsed. While the model used int his thesis supports this mode, it is useful to keep these edge cases in mind. This edge case can be circumvented by finding the first opening curly brace \enquote{\{} in the response and the last closing curly brace \enquote{\}} because the string between is valid \ac{JSON}. As a result, any text before or after the \ac{JSON} is ignored and cut off. 
+
+Secondly, one problem for \acp{LLM} is that they generate token by token and therefore cannot pre-plan their output. Usually, this does not cause problems. 
+
+However, as outlined in section \ref{sec:llm_challenges}, the maximum output size of a model is restricted so that a model cannot generate large output at once. The model can be prompted to continue the output, but this requires additional prompts. Additionally, these interim prompts must be combined into one so that they can parsed.
+
+If the output is \ac{JSON}, this can become problematic as the syntax of \ac{JSON} is intolerant to sudden stops. For instance, if closing curly braces  are missing, usual \ac{JSON} parsers are unable to deal with. 
+
+The easiest solution to this problem is to simple ignore the output as the response was invalid. Such a large output is correlated with a large input so it might be useful to reduce the set of transmitted files. 
+
+However,  one can still try to parse the output as the incomplete \ac{JSON} might still contain relevant data (e.~g. refactoring instruction). While the refactoring is probably incomplete, it might be a good start and possible errors can be fixed in the validation step.
+
+Parsing such incomplete \ac{JSON} is however not trivial. One approach is to to incrementally remove the last character of the string, and then to try appending closing brackets to the string until the result is a valid \ac{JSON}. This is resource extensive as the validity of the \ac{JSON} must be checked repeatedly. Alternatively, a tolerant \ac{JSON} parser could be used, but these are more appropriate for \acp{JSON} with comments or new lines inside strings. 
 
 
 

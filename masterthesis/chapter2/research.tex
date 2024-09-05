@@ -76,4 +76,5 @@ In case of refactoring, the author suggest that ChatGPT is able to refactor code
 Cao et al. \cite{cao2023study} focus on using ChatGPT for fixing deep learning programs. Those are programs that cannot be understood only by their source code alone, but are are largely influenced by underlying data like  neural networks etc. This makes finding faults more difficult. The study finds out that ChatGPT can find code smells and detect faults. Without giving instructions however, ChatGPT will tend to return code smells and outdated API calls while not finding other bugs. 
 
 
-
+Madaan et al. present a self-refinement process for \acp{LLM} with regard to code generation. Their idea is to submit the output of a model to the model again so the code can be evaluated by the model. The feedback returned by the \ac{LLM} is the used to improve the code again so as long as a stop condition is reached. They find that this approach increases the quality of the generated code. For instance, the number of optimized programs using this strategy increases from 27.3~\% to 36~\%. \cite{Madaan2023SelfRefineIR}. 
+The general idea of this approach will also be used in this master thesis to correct building errors that can occur after using an \ac{LLM}. 
