@@ -1,5 +1,13 @@
-\documentclass[a4paper,12pt,oneside, bibliography=totoc]
+%\newcommand*{\DEBUG}{}
+\ifdefined\DEBUG
+\documentclass[a4paper,12pt,oneside, bibliography=totoc,dvipsnames]
 {scrbook}
+\else
+  \documentclass[a4paper,12pt,oneside, bibliography=totoc]{scrbook}
+\fi
+\usepackage[dvipsnames]{xcolor}
+
+
 \usepackage[utf8]{inputenc}
 \usepackage{pgf-umlcd}
 % Schrift und -kodierung
@@ -13,6 +21,7 @@
 \usepackage{floatflt}
 \usepackage{float} 
 \usepackage{verbatim}
+
 \usepackage{hyperref}
 \usepackage{graphicx}
 \usepackage{pbox}
@@ -71,6 +80,11 @@
 \usepackage[]{hyperref}
 
 \begin{document}
+
+\ifdefined\DEBUG
+\color{ForestGreen}
+\fontfamily{qcr}\selectfont
+\fi
 \frontmatter %roman page numbers
 
 

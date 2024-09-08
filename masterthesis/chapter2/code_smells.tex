@@ -4,15 +4,15 @@ The term \enquote{Code smell} is suggested by Kent Beck in \cite{fowler2019refac
 
 Different types of code smells can be distinguished \cite{data_clumps_refactoring_guru}:
 \begin{description}
-    \item [Bloaters] Code smells that increase the code size unnecessarily 
-    \item [Change Preventers] A code smell that makes it harder to apply changes to the source code because many files are affected by a small change
-    \item [Dispensables] Source code that can be easily removed without affecting the functionality
+    \item [Bloaters:] Code smells that increase the code size unnecessarily 
+    \item [Change preventers:] A code smell that makes it harder to apply changes to the source code because many files are affected by a small change
+    \item [Dispensables:] Source code that can be easily removed without affecting the functionality
 \end{description}
 
-Another distinction of code smells is how easier they can be detected. Localized code smells can be spotted by analyzing a small amount of code lines (i.~e. it not essential to analyze multiple files to be sure of the existence of a code smell). Long parameter list or missing documentation is one example of local code smells.  In contrast, scattered code smells can only be detected by comparing multiple part of the source code to each other(e.~g. strong coupling between classes). \cite{10.1007/978-3-030-29238-6_19}
+Another distinction of code smells is how easier they can be detected. Localized code smells can be spotted by analyzing a small amount of code lines (i.~e. it not essential to analyze multiple files to be sure of the existence of a code smell). Long parameter list or missing documentation is one example of local code smells.  In contrast, scattered code smells can only be detected by comparing multiple parts of the source code to each other (e.~g. strong coupling between classes). \cite{10.1007/978-3-030-29238-6_19}
 
 In all these cases, the short term effects of refactoring are small to non-existent. For instance, the performance or bug resiliency of a program is not improved. In longer terms however, as the software must be adapted for future challenges, the advantages of refactoring become clear as the costs of finding and fixing bugs and implementing new features is reduced. 
 
-One issue with regard to refactoring is code smell prioritization and filtering. Not all code smells are equally problematic and many developers disagree on what constitutes a code smell. Additionally,  the amount of resources to refactor code smells is proportional to the amount of code smells. \cite{10.1007/978-981-13-8300-7_21}
+One issue with regard to refactoring is code smell prioritization and filtering. Not all code smells are equally problematic and many developers disagree on what constitutes a code smell. Additionally,  the amount of resources to refactor code smells is correlated to the amount of code smells. \cite{10.1007/978-981-13-8300-7_21}
 
 Therefore, the goal of refactoring is often not to eliminate all at once code smells but a subset of them that are deemed \enquote{important}. Determining and refactoring these code smells is an essential method to maximize the quality of the source code while minimizing costs.

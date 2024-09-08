@@ -1,4 +1,4 @@
-\section{Large language models}
+\section{Large language models}\label{sec:llm}
 
 The term \ac{LLM} refers to a machine learning model that can generate and understand texts in an all-purpose manner. 
 
@@ -62,13 +62,13 @@ Listing \ref{lst:chatgpt_api} shows how an \ac{API} query may look like if it us
 		\end{figure}
  
 
-Since ChatGPT uses \ac{JSON} for communication, the content header of \ac{HTTP}  must be set to \enquote{application/json} (l. 2). Subsequently, a token must be provided to ChatGPT (l. 23). which is generated on the OpenAI website, links the query to a specific OpenAI account for billing purposes. It is crucial that this token remains confidential and is not exposed (e.g., through version control systems).
+Since ChatGPT uses \ac{JSON} for communication, the content header of \ac{HTTP}  must be set to \enquote{application/json} (l. 2). Subsequently, a token must be provided to ChatGPT (l. 23). which is generated on the OpenAI website and links the query to a specific OpenAI account for billing purposes. It is crucial that this token remains confidential and is not exposed (e.g., through version control systems).
 
 Then, the actual query is defined (l. 4-24.). Firstly, the model is defined (l. 5). OpenAI provides multiple models that have different advantages and disadvantages. For instance, a newer model like \textit{gpt-4} has more capabilities but is more expensive.  By providing a temperature, a user can configure the randomness of the response (l.6). A higher temperature results in more creative answers but this creativity might worsen the quality of the responses. 
 
 Afterward, the actual messages are provided (l. 7-25). Each message is a tuple of a \textbf{role} and a \textbf{content}. The content of a message is the input or output provided to or by ChatGPT. 
 
-The role of a message indicates the source of a message. If the content of the messages comes from a user, the role should be \enquote{user} (l. 13). A reply for a query is defined as the role \enquote{assistant} (l. 17). The system role is a more specific and can be used to include further context for ChatGPT without eliciting a response (l. 9)
+The role of a message indicates the source of a message. If the content of the messages comes from a user, the role should be \enquote{user} (l. 13). A reply for a query is defined as the role \enquote{assistant} (l. 17). The system role is a more specific and can be used to include further context for ChatGPT without eliciting a response (l. 9).
 
 The response of the ChatGPT \ac{API} based on listing \ref{lst:chatgpt_api} is displayed in listing \ref{lst:chatgpt_api_response}.
  \begin{figure} [htbp!]
@@ -79,9 +79,9 @@ The response of the ChatGPT \ac{API} based on listing \ref{lst:chatgpt_api} is d
 			{figures/chapter2/chatgpt_api_response.json}
 		\end{figure}
 
-In the bottom part of the listing (l. 13-19), meta information is provided. This includes the response generation time (l. 12), the used model for the response (l. 14), an id for the response (l. 13).
+In the bottom part of the listing (l.~13-19), meta information is provided. This includes the response generation time (l.~12), the used model for the response (l.~14), and an id for the response (l.~13).
 
-To enable clients to calculate the costs of using ChatGPT, each response also includes how many tokens have been used by the prompt (l. 18), by the response (l. 17), and the total number of tokens (l. 19).
+To enable clients to calculate the costs of using ChatGPT, each response also includes how many tokens have been used by the prompt (l.~18), by the response (l.~17), and the total number of tokens (l.~19).
 
 In the upper part of the response (l. 1-11), the actual response is provided. The response is an array of so-called choices (l. 2~-~11). Each choice consists of the actual message (l.~ 6-8), which itself consists of the message content (l. 7) and the role of the content (usually \enquote{assistant}).
 
@@ -90,19 +90,19 @@ The \enquote{finish\_reason} indicates how the \ac{LLM} has finished on the prom
 
 \subsection{Advantages and challenges on using large language models}\label{sec:llm_challenges}
 
-While using  \ac{LLM} for refactoring brings many advantages  and possibilities, using \ac{LLM}  successfully can be challenging. The advantages and disadvantages will be discussed in this subsection. A \textbf{traditional algorithm} as used in this section means any manual refactoring algorithm (e.~g.,~ refactoring data clumps by extracting a class, removing and introducing parameters in methods, and updating all references)
+While using  \ac{LLM} for refactoring brings many advantages  and possibilities, many challenges should be taken into account. The advantages and disadvantages will be discussed in this subsection. A \textbf{traditional approach} as used in this section means any manual refactoring algorithm (e.~g.,~ refactoring data clumps by extracting a class, removing and introducing parameters in methods, and updating all references)
 
 \subsubsection{Advantages}
 
-First of all, large language models are very flexible. A normal refactoring algorithm needs to consider many situations. For instance, a traditional algorithm that modifies the method signature in a class might not work on an interface. A large language model does not need to be adapted to all edge cases but often finds a suitable solution to a problem because it is not restricted to a specific refactoring process. \cite{shirafuji2023refactoring}
+First of all, large language models are very flexible. A normal refactoring algorithm needs to consider many situations. For instance, a traditional approach that modifies the method signature in a class might not work on an interface. A large language model does not need to be adapted to all edge cases but often finds a suitable solution to a problem because it is not restricted to a specific refactoring process. \cite{shirafuji2023refactoring}
 
-Additionally, a \ac{LLM} is more similar to a human as it is more  \enquote{creative}. While it is still a computer model and does not win the Turing-Test \cite{turing_test}, a \ac{LLM} can refactor code in a manner more closely as a human being would do. For instance, it can suggest class names that are related to the topic of the class, which a human being would also consider, while traditional algorithms would use placeholder names, concatenation of field names or other simple name construction algorithms. \cite{shirafuji2023refactoring}
+Additionally, a \ac{LLM} is more similar to a human as it is more  \enquote{creative}. While it is still a computer model and does not win the Turing-Test \cite{turing_test}, a \ac{LLM} can refactor code in a manner more closely as a human being would do. For instance, it can suggest class names that are related to the topic of the class, which a human being would also consider, while traditional approachs would use placeholder names, concatenation of field names or other simple name construction algorithms. \cite{shirafuji2023refactoring}
 
 Large language models are also extensible. For instance, if another programming language is used, an \ac{LLM} can be easily adapted, while a traditional refactoring approach would require more effort to be language-agnostic.
 
-Moreover, a \ac{LLM} can refactor the code in more ways than instructed. While a model can be specifically instructed to refactor data clumps, it might also correct formatting errors, spelling mistakes, or other code smells. While the focus of this master thesis will be on data clumps, other code smells are important too and might be more serious. Using a  \ac{LLM} allows developers to fix more code smells without developing and testing more tools to refactor multiple code smells. As they are better to understand the context of the code than a traditional algorithm, the quality of the code can therefore be improved. \cite{shirafuji2023refactoring}
+Moreover, a \ac{LLM} can refactor the code in more ways than instructed. While a model can be specifically instructed to refactor data clumps, it might also correct formatting errors, spelling mistakes, or other code smells. While the focus of this master thesis will be on data clumps, other code smells are important too and might be more serious. Using a  \ac{LLM} allows developers to fix more code smells without developing and testing more tools to refactor multiple code smells. As they are better to understand the context of the code than a traditional approach, the quality of the code can therefore be improved. \cite{shirafuji2023refactoring}
 
-Furthermore, \ac{LLM} can adapt to the coding style of the source code. If for instance, the source code used the \enquote{snake\_case} or the \enquote{pascalCase} naming convention, the model can detect this convention and use it for its own refactoring (e.g. creating new methods, variables or classes). A traditional approach would need to be configured for each project to use the right convention so that the generated code might look more artificial as it does not fit to the rest of the code.
+Furthermore, \ac{LLM} can adapt to the coding style of the source code. If for instance, the source code used the \enquote{snake\_case} or the \enquote{pascalCase} naming convention, the model can detect this convention and use it for its own refactoring (e.g. creating new methods, variables or classes). A traditional approach would need to be configured for each project to use the right convention so that the generated code might look more artificial as it does not not fit to the rest of the code.
 
 
 \subsubsection{Disadvantages}
@@ -111,7 +111,7 @@ First of all \ac{LLM}s are not trustworthy. They are often confident in their an
 
 Additionally, \ac{LLM} use randomness in their answers which means that the same query can result in different replies. The factors influencing the reply are generally not known and should not be assumed. As a result, requirements regarding a specific output format may be ignored by the model so that developers using a \ac{LLM} must always consider how to parse non-adhering output.  \cite{hu2023large}
 
-One issue that many \acp{LLM} share is hallucination. This means that the model generates a response, but does not come to an end. For instance, an \ac{LLM} generating a \ac{JSON} can add more and more \ac{JSON} objects to its response until it has no space left so that it must abruptly stop leaving an invalid \ac{JSON} with no closed braces.  The conditions when such behavior can be observed are unpredictable and should be taken care for. 
+One issue that many \acp{LLM} share is hallucination. This means that the model generates a response, but does not come to an end. For instance, an \ac{LLM} generating \ac{JSON} can add more and more \ac{JSON} objects to its response until it has no space left so that it must abruptly stop leaving an invalid \ac{JSON} with no closed braces.  The conditions when such behavior can be observed are unpredictable and should be taken care for. 
 
 Furthermore, \ac{LLM}s are usually black boxes. They do not give hindsight on how they came to a specific reply. While they can explain their reasoning, it is not possible to check the exact thought process.
 While a query can consist of multiple parts, conditions, or requirements, a \ac{LLM} will not always adhere to all of these. It may weigh some requirements, ignore other, or interpret them wrongly so that the result is unexpected. A \ac{LLM} may also come to an intermediate result that it will not show at the end even though the intermediate result was correct or requested. Also, no sources of the information is provided. \cite{chen2023instructzero}
@@ -125,7 +125,7 @@ Furthermore, it is not out of the question that a malicious attacker might chang
 Another significant aspect are the legal implications of using \acp{LLM}. Since these models have only recently become mainstream, there are still unresolved legal issues. For instance, since most \acp{LLM} are trained using publicly available data, there are copyright issues as the idea of a particular line of code might come from somebody unknown. Also there are responsibility questions. What happens if the output of the model is malicious or faulty and who is legally responsible for making sure that no damage is done if the output of a model is used. The answers to these issues depend strongly on the jurisdiction. For instance, in the European Union the EU AI Act (Regulation (EU) 2024/1689), requires  transparency for using \acp{LLM} and bans the use of them in situation critical for human safety.  \cite{eu-ai-act}
 
 
-Lastly, also costs and capacity considerations needs to be observed. For large projects, a \ac{LLM} might be too costly because  the costs are often dependent on the input size. Therefore, the use of large language models should be adequately prepared so that as many costs as possible can be saved.  \cite{chen2023frugalgpt}
+Lastly, also costs and capacity considerations needs to be observed. For large projects, a \ac{LLM} might be too costly because  the costs are often dependent on the input size. Therefore, the use of large language models should be adequately prepared so that as much costs as possible can be saved.  \cite{chen2023frugalgpt}
 
 
 
@@ -145,14 +145,14 @@ ChatGPT is stateless. This means that the token id explained above is solely use
 \end{figure}
 
 
-Figure \ref{fig:chatgpt_stateless} visualize this issue. Here, the user asks the ChatGPT API to find all data clump java files \textit{(request a)}. ChatGPT responds with some data clumps. These might not be all data clumps, so a follow-up request might improve the results \cite{10062688}. Therefore, the user sends another completely new request \textit{(request b)} to instruct the model to find more data clumps. However, ChatGPT responds with a general message stating that no files have been submitted. This is the result of the statelessness which requires that the user always send the whole context with each query. In \textit{request c)}, the context is provided so that ChatGPT accurately responds by finding another data clump.
+Figure \ref{fig:chatgpt_stateless} visualizes this issue. Here, the user asks the ChatGPT API to find all data clumps in Java files \textit{(request a)}. ChatGPT responds with some data clumps. These might not be all data clumps, so a follow-up request might improve the results \cite{10062688}. Therefore, the user sends another completely new request \textit{(request b)} to instruct the model to find more data clumps. However, ChatGPT responds with a general message stating that no files have been submitted. This is the result of the statelessness which requires that the user always send the whole context with each query. In \textit{request c)}, the context is provided so that ChatGPT accurately responds by finding another data clump.
 
 Since follow-up requests make only sense if ChatGPT has already responded, the whole original request, the reply by ChatGPT, and any previous conversation must be provided which can have a significant impact on costs and rate limits. 
 
 A related issue occurring for some \acp{LLM} other than ChatGPT is the context window. Large language models like ChatGPT can only stores a limited amount of information during a conversation. If the amount of information is too large,  a model can react differently. ChatGPT will throw an error so that the user must reduce the amount of information transmitted to ChatGPT.
 
 Other models will forget some parts of it even though they might be relevant for the use case of the \ac{LLM}.
-Assuming, an \ac{LLM} has only a very small context window, which every modern model should easily handle, figure \ref{fig:llm_loose_context} demonstrates the issues that arises  A model is instructed to find and refactor data clumps in java files, and those java files are submitted as well. The response of the model at the bottom of the figure is however unexpected as it only explains the content of the files submitted. The reason for this response is not some misunderstanding of the prompt but a lack of prompt. The transparent rectangle represents the context window, only covering the content of the transmitted files while the instruction is not covered. 
+Assuming, an \ac{LLM} has only a very small context window, which every modern model should easily handle, figure \ref{fig:llm_loose_context} demonstrates the issues that arises  A model is instructed to find and refactor data clumps in java files, and those java files are submitted as well. The response of the model at the bottom of the figure is however unexpected as it only explains the contents of the files submitted. The reason for this response is not some misunderstanding of the prompt but a lack of prompt. The transparent rectangle represents the context window, only covering the content of the transmitted files while the instruction is not covered. 
 Because of the context window limitation, transmitting the third file overwrites the content of the prompt so that the model forgets the initial instruction and cannot reasonably process the files, giving instead a description of the files. The problem also arises on greater context window if multiple files or large files are involved as it may be the case while refactoring data clumps.
 
 \begin{figure}[ht!]
@@ -166,9 +166,9 @@ Also the output size of an \ac{LLM} is often limited. This means that generating
 \subsubsection{Choosing the right parameters}
 When dealing with an \ac{LLM}, a user must configure the model. The most major settings to be configured are the model itself and the temperature.
 
-In this master thesis, the model \textit{gpt-4-1106-preview} is used as it provides a larger context  and output size and supports outputting in \ac{JSON} only. However, the cost associated with this model can be a disadvantages. Alternatively, the model \textit{gpt-3.5-turbo-1106} is cheaper but is not as thoroughly trained. 
+In this master thesis, the model \textit{gpt-4-1106-preview} is used as it provides a larger context  and output size and supports outputting in \ac{JSON} only. However, the cost associated with this model can be a disadvantage. Alternatively, the model \textit{gpt-3.5-turbo-1106} is cheaper but is not as thoroughly trained. 
 
-The temperature is another import configurable item. Using a higher temperature can be beneficial for creative tasks. On the other hand, the quality can be worse as the outputs can get more unpredictable. 
+The temperature is another important configurable item. Using a higher temperature can be beneficial for creative tasks. On the other hand, the quality can be worse as the outputs can get more unpredictable. 
 
 
 
@@ -226,7 +226,7 @@ This server must be suitable equipped. In general, at least 32 GB of RAM are nec
 
 
 
-Another problem with self-hosted \acfp{LLM} is that they might have lower standards regarding output control. For instance, generating malicious or illegal content is easier with these models than those from OpenAI as they are more censored. 
+Another problem with self-hosted \acp{LLM} is that they might have lower standards regarding output control. For instance, generating malicious or illegal content is easier with these models than those from OpenAI as they are more censored. 
 
 
 Self-hosting \acfp{LLM} should not be confused with self-trained \acp{LLM}. In the latter case, a user must train its own model which requires extensive amount of data, even more processing power and the need to properly design the training process to prevent typical issues of machine learning like over-fitting.
