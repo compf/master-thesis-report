@@ -1,0 +1,18 @@
+\section{Extensibility to  other programming languages}\label{sec:lang_indep}
+
+One goal of this master thesis is to achieve programming language independence. This means that adding support for other programming language like  C\#, C++, or Python should be made as easy as possible and therefore be part of the design considerations. This section details these consideration and what challenges nevertheless cannot be ignored when adding new programming language support.
+
+By relying on \acp{LLM}, many difficulties regarding different programming languages can be avoided as these models are capable of dealing with all popular programming languages. Therefore, only small adjustment in the wording of the instruction should be made if most work is done by the \ac{LLM}.
+
+Also, the use of the context helps to add new programming languages as it is deliberately programming language neutral. However, this adds burden on the respective handler as it must update the context correctly by providing the necessary information. 
+
+Firstly, the data clump detection process by the \textit{DataClumpDoctor} relies on \ac{AST} that have been generated. The actual data clump detection process does not use the source code anymore so that the \textit{DataClumpDoctor} can be reused. Nevertheless, these \ac{AST} files must be generated. In Java this can be achieved by \textit{PMD}, but this might not work with other programming languages, so other services must be programmed and an associated handler must be written.
+
+Regarding class extraction, the simple class generation method discussed in section \ref{sec:step_impl} can be adapted to generate valid C\# or C++ classes.
+
+Reference finding can be more difficult as the respective services vary between programming language.
+
+Also, developing sub steps  of the refactoring process (e.~g. removing variables, update references etc) can be challenging. These are highly dependent on the concrete programming language and it is difficult to develop a shared interface that eases the programming of such services.
+
+To sum up, the more work is performed by an \ac{LLM}, the easier is the extension to other programming languages. However, even if manual detection and refactoring services are used, the pipeline approach helps to reduce some work.  
+

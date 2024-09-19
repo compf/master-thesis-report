@@ -6,7 +6,7 @@ The evaluation is separated into two parts.
 
 In the first part, the tool was used on multiple public GitHub repositories to measure the acceptance of \ac{LLM}-assisted refactoring.
 
-In the second part different applications of the tool were tested and compared with manual approaches to determine the usefulness and challenges of the tool while detecting and refactoring data clumps.
+In the second part different applications of the tool were tested and compared with manual approaches to determine the usefulness and challenges of the tool for detecting and refactoring data clumps.
 
 
 
@@ -16,13 +16,11 @@ In the second part different applications of the tool were tested and compared w
 \section{Pull request evaluation}\label{sec:pull_request_eval}
 In this section, the first evaluation about pull request (PR) related to data clump refactoring is discussed. 
 
-\subsection{Goal of the evaluation}
-
 To ascertain the quality of refactoring, human feedback is essential. While there are metrics to evaluate whether a given refactoring is useful, the metrics do not always align with the viewpoints of developers. 
 
  For instance, while data clumps can be detected with the DataClumpDoctor, each detected data clump might not be a data clump for every developer. Discrepancies might arise over the minimal number of data clump items (three in this master thesis). Additionally, developers who are  familiar with the projects's structure can more accurately judge  whether a group of variables  genuinely constitutes a data clump. In some cases, they have written the method or class themselves and have introduced the data clump on purpose because they could not find a proper name for the extracted class, or the disadvantages discussed in section \ref{sec:data_clump_not_refactor} outweigh the advantages of introducing a code smell. 
 
-Even if developers agree that a detected data clump constitutes a data clump  in their opinion, there could be arguments against refactoring them. These reasons include the points  discussed in section \ref{sec:data_clump_not_refactor}.Additionally, there are more grounds that are not specific to data clumps but code smells in general. For instance, the location of the code smell could be currently under heavy editing so that it might not be certain whether the methods or classes will exist in the long-term. On the other hand, parts of the source code that have been untouched for longer times, could be too risky to refactor as the knowledge on how the source code behaves or is structured is limited, so that developers would not refactor them even if it might make sense. 
+Even if developers agree that a detected data clump constitutes a data clump  in their opinion, there could be arguments against refactoring them. These reasons include the points  discussed in section \ref{sec:data_clump_not_refactor}. Additionally, there are more grounds that are not specific to data clumps but code smells in general. For instance, the location of the code smell could be currently under heavy editing so that it might not be certain whether the methods or classes will exist in the long-term. On the other hand, parts of the source code that have been untouched for longer times, could be too risky to refactor as the knowledge on how the source code behaves or is structured is limited, so that developers would not refactor them even if it might make sense. 
 
 As a result, soliciting  the opinion and insights of developers on whether data clump refactoring is justified and can be performed by a \ac{LLM}  forms the foundation of this evaluation.
 
@@ -30,21 +28,49 @@ As a result, soliciting  the opinion and insights of developers on whether data 
 
 \subsection{GitHub project selection}\label{sec:github_projects}
 
-To facilitate the evaluation, GitHub projects were selected to be analyzed in the first evaluation. 
+To facilitate the evaluation, GitHub projects were selected to be analyzed in the first experiment. 
 
 
 The projects are selected from the trending page of GitHub. This page list GitHub projects that have gained significant attention over a specific  period. While the exact criteria for this listing remain opaque, popular indicators include higher-than-average forks and stars. Each selected project was evaluated based on the following criteria:
 \begin{enumerate}
     \item Whether the project contains at least  10,000 \ac{LOC} of Java
         \item Whether the project  has at least 100 stars
-\item Whether pulll request have been merged in the last 30 days
+\item Whether pull request have been merged in the last 30 days
+\item Whether the project compiles and all tests run flawlessly.
 \end{enumerate}
 
-These criteria esnure the inclusion of  only larger project. This increases heuristically the chance of having a higher number of data clumps, and also the chance of getting more developers to respond to the survey as larger projects tend to be maintained by more people. The third criteria also influences the number of contributors and their willingness to work on the project. Only if pull request are frequently considered and closed (which does not necessarily mean that they are merged), the project is considered active enough. 
+These criteria ensure the inclusion of  only larger project. This increases heuristically the chance of having a higher number of data clumps, and also the chance of getting more developers to respond to the survey as larger projects tend to be maintained by more people. 
 
+The third criterion also influences the number of contributors and their willingness to work on the project. Only if pull request are frequently considered and closed (which does not necessarily mean that they are merged), the project is considered active enough. 
+
+The last criterion ensures that the eventual refactoring can be evaluated smoothly. If the project does not compile properly or tests are failing, it becomes more difficult to determine whether these errors were caused by a refactoring or whether they exist from the beginning. This hinders the manual refinement step discussed in section \ref{sec:manual_refinement}
+
+As a result, it is beneficial to make sure that these projects do build correctly. This can be checked by executing \textit{mvn clean package} or \textit{gradle clean build} (depending on the build system) as these commands usually run all required tests.
+
+To make sure that the building is actually performed correctly, a small error can be manually inserted. For instance, a semicolon can be removed, or an arbitrarily test is modified. If the building does fail then, the building is reliable and the refactoring can be performed. 
 
 \subsection{Criteria for selecting data clumps}
+For each selected project, one data clump was chosen. To initialize this data clump selection process, the metrics described in section \ref{sec:data_clump_filtering} were combined. These metrics include the occurrence, size, and affected files metric. The top ten most-scored data clumps were manually reviewed to determine a data clump for refactoring. The selection process was supported by 
+\begin{itemize}
+\item A proposal by ChatGPT (though only as a suggestion)
+    \item Whether any filter discussed in section \ref{sec:data_clump_filtering} would trigger (e.~g. abstract class, generics, annotations
+    \item Whether the data clump items share a common domain such that extracting a class is useful. 
+    \item Whether the project is library used by other programs so that refactoring of public or protected components should be carefully scrutinized. 
+\end{itemize}
 
+All these criteria are more guidelines than strict requirements to allow flexibility 
+After considering all of these criteria, one final data clump was selected.
+After a data clump is selected, the next step is to assign the project to a category to determine the extent \acs{LLM} are used to find and refactor data clumps. 
+
+Two categories are to be distinguished which are explained in the following subsections:
+
+\subsubsection{Full refactoring by ChatGPT}
+In this method, ChatGPT performs the refactoring completely. Because transmitting whole GitHub projects would infeasible, the DataClumpDoctor was used to detect the previously selected data clump and obtain all locations of interests. A margin of 5 was used so that 5 lines below and 5 lines above each location of interest was transmitted. 
+
+Then, ChatGPT is instructed to refactor all data clumps in the provided locations of interest. This instruction was repeated at least ten times, in each time the context of ChatGPT was cleared so it didn't know its previous answers. 
+
+From these ten proposal, one proposal was chosen that describes refactoring data clumps most accurately. For instance, the extracted class is valid, most usages of the data clump items are updated and all method signatures are refactored (if applicable). Generating multiple proposals is necessary because not every proposal will be correct.
+\begin{comment}
 For each selected project, one data clump was chosen. Two selection approaches were used. 
 In the first approach, a data clump was chosen based on a weighted combination of metrics to identify an \enquote{important} data clump. These metrics are:
 
@@ -71,24 +97,15 @@ All these criteria are more guidelines than strict requirement to allow flexibil
 After considering all of these criteria, one final data clump was selected.
 \subsection{Refactoring process}
 
-After a data clump is selected, the next step is to assign the project to a category to determine the extent \acs{LLM} are used to find and refactor data clumps. 
 
-Two categories are to be distinguished which are explained in the following subsections:
-
-\subsubsection{Full refactoring by ChatGPT}
-In this method, ChatGPT performs the refactoring completely. Because transmitting whole GitHub projects would infeasible, the DataClumpDoctor was used to detect the previously selected data clump and obtain all locations of interests. A margin of 5 was used so that 5 lines below and 5 lines above each location of interest was transmitted. 
-
-Then, ChatGPT is instructed to refactor all data clumps in the provided locations of interest. This instruction was repeated at least ten times, in each time the context of ChatGPT was cleared so it didn't know its previous answers. 
-
-From these ten proposal, one proposal was chosen that describes refactoring data clumps most accurately. For instance, the extracted class is valid, most usages of the data clump items are updated and all method signatures are refactored (if applicable). Generating multiple proposals is necessary because not every proposal will be correct.
-
+\end{comment}
 \subsubsection{Refactoring by IntelliJ}
 
-The second approach for refactoring was via IntelliJ. In this case, ChatGPT only suggest as suitable name for the extracted class, but is otherwise not involved in the refactoring. Instead, IntelliJ, performs all refactoring in the manner described in section  \ref{sec:intellij_refactoring} is applied. This results in a very consistent refactoring without any creativity. Hence, this refactoring needs only to be executed once and the first proposal can be selected immediately. 
+The second approach for refactoring was via IntelliJ. In this case, ChatGPT only suggest a suitable name for the extracted class, but is otherwise not involved in the refactoring. Instead, IntelliJ, performs all refactoring in the manner described in section  \ref{sec:intellij_refactoring} is applied. This results in a very consistent refactoring without any creativity. Hence, this refactoring needs only to be executed once and the first proposal can be selected immediately. 
 
+
+\subsubsection{Manual refinement}\label{sec:manual_refinement}
 After selecting a proposal, the proposal is applied and saved on a separate branch.
-
-\subsubsection{Manual refinement}
 
 Afterwards, the proposal might not be fully correct. For instance, there might none-updated method calls, missing semicolons etc. An additional problem occurs if codestyle tools like SpotBugs or Checkstyle are employed. If the refactoring by the \ac{LLM} does not conform to the required codestyle, the code might not compile because the developers of the project force a certain style. Therefore, a manual correction step is performed. The project is  manually changed in such a way that it fully compiles. However, no creative refactoring is performed. For instance, if one part of the source code was not refactored, it was refactored like another part regardless of whether another refactoring might have make more sense. This reduces human intervention to a minimum and ensures that the creative part of the refactoring is done by the \ac{LLM}. 
 
@@ -100,12 +117,12 @@ The feedback by the form and comments were collected and evaluated as described 
 
 The feedback consists of two parts.
 \subsubsection{GitHub comments}
-One  natural way of providing feedback over GitHub is via comments. These comment can be review comments that address specific parts of the code or general comments unrelated to any code that addresses the pull request as a whole. \cite{10.1145/3597208}. Therefore it is an important source of determining the acceptance of the proposed refactoring. However, since the comments are natural texts, obtaining meaningful results is more challenging. 
+One  natural way of providing feedback over GitHub is via comments. These comment can be review comments that address specific parts of the code or general comments unrelated to any code that addresses the pull request as a whole. \cite{10.1145/3597208}. Therefore it is an important source of determining the acceptance of the proposed refactoring. However, since the comments are natural texts, the evaluation is more challenging.
 
 \subsubsection{Likert scale}
-The likert scale is a common method in surveys. It consists of statements that claim a certain fact and the respondents have to express their opinion to each statement by choosing from one discrete attitude category. \cite{edmondson2005likert}
+The likert scale is a common method in surveys. It consists of statements that claim a certain fact and the respondents have to express their opinion to each statement by choosing one discrete attitude category per statement . \cite{edmondson2005likert}
 
-For instance, a statement might be \enquote{refactoring data clumps is useful}, and the list of available attitudes can be
+For instance, a statement might be \enquote{refactoring data clumps is useful}, and the list of available attitudes might be
 \begin{itemize}
     \item Strongly agree
     \item Agree
@@ -119,29 +136,43 @@ Using the method evaluating the variance of opinion can be eased as the possible
 
 For this master thesis, the survey platform \textit{lamapoll} \cite{lamapoll} was used.  The following statements should be addressed by the respondents:
 \begin{enumerate}
-\item Data clumps are a code smell that should be fixed, 
-\item Using LLMs in software development can be helpful to improve code quality,
-\item The proposed refactoring maintains or improves the quality of the code.,
-\item The proposed refactoring has  adequately identified and preserved the original functionality and intent of the code, 
-\item The name of the new extracted class(es), fields and methods are well-chosen
- \item The location of the extracted class(es) are well-chosen,
- \item For how long have you been contributing to this project?,
-\item For how long have you been a developer in Java ?, 
-\item Please input the URL of the GitHub project from where you got to this survey
+\item Data clumps are a code smell that should be fixed.
+\item Using LLMs in software development can be helpful to improve code quality.
+\item The proposed refactoring maintains or improves the quality of the code.
+\item The proposed refactoring has  adequately identified and preserved the original functionality and intent of the code.
+\item The name of the new extracted class(es), fields and methods are well-chosen.
+ \item The location of the extracted class(es) are well-chosen.
+ \item For how long have you been contributing to this project?
+\item For how long have you been a developer in Java ? 
+\item Please input the URL of the GitHub project from where you got to this survey.
 
 \end{enumerate}
 
 
-The statements 7--9 are actually questions not using the likert scale. Question 7 attempts to assess the experience of the developer about this project. Question 8 similarly is aimed to obtain the programming experience of the respondent in the Java language.
+The statements 7--9 are actually questions that do not use the likert scale. Question 7 attempts to assess the experience of the developer about this project. Question 8 similarly is aimed to obtain the programming experience of the respondent in the Java language.
 
-The purpose of question 9 is to create a connection between the survey and the pull request of the project as the survey platform does not allow such a link easily. 
+The purpose of question 9 is to create a connection between the survey and the pull request of the project as the survey platform does not allow such a link easily.
+
+The full text of the pull request can be found in appendix \ref{app:pr_text}.
+
+
+\subsection{Evaluation metrics}
+For the evaluation, the following metrics are used:
+\begin{description}
+    \item [Acceptance rate] How many PRs are merged or rejected.
+    \item [Likert scale] The numerical value of the likert scale
+    \item[Discrete review subjects] These are topics mentioned in the comments that are either positive or negative. For instance, a comment might mention that the readability is improved or worsened by a refactoring. The occurrence of these topics can be counted. 
+\end{description}
+
+By grouping the pull requests into categories (e.~g. by refactoring method, data clump type etc.), these metrics can be used to gather hindsight into the acceptance of \ac{LLM}-assisted refactoring. 
+
 \subsection{Threats to validity}
 
 The survey evaluation has some threats to its validity that should not be disregarded.
 
 To begin with, the selection of GitHub project is not completely unbiased. For instance, currently trending GitHub projects were chosen although it is not certain why they were popular. Therefore, the maintainers of the project might not be fully prepared to deal with associated surge in pull requests associated with trending projects. This can increase the chance that a pull request (even though reasonable and well-meant) is summarily rejected. \cite{10.1145/3366423.3380272}
 
-Additionally, only projects that do build flawlessly were considered. Usually, this should be case for every project, but the reality differs. For instance, the operating system, the installed libraries, the Java version, and other components can have a significant impact on whether all unit tests complete without errors and the project compiles.  While every effort was made to give each project a chance to compile, at some point, time constraints prevented endless consideration of a project. Hence, if even after testing on multiple system, reading the associated documentation, and testing multiple Java version, no fully functional build was achieved, the project war disregarded.
+Additionally, only projects that do build flawlessly were considered. Usually, this should be case for every project, but the reality differs. For instance, the operating system, the installed libraries, the Java version, and other components can have a significant impact on whether all unit tests complete without errors and the project builds.  While every effort was made to give each project a chance to compile, at some point, time constraints prevented endless consideration of a project. Hence, if even after testing on multiple system, reading the associated documentation, and testing multiple Java version, no fully functional build was achieved, the project was disregarded.
 
 The manual correction process should also be taken into account as it could induce mistakes or bugs by human error instead of by an \ac{LLM}. Feedback regarding these errors must be filtered out as they are not relevant. 
 
@@ -157,13 +188,11 @@ First of all, full transparency is provided  with regard to the pull request. Th
 
 Additionally, the requests were not sent en masse but after careful consideration. Only if it is thought that a pull request does compile, passes all unit test and otherwise does not have major issues, the pull request is submitted. Of course, mistakes can happen so that this approach cannot guarantee hundred percent fault-free code. Since many projects needs to be considered, the extensive knowledge of the software project, which a regular contributor has, is missing, so that the chance of faults are higher. Nevertheless, pull requests can be created by anyone and the review process by continuous integration and deployment tools and human beings is a safeguard to limit the risk of faulty code added to the code base. 
 
-Last but not least, it was attempted to minimize the burden on the reviewers. For instance, data clumps affecting a significant number of files were not refactored. Also only one pull request per project was created, thereby minimizing the chance that a participant might review multiple pull requests. 
-
-At one instance, an ethical complaint was filled because of the use of \acfp{LLM} and the perceived spamming of pull requests. These complaints were however dismissed by the competent organizations of the University of Osnabrück.  
+Last but not least, it was attempted to minimize the burden on the reviewers. For instance, data clumps affecting a significant number of files were not refactored. Also only one pull request per project was created, thereby minimizing the chance that a participant might review multiple pull requests. \footnote{At one instance, an ethical complaint was filled because of the use of \acp{LLM} and the perceived spamming of pull requests. These complaints were however dismissed by the competent organizations of the University of Osnabrück}.  
 
 \section{ChatGPT suitability evaluation}
 
-In the second experiment, test were conducted to assess the suitability of ChatGPT performing steps of the pipeline.
+In the second experiment, tests were conducted to assess the suitability of ChatGPT performing steps of the pipeline.
 \subsection{Data clump detection}
 
 Detecting data clumps is an essential part to refactor them. Because it happens at a very early state, it is even more important that the data clump detection data is accurate and conforms to the specification. The question is here is whether the model can perform this task so that subsequent steps of the pipeline (e.~g. a manual refactoring tool) can rely on the data.
@@ -180,7 +209,7 @@ Because transmitting the full project is infeasible, the data clumps are previou
 The following metrics are used for evaluating this tests:
 
 \begin{description}
-    \item[Sensitivity and specificity] These describe the false negative and false positive rate of the detection. The model might miss a data clump so that it is not reported (false negative). It might also report  a data clump that is not detected as a data clump by the \textit{DataClumpDoctor}. In the latter case, cautiousness is warranted as the \ac{LLM} can detect more data clumps that a traditional algorithm. 
+    \item[Sensitivity and specificity] These describe the false negative and false positive rate of the detection. The model might miss a data clump so that it is not reported (false negative). It might also report  a data clump that is not detected as a data clump by the \textit{DataClumpDoctor}. In the latter case, cautiousness is warranted as the \ac{LLM} can detect more data clumps than a traditional algorithm. 
 
     \item[Correctness of output format]
 
@@ -195,31 +224,34 @@ As outlined in section \ref{sec:data_clump_filtering}, there are multiple approa
 The question here is whether the \ac{LLM} uses novel filtering approaches or simply relies on the metric discussed in section \ref{sec:data_clump_filtering}. In the latter case, it is more useful to use the manual algorithm because they are reliable and do not incur the costs associated with Large Language Models. 
 
 \subsubsection{Methodology}
-In order to facilitate this experiment, the data clumps are evaluated on 3 metrics (size, occurrence, affected files. These data clumps were saved. Independently from this, the ten most important data clumps are randomly shuffled and presented to the \ac{LLM} which chooses one data clump. The output format for reporting result is a \ac{JSON}  consisting of a data clump key, and a justification which aims to explore the model's reasoning. However, even if the \ac{LLM} does not return a valid data clump key, indications like variable names or class names are used to determine the data clump that most likely fit the data clump the \ac{LLM} is referring to. 
+In order to facilitate this experiment, the data clumps are evaluated on 3 metrics (size, occurrence, affected files). These data clumps were saved. Independently from this, the ten most important data clumps are randomly shuffled and presented to the \ac{LLM} which chooses one data clump. The output format for reporting result is a \ac{JSON}  consisting of a data clump key, and a justification which aims to explore the model's reasoning. However, even if the \ac{LLM} does not return a valid data clump key, indications like variable names or class names are used to determine the data clump that most likely fit the data clump the \ac{LLM} is referring to. 
 
 The following metrics are used to evaluate this experiment:
-\begin{itemize}
-    \item The rank of the chosen data clump with regard to each of the three metrics mentioned
-    \item the weighted combination of the three metrics
-    \item the easiness of refactoring this data clump
-\end{itemize}
+\subsubsection{Rank of the data clump}
+\begin{description}
+    
+    \item [Rank] The rank of the chosen data clump with regard to each of the three metrics mentioned
+    \item [Weighted combination] The weighted combination of the three metrics
+    \item [Refactoring difficulties] Whether any difficulties exist that may be an obstacle for refactoring
+\end{description}
 
 
 \subsection{Data clump refactoring}
 
 Evaluating how an \ac{LLM} performs data clump refactoring is another method to assess the suitability of the models for use in the pipeline. Here, especially the creativity is important. If a model merely refactors similarly to a manual tool (e.~g. IntelliJ), it has less use.
 
-If however, the \ac{LLM} extracts more functionality by creating new methods ore solves the data clump in other ways, the advantages of the model become more obvious.
+If however, the \ac{LLM} extracts more functionality by creating new methods or solves the data clump in other ways, the advantages of the model become more obvious.
 
 
 \subsubsection{Methodology}
 
 In this experiment, the model is provided the five most-scored data clumps. The model outputs by providing diff instruction as discussed in section \ref{sec:output_processing} and the modifications are applied.  The modified program is tested with the respective build system (gradle or maven). if the build fails, the model is provided with error messages and the content of the affected lines, and the model is instructed to fix these issues. If after ten attempts, the project still not compiles, no further attempts are made. 
+
 The following metrics are used for evaluating this tests:
 
-\begin{itemize}
-    \item The number of attempts until the refactored program compiles
-    \item whether the extracted class are more than mere data classes
-    \item the existence of documentation/comments
-\end{itemize}
+\begin{description}
+    \item [Compilation attempts] The number of attempts until the refactored program compiles
+    \item [Rich class] Whether the extracted class are more than mere data classes
+    \item [Documentation] The existence of documentation/comments
+\end{description}
 

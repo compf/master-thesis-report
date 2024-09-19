@@ -3,7 +3,7 @@
 A significant portion of the cost associated with software development incurs not before the release but afterwards. Most software needs to be improved in the future because of new requirements, improving the performance or adapting to external changes, which makes maintenance a major phase in the  software life cycle.
 
 
-A prominent issue  complicating maintenance is the presence of code smells. Code smells are parts of the source code that tend to make the source code hard to read without directly causing any functional issues. Refactoring and removing code smells has a positive impact on the maintainability  of a software project and reduces cost associated with development in the long-term.\cite{mealyEvaluatingSoftwareRefactoring2006}.
+A prominent issue  complicating maintenance is the presence of code smells. Code smells are parts of the source code that tend to make the source code hard to read without directly causing any functional issues. Refactoring and removing code smells has a positive impact on the maintainability  of a software project and reduces cost associated with development in the long-term.\cite{mealyEvaluatingSoftwareRefactoring2006}
 
 
 
@@ -14,42 +14,41 @@ Moreover, there are code smells that remain often unnoticed and hence unfixed be
 
 
 
-One potential solution to this issue is to automatically fix certain code smells that are easy to define so that human intervention is minimized. This automation can be regularly applied, allowing code smells to be gradually addressed without distracting developers from their primary tasks while profiting from cleaner code. 
+One potential solution to this issue is to automatically fix certain code smells that are easy to define so that human intervention is minimized. This automation can be regularly applied, allowing code smells to be gradually addressed. This helps developers to focus on their their primary tasks while profiting from cleaner code. 
 However,  automatic refactoring  is more difficult than a simple detection because it requires changes to the source code that could potentially induce bugs or break the build process \cite{9796303}. Hence, the tools used must be carefully assessed. 
 
-The data clump example mentioned above is one of those code smells that can be clearly defined. For instance, one can propose that a group of at least three variables that appear in more than one part of the source code constitutes a data clump \cite{zhangImprovingPrecisionFowler2008}. Hence it is amenable for automatic refactoring purposes. 
+The data clump example mentioned above is one of those code smells that can be clearly defined by applying subjective thresholds \cite{zhangImprovingPrecisionFowler2008}. Hence it is amenable for automatic refactoring purposes. 
 
 
-However, a successful re-factorization of data clumps requires several steps. This includes renaming identifiers, removing symbols, and extracting a class. Also, to minimize human intervention, a suitable identifier of the class must be found that accurately describes the purpose of these variables and their connection. Hence, domain knowledge and some creativity are necessary to fully perform the refactoring process.
+However, a successful re-factorization of data clumps requires several steps which partly require domain knowledge and the ability to understand the context of the code \cite{martin2009clean}. Traditional refactoring tools are unable to minimize these human-like abilities so that they can only offer semi-automatic refactoring.   Instead, they can generate code that can be  perceived as artificial which limits their usefulness. 
 
-
+Since a fully-automatic refactoring of data clumps is currently not supported, humans must still be involved to further improve the code so that it looks natural and is beneficial to improve readability. This reduces the suitability of semi-automatic refactoring tools as developers still need to review the proposed code changes, understand the refactoring, and come up with additional changes to enhance readability. 
 
 
 
 \section{Approach}
-As a result,  additional tools (such as ChatGPT \cite{ChatGPT_url})  can be instrumental to fully automate the refactoring pipeline while minimizing the need for manual changes.  Each tool can be regarded as  a service that provides a certain functionality and is encapsulated from other tools so that replacing a program by another can always be done in an efficient manner. 
+
+The lack of fully-automatic refactoring for data clumps can be addressed by using additional 
+  services performing typically handled by humans.  \acp{LLM} which have gained significant attention in recent years are a prominent example for such services as they can mimic human abilities and hence are suitable for these tasks.
+  
+  A popular \ac{LLM} is ChatGPT \cite{ChatGPT_url}. ChatGPT is an AI language model developed by OpenAI that uses a Generative Pre-trained Transformer (GPT) model to process textual input data (i.~e. natural language or source code). Users can provide queries, questions, or other textual material to ChatGPT and the model responds with a textual reply attempting to satisfy the user's request \cite{yetistirenEvaluatingCodeQuality2023}. It also employs a conversation feature so that previous requests and replies can be referred to by future requests and responses \cite{sobania2023analysis}.
+
+These services can be employed via a pipeline architecture that executes specific steps in a systematic order.  Given a software project, the pipeline is gradually filled with information from the tools and services that are used so that each tool and service can contribute to the goal of refactoring data clumps.  In each step, a specific service is used to perform a specific task that is necessary for refactoring data clumps. At the conclusion of this refactoring pipeline, some (or all) data clumps occurring in source code are removed.  
 
 
-The goal of this master thesis is to develop a tool that combines ChatGPT and other refactoring tools  to automatically detect and refactor data clumps in software projects. The program  shall at least support the Java programming language but shall be extendable to  other programming languages. The tool shall also  be able to filter out some files and data clumps by several criteria to reduce resources and costs. 
 
 
+The goal of this master thesis is to develop a tool that combines \acp{LLM} and other refactoring tools to automatically detect and refactor data clumps in software projects. The tool  shall at least support the Java programming language but shall be extendable to  other programming languages. The tool shall also  be able to filter out some files and data clumps by several criteria to reduce resources and costs. 
 
-
-To facilitate the integration of tools and services, a pipeline architecture is used. Given a software project, the pipeline is gradually filled with information from the tools and services that are used so that each tool and service can contribute to the target of refactoring data clumps.
 
 A major part of the master thesis will deal with how to use and integrate ChatGPT into the refactoring pipeline. 
-ChatGPT is an AI language model developed by OpenAI that uses a Generative Pre-trained Transformer (GPT) model to process textual input data (i.~e. natural language or source code). Users can provide queries, questions, or other textual material to ChatGPT and the model responds with a textual reply attempting to satisfy the user's request \cite{yetistirenEvaluatingCodeQuality2023}. It also employs a conversation feature so that previous requests and replies can be referred to by future requests and responses \cite{sobania2023analysis}.
-
-Given ChatGPT's capability to process  source code \cite{sadik2023analysis}\cite{guo2023exploring}, one goal of this master thesis attempts to explore to what extent it can help developers find data clumps and refactor them. Different methods for including ChatGPT will be tested  
 
 With a minimal ChatGPT inclusion approach,  data clumps will be found algorithmically  and ChatGPT will be provided with a list of data clump variables and asked to suggest a suitable name for the extracted class, while the refactoring process will be executed using other refactoring tools.
 
 
 Conversely, it will be tested whether ChatGPT can execute the refactoring itself by providing the pieces of the source code containing data clumps of a software project and providing specific queries to find the data clumps, refactor them, and output the refactored source code. \cite{White2023ChatGPTPP}.
 
-In addition, the usability for ChatGPT with regard to other steps of the pipeline will be examined. For instance, whether ChatGPT can be used to rank data clumps and hence to refactor only the important ones. 
-
-The goal is to assess in what way ChatGPT can be helpful in performing the data clump refactoring task. Also possible costs for the usage of ChatGPT and other resources will be considered \cite{xia2023conversation}. \cite{4ef0b456377aafb68884e643779dffb36b8e7cc1}.
+In addition, the usability for ChatGPT with regard to other steps of the pipeline will be examined. For instance, whether ChatGPT can be used to rank data clumps and hence to refactor only the important ones. The goal is to assess in what way ChatGPT can be helpful in performing the data clump refactoring task. Also possible costs for the usage of ChatGPT and other resources will be considered \cite{xia2023conversation}. \cite{4ef0b456377aafb68884e643779dffb36b8e7cc1}.
 
 
 The methodology of this master thesis will be evaluated by sending  pull requests about discovered data clumps and a refactoring proposal to several public GitHub repositories and analyzing the feedback gathered from the responses. Also experiments will be conducted to measure the quality of ChatGPT if it is used to perform particular steps of the refactoring pipeline.  
@@ -57,9 +56,9 @@ The methodology of this master thesis will be evaluated by sending  pull request
 Hence, the following research question will be explored in this master thesis
 
 \begin{description}
-    \item [RQ1] Do developers accept data clump refactoring via ChatGPT
-    \item [RQ2] In what ways can ChatGPT be used to improve data clump refactoring
-    \item [RQ3] How do different parameters of ChatGPT affect the quality of the results if it is used on different parts of the pipeline. 
+    \item [RQ1] Do developers accept data clump refactoring via ChatGPT?
+    \item [RQ2] In what ways can ChatGPT be used to improve data clump refactoring?
+    \item [RQ3] How do different parameters of ChatGPT affect the quality of the results if it is used on different parts of the pipeline?
 \end{description}
 This thesis does not attempt to find the best large language model prompt to solve the data clump issue. It also focuses only on ChatGPT although other models might be better suited. 
 \section{Organization}
@@ -67,7 +66,7 @@ The rest of this master thesis is organized as follows:
 
 In chapter \ref{chapter:background}, the background of this master thesis  is outlined. To this end, data clumps are defined and refactoring proposals discussed. Additionally large language models (such as ChatGPT) are introduced. This includes the usage of the ChatGPT \ac{API}, and the potentials and challenges of large language models.  Furthermore, a overview about research  concerning data clumps and using large language models in software development is presented. 
 
-In chapter \ref{chapter:conception}, the design and structure of the tool is explained. A pipeline for combining multiple services and programs is introduced. Furthermore, the integration of large language models is discussed. 
+In chapter \ref{chapter:conception}, the design and structure of the tool is explained. A pipeline for combining multiple services and tools is introduced. Furthermore, the integration of large language models is discussed. 
 
 In chapter \ref{chapter:implementation}, the practical implementation is outlined.  Moreover, there is a discussion of how each tool and service can be used for the purpose of refactoring data clumps and what challenges exist. 
 

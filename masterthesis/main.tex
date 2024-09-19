@@ -36,12 +36,15 @@
 \usepackage[page, title, titletoc, header]{appendix} %prettier appendix
 
 \svgpath{{../figures/}}
+\usepackage{xstring}
 
 \usepackage[printonlyused]{acronym}
 \usepackage{listings} 
 %\usepackage{subfig}
 \lstset{xleftmargin=2em} %Proper indention of listings
-
+\usepackage{xpatch}
+\usepackage{accsupp}
+\usepackage[]{hyperref}
 \widowpenalty10000
 \clubpenalty10000
 \usepackage{tabularx} %For tables
@@ -77,7 +80,7 @@
 %\addbibresource{literatur2.bib}
 
 
-\usepackage[]{hyperref}
+
 
 \begin{document}
 
@@ -143,9 +146,9 @@
 \input{chapter2/chapter2}
 
 
-\clearpage
+%\clearpage
 \input{chapter3/chapter3}
-\clearpage
+%\clearpage
 \input{chapter4/chapter4}
 %\input{Main/main}
 

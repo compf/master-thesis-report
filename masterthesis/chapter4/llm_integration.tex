@@ -64,9 +64,9 @@ Artificially enlarging the number of locations of interest is also a method wort
 \end{figure}
 
 Figure \ref{fig:margin_effect} illustrates the advantage of a larger margin size. The source code shows counters used for testing purposes and a possible way to reset them \footnote{This example is somewhat inspired by a JUnit5 data clump that was refactored as part of the evaluation in section \ref{sec:pull_request_eval}}. The first four fields are part of a data clump (the second class is not shown for brevity). Consider only the data clump item \enquote{afterAll}. If the margin is zero, only line 4 would be transmitted to the model (black rectangle). This means that the \ac{LLM} has only a scarce overview over the purpose of the variable.
-The green rectangle covers the area if a margin of three is used. Now, line 3 and 5 are also included. Since line 5 mentions something about tests, the model can infer where the data clump items are used and might improve its refactoring. The red rectangle represents a margin size of three. In this case, the full code block is transmitted, and the model can observe that it might be useful to include a reset method in the extracted class. 
+The green rectangle covers the area if a margin of one is used. Now, line 3 and 5 are also included. Since line 5 mentions something about tests, the model can infer where the data clump items are used and might improve its refactoring. The red rectangle represents a margin size of three. In this case, the full code block is transmitted, and the model can observe that it might be useful to include a reset method in the extracted class. 
 
-However, not only data clumps items could be used as the starting point of the additional lines. Many source code files contains a header file and import statements in the beginning. These information can be beneficial especially in case of refactoring as the model can better understand the types of the variables or the context of the source code.
+However, not only data clumps items could be used as the starting point of the additional lines. Many source code files contains a header and import statements in the beginning. These information can be beneficial especially in case of refactoring as the model can better understand the types of the variables or the context of the source code.
 
 In this master thesis mainly a constant margin is considered. However, variable margins that depends on the programming language or statistics of the source code (average length of a method or documentation) could be considered too.
 
@@ -80,7 +80,7 @@ In this master thesis mainly a constant margin is considered. However, variable 
 An \ac{LLM} on its own cannot change code or controls a system since, for the purpose of this master thesis, it  can only output textual information. Therefore, each output from the model must be received and interpreted  in order to serialize them permanently. Two approaches are discussed. 
 
 \subsubsection{By human in the loop}
-Commonly, he refactoring is done by human beings who review the output, interpret it and use the gained knowledge to simplify the workflow. In the case of refactoring, the model can propose changes to the source code, but cannot change the source code directly. Instead, a human in the loop has to read the refactoring suggestion, determine whether they are reasonable, and perform the suggested refactoring. In the last step, this involves also finding the affected files, change them, and test the changes. Hence, while an \ac{LLM} can help to make decisions, manual work must still be performed. 
+Commonly, the refactoring is done by human beings who review the output, interpret it and use the gained knowledge to simplify the workflow. In the case of refactoring, the model can propose changes to the source code, but cannot change the source code directly. Instead, a human in the loop has to read the refactoring suggestion, determine whether they are reasonable, and perform the suggested refactoring. In the last step, this involves also finding the affected files, change them, and test the changes. Hence, while an \ac{LLM} can help to make decisions, manual work must still be performed. 
 
 One approach to facilitate these suggestions is to create a mirror file. This means that the original file is untouched but the changes are written to a similar named but new file. A human in the loop must then manually apply the refactoring suggested in the mirror file to the original file. While this is a more time-consuming task, it allows for more control by the developer. Additionally, \acs{LLM} tend to omit unchanged code. Directly overwriting files will therefore result in much smaller files that have lost much of their contents. Moreover, creating multiple mirror file would be possible allowing to the developer to have multiple refactoring option suggested by one or multiple models with various parameters so that there is more flexibility. 
 Markdown is one common way to integrate code and text description to explain the human in the loop to decide what steps to perform in order to successfully refactor the data clump.  
@@ -100,7 +100,7 @@ One challenging aspect of this method is that the \ac{LLM} will likely make erro
 Therefore, the \ac{JSON} approach should be modified so that not full file contents are returned but replacement instructions. These are instruction given by the model to replace specific lines by a given text, so that only specific lines of a file are modified.  As a result, code lines not related to data clumps can be left untouched minimizing the risk for mistakes. 
 
 
-Figure \ref{fig:json_based_changes} illustrates how the diff-based approach works on a small example. The original source code on the top-left is changed by applying the JSON in the bottom-center. The modified file is shown in the top-right of the figure. The red color indicates removed lines. The concrete changes are as follows:
+Figure \ref{fig:json_based_changes} illustrates how the diff-based approach works on a small example. The original source code on the top-left is changed by applying the \ac{JSON} in the bottom-center. The modified file is shown in the top-right of the figure. The red color indicates removed lines. The concrete changes are as follows:
 \begin{figure}
     \centering
     \includegraphics[width=\columnwidth]{figures/chapter4/diff_original_changed_vscode_cmp.png}
@@ -133,7 +133,7 @@ In this master thesis both approaches are employed. The second approach is alway
 
 When using the \ac{JSON} output format, it is essential to deal with edge cases where the ourput is not valid \ac{JSON}. This problem can happen in two scenarios.
 
-Firstly, not all \acp{LLM} support \ac{JSON}-only modes. This means that that the content of the model cannot be forced to contain only \ac{JSON} but might contain additional text that cannot be parsed. While the model used int his thesis supports this mode, it is useful to keep these edge cases in mind. This edge case can be circumvented by finding the first opening curly brace \enquote{\{} in the response and the last closing curly brace \enquote{\}} because the string between is valid \ac{JSON}. As a result, any text before or after the \ac{JSON} is ignored and cut off. 
+Firstly, not all \acp{LLM} support \ac{JSON}-only modes. This means that that the content of the model cannot be forced to contain only \ac{JSON} but might contain additional text that cannot be parsed. While the model used in this thesis supports this ouput mode, it is useful to keep these edge cases in mind. This edge case can be circumvented by finding the first opening curly brace \enquote{\{} in the response and the last closing curly brace \enquote{\}} because the string between is valid \ac{JSON}. As a result, any text before or after the \ac{JSON} is ignored and cut off. 
 
 Secondly, one problem for \acp{LLM} is that they generate token by token and therefore cannot pre-plan their output. Usually, this does not cause problems. 
 
@@ -143,7 +143,7 @@ If the output is \ac{JSON}, this can become problematic as the syntax of \ac{JSO
 
 The easiest solution to this problem is to simple ignore the output as the response was invalid. Such a large output is correlated with a large input so it might be useful to reduce the set of transmitted files. 
 
-However,  one can still try to parse the output as the incomplete \ac{JSON} might still contain relevant data (e.~g. refactoring instruction). While the refactoring is probably incomplete, it might be a good start and possible errors can be fixed in the validation step.
+However,  one can still try to parse the output as the incomplete \ac{JSON} might still contain relevant data (e.~g. refactoring instructions). While the refactoring is probably incomplete, it might be a good start and possible errors can be fixed in the validation step.
 
 Parsing such incomplete \ac{JSON} is however not trivial. One approach is to to incrementally remove the last character of the string, and then to try appending closing brackets to the string until the result is a valid \ac{JSON}. This is resource extensive as the validity of the \ac{JSON} must be checked repeatedly. Alternatively, a tolerant \ac{JSON} parser could be used, but these are more appropriate for \acp{JSON} with comments or new lines inside strings. 
 
@@ -159,12 +159,16 @@ The model generates multiple independent proposals. This means that in each prop
 
 The issue is determine the \enquote{best} proposal. One approach could be to determine the proposal that causes the least compiler errors. While this idea might be helpful to reduce the manual work to correct errors, it also can tend to produce proposals that change as few code as possible. For instance, refactoring nothing can cause no compiler errors.
 
-As an alternative, one could count the number of changed lines in a proposal and rate proposals with more changes higher than those with fewer changes. This idea rewards proposals that refactor all lines of interests more than proposals that only refactor only a small part of the program while the data clump exists in other known parts too. 
+As an alternative, one could count the number of changed lines in a proposal and rate proposals with more changes higher than those with fewer changes. This idea rewards proposals that refactor all locations of interests more than proposals that only refactor only a small part of the program while the data clump exists in other known parts too. 
 
 
-If interaction is possible, there is also an option to let the user decide.
+If interaction is possible, there could be also an option to let the user decide.
 \subsubsection{Sequential proposals}
 
-With sequential proposals, one conversation is hold and the context is kept so that that the \ac{LLM} does not forget its previous output. Using this idea, not the first proposal is chosen but the last one after the \ac{LLM} has been given enough chances to correct errors.  To facilitate this, build errors from the refactoring proposal can be gathered and presented to the model so that it can improve its refactoring. This represents the chain of thought idea discussed in section \ref{sec:chain of thought}
+With sequential proposals, one conversation is hold and the context is kept so that that the \ac{LLM} does not forget its previous output. Using this idea, not the first proposal is chosen but the last one after the \ac{LLM} has been given enough chances to correct errors.
+
+Handling sequential proposal is therefore a combination of refactoring and validation handlers. At first, the usual refactoring process is performed. This could be a manual refactoring (e.~g. PSI) or a refactoring via an \ac{LLM}. Then, the refactored code is build. If there a building issues (e.~g. compiler errors or failing tests), the model is instructed to fix them. From now on, only the \ac{LLM} performs the refactoring even if a manual approach was used. Then, the code is build again, and the process starts again if there are errors. 
+
+
 
 It should be noted that at some point a proposal should be finally chosen as the \ac{LLM} might not always find a solution that compiles even if infinitive steps were available. Similar to a an optimization algorithm, it can be struck into a local optimum and cannot suggest reasonable changes so that the program compiles again.  

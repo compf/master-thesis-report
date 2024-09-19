@@ -8,9 +8,9 @@ The \textit{DataClumpDoctor} performs both the \ac{AST} generation step and the 
 
 If a \ac{AST} context is already present, it re-used. Otherwise the \ac{AST} context is generated. Here, the file filtering inclusion and exclusion rules must be applied as only the generated \ac{AST} files form the foundation for the \textit{DataClumpDoctor} to detect data clumps. Files  not represented by an \ac{AST} file are ignored. Since the detector internally uses \textit{PMD}, inclusion and exclusion rules can be set by creating a \enquote{custom-java-ruleset.xml} file. This file is located inside the Java-Archive file used by the detector, and must be updated whenever \ac{AST} files are generated to apply the current filtering rules. 
 
-After that, the \textit{DataClumpDoctor} loads the \ac{AST} files and detects the data clump by comparing the identifier and types of variables that might constitute a data clump, thereby requiring strict equality. These detected data clumps are saved in a separate file and can be re-used in the pipeline. 
+After that, the \textit{DataClumpDoctor} loads the \ac{AST} files and detects the data clumps by comparing the identifiers and types of variables that might constitute a data clump, thereby requiring strict equality. These detected data clumps are saved in a separate file and can be re-used in the pipeline. 
 
-One issue with the \textit{DataClumpDoctor} is its handling of large projects. While a concrete \ac{LOC} number cannot be given, at some points analyzing large projects becomes infeasible leading to crashes or prolonged running times. This can be explained by considering that  the number of detected data clumps grows quadratically with the actual number of data clump holders. Due to the structure of the reporting format as discussed in appendix \ref{sec:data_clump_format}, there is a significant amount of repetition. For sufficiently large projects, this can be a problem it the data clump information needs to be serialized as NodeJS is not optimized for these tasks. While changing the format is one solution to this problem, it can be argued that using previous file filters are more suitable as the data clump detection results from large projects are difficult to evaluate. 
+One issue with the \textit{DataClumpDoctor} is its handling of large projects. While a concrete \ac{LOC} number cannot be given, at some points analyzing large projects becomes infeasible leading to crashes or prolonged running times. This can be explained by considering that  the number of detected data clumps grows quadratically with the actual number of data clump holders. Due to the structure of the reporting format as discussed in appendix \ref{sec:data_clump_format}, there is a significant amount of repetition. For sufficiently large projects, this can be a problem it the data clump information needs to be serialized as NodeJS is not optimized for these tasks. While changing the format is one solution to this problem, it can be argued that using previous file filters is more suitable as the data clump detection results from large projects are difficult to evaluate. 
 
 \subsection{Name finding}
 Finding a suitable name for the soon-to-be-extracted class is the next step  that must be implemented. Two approaches are chosen.
@@ -20,11 +20,11 @@ The first approach is the classic approach that has been used before the advent 
 The advantage of this manual method is that the generated names are very unique and with a high probability will not conflict with other names because they are very artificial. Nevertheless, they lack creativity and in most cases, a developer will need to choose a better name in order to improve readability. 
 
 
-On the other hand,a suitable name for the extracted class of a data clump can be chosen by using the creativity of \acs{LLM}.  For this the model has to know the names of the variables of the data clump. It is also useful to include the qualified type of each data clump item because this type contains additional information to generate a more suitable name. For instance, the qualified name could contain the name of the project to analyze, the location of the type, and the range of possible values that the variable can have.
+On the other hand, a suitable name for the extracted class of a data clump can be chosen by using the creativity of \acs{LLM}.  For this the model has to know the names of the variables of the data clump. It is also useful to include the qualified type of each data clump item because this type contains additional information to generate a more suitable name. For instance, the qualified name could contain the name of the project to analyze, the location of the type,     and the range of possible values that the variable can have.
 
-While using \acs{LLM} for name finding, excessive name caching can be useful to save costs and resources. The same combination of data clump items will probably result in the same or at least a similar class name. In order to prevent the extraction of classes with similar purposes, it is therefore useful to only ask the model if the combination of data clump items has not occurred before. 
+While using \acs{LLM} for name finding, excessive name caching can be useful to save costs and resources. The same combination of data clump items will probably result in the same class name. In order to prevent the extraction of classes with similar purposes, it is therefore useful to only ask the model if the types-names identifier has not occurred before. 
 
-A related issue to name finding is the location of the extracted class. Here, one has to differentiate  between data clumps existing in a single class and data clumps connecting multiple classes. In the former case, the location of the extracted class can be an already existing file, namely the file of the data clump  while in the latter case, a new class should be created.
+A related issue to name finding is the location of the extracted class. Here, one has to differentiate  between data clumps existing in a single file and data clumps connecting multiple files. In the former case, the location of the extracted class can be an already existing file, namely the file of the data clump  while in the latter case, a new class should be created.
 
 Using an existing class can be problematic because the succeeding step (class extraction) must be mindful that an existing class is used as it could override the file. Additionally, integrating the new class into the existing class can be challenging. Should the new class be an inner class of some class? In Java, should the inner class be static?  Creating an inner class require strategic syntactical modification of the source code which would require specialized handlers. As a result, they are not implemented in this master thesis, but could be. 
 
@@ -34,7 +34,7 @@ One has also be mindful about any name conflicts that might occur. If the sugges
 
 \subsection{Class extraction}
 
-Generating the actual class is a task that can be done manually if the names and type of the fields are known and the name of the class is known. However, the specific syntax depends on the programming language so that each programming language must have its own class extractor.
+Generating the actual class is a task that can be done manually if the names and types of the fields are known and the name of the class is known. However, the specific syntax depends on the programming language so that each programming language must have its own class extractor.
 
 Other issues should also be taken into consideration. For instance, whether the class body at first contains the declaration of fields, then the getters, setters, and then the constructor, or another order is better depends on the project's style. For instance, the constructor could be declared directly after the fields.
 
@@ -46,10 +46,10 @@ Here also, the creativity of an \ac{LLM} can be useful. Given a suitable context
 
 \subsection{Reference Finding}
 
-Other relevant handlers deal the finding of references. Only if all references are correctly resolved, the data clump refactoring can proceed smoothly. 
+Other relevant handlers deal with the finding of references. Only if all references are correctly resolved, the data clump refactoring can proceed smoothly. 
 
 \subsubsection{Via \ac{LSP}}
-In order to refactor data clumps, all relevant locations of interests (references) must be identified. If the IntelliJ plugin discussed in the next subsection is used for refactoring, this step can sometimes be left out. However, since this plugin has some issues and the refactoring might be performed by an \ac{LLM}, it is beneficial to implement a service for reference finding. 
+In order to refactor data clumps, all relevant locations of interests (references) must be identified. If the IntelliJ plugin is used for refactoring, this step can sometimes be left out. However, since this plugin has some issues and the refactoring might be performed by an \ac{LLM}, it is beneficial to implement a service for reference finding. 
 
 The \ac{LSP} is one method to find these references because it works reliable and is also available for other programming languages.
 
@@ -71,7 +71,7 @@ This handler works with all programming language as it does not parse the source
 
 This simple approach has two issues. First of all, one must determine where to search. Searching the whole project will require a significant amount of time. Alternatively, only the files containing the data clump or the respective folder can be traversed.
 
-Moreover, this method will lead to more false positives. For instance, searching for the variable name \textit{foo} will also match local variables named \textit{foo}. Therefore, a match might not be part of a data clump and refactoring this match can lead to more harm than good. 
+Moreover, this method will lead to more false positives because it disregards the scope of variables. For instance, searching for the variable name \textit{foo} will also match local variables named \textit{foo}. Therefore, a match might not be part of a data clump and refactoring this match can lead to more harm than good. 
 
 This handler works best if combined with an \ac{LLM}. The model can decide for each reference whether it is truly relevant for data clump refactoring purposes. It might also propose a more sophisticated refactoring idea by using these non-data-clump references. 
 
@@ -100,7 +100,7 @@ Whether such manual search is faster than the combined use of \ac{LSP} and Intel
 
 
 
-Regardless of how the reference issue is solved, IntelliJ can now perform the refactoring. Depending of the category of a reference , IntelliJ needs to perform distinct step. 
+Regardless of how the reference issue is solved, IntelliJ can now perform the refactoring. Depending of the category of a reference, IntelliJ needs to perform distinct step. 
 \begin{enumerate}
     \item In case of a declared field, the field can be deleted because it is part of a field data clump. Now it can be determined whether the class contains already the new field that replaces the fields of the data clump.
     \item If a method is declared, IntelliJ can modify the signature of the method. This can be the original method or an overridden one. IntelliJ needs to remove the parameters that are part of the data clump and add a new method parameter which replaces the method parameters of the data clump. 
@@ -119,4 +119,4 @@ Regardless of how the reference issue is solved, IntelliJ can now perform the re
 
 This approach requires some coordination. For instance, the order of operation is important. Method and field declarations must be updated first because they are needed to perform the refactoring of variable usages and method calls successfully. 
 
-Another aspect, where the order of the operation matters, is the hierarchy in the abstract syntax tree. Consider the assignment \textit{x=x+1}. In an abstract syntax tree, the reading of the value \textit{x} and the addition of 1 is executed first. It is also at a deeper level of the tree than the assignment. If the assignment were to be replaced by a setter, the syntax tree of the reading expression can be out of sync because it is not linked to the original assignment. Therefore, it is vital to refactor parts of a code with higher depth in the syntax tree before parts with lower depths. 
+Another aspect, where the order of the operation matters, is the hierarchy in the abstract syntax tree. Consider the assignment \textit{x=x+1}. In an abstract syntax tree, the reading of the value \textit{x} and the addition of 1 is executed first. It is also at a deeper level of the tree than the assignment. If the assignment were to be replaced by a setter, the syntax tree of the reading expression can be out of sync because it is not linked to the original assignment anymore. Therefore, it is vital to refactor parts of a code with higher depth in the syntax tree before parts with lower depths. 

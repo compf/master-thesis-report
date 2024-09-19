@@ -1,8 +1,10 @@
+
+
 \section{Pipeline}\label{sec:pipeline}
 In order to find and refactor data clumps automatically, a particular sequence of steps \textbf{(pipeline)} has to be respected. Most steps of this sequence must be in a specific order because they rely on information extracted in a previous step.
 
 \subsection{Structure of the pipeline}
-Each step of the pipeline is performed by a  \textbf{handler}. A handler might handle one or more steps.  Each handler has information about what steps of the pipeline it supports and  a handler can be registered to a pipeline step if it supports the particular step.  
+Each step of the pipeline is performed by a  \textbf{handler}. A handler might handle one or more steps.  Each handler has information about what steps of the pipeline it supports and  a handler can be registered to a pipeline step if it supports that particular step.  
 
 Since a service-based approach is used, a handler can be seen as a gateway to a different program or service that performs the specific functionality.  The handler and the respective service are tightly coupled. While a handler could deal with multiple services, it is not required by the design, and requires special care. Nevertheless, it recommendable to write the handler as abstract as possible.
 \begin{figure}
@@ -31,9 +33,9 @@ The program, therefore, acts as an orchestrator. It starts every service and con
 
 An alternative approach is called choreography. Here each step would call the next step without using the central main program. 
 
-Both approaches have their advantages. In the choreography architecture, there is less coupling since a main program does not need to know which gateway handles which step. Instead, each gateway need to know the next (and only the next) step. This can become challenging if steps are optional because the gateway does not know what service to call next. Additionally, debugging the process is more challenging as there is no central point that coordinates the pipeline.
+Both approaches have their advantages. In the choreography architecture, there is less coupling since a main program does not need to know which handler is associated with which step. Instead, each handler need to know the next (and only the next) step. This can become challenging if steps are optional because the gateway does not know what service to call next. Additionally, debugging the process is more challenging as there is no central point that coordinates the pipeline.
 
-On the other hand, the orchestrator architecture is easier to control and debug. It easier to configure and to implement. Nevertheless, the coupling to each gateway is stronger because each gateway must be known by by the main program. Additionally, the main program is a single point of failure. If there is a problem with the main program, the data clump refactoring cannot proceed as every step requires coordination with the orchestrator. Also the overhead should be considered because the orchestrator will need to act multiple time to process responses and generate new requests for the next gateway. This becomes more important if services are not local but are accessed using the internet or the local network, which causes more overhead. \cite{orchestration_choreography}
+On the other hand, the orchestrator architecture is easier to control and debug. It easier to configure and to implement. Nevertheless, the coupling to each handler is stronger because each gateway must be known by by the main program. Additionally, the main program is a single point of failure. If there is a problem with the main program, the data clump refactoring cannot proceed as every step requires coordination with the orchestrator. Also the overhead should be considered because the orchestrator will need to act multiple time to process responses and generate new requests for the next gateway. This becomes more important if services are not local but are accessed using the internet or the local network, which causes more overhead. \cite{orchestration_choreography}
 
 
 \subsection{Pipeline execution order}\label{sec:pipeline_exec_order}

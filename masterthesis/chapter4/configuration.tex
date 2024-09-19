@@ -23,11 +23,11 @@ In the beginning, the programming language is defined (l.~1).
 
 Then, the user can define objects. An object can be used by a handler to perform sub-steps, but declaring an object in \ac{JSON} does not necessarily mean that it is used. 
 
-Here, one object is declared (l.4). The \textit{AbstractLanguageModel} represents the interface to the \ac{LLM}.  An instance of type \enquote{ChatGPTInterface} (l.5). The object is given argumentes via the \enquote{args} attribute (l. 6). In this case, model name and temperatures are given (l. 7-8).  This instance is stored internally and can be queried for.   
+Here, one object is declared (l.4). The \textit{AbstractLanguageModel} represents the interface to the \ac{LLM}.  An instance of the type \enquote{ChatGPTInterface} (l.5). The object is given arguments via the \enquote{args} attribute (l. 6). In this case, model name and temperatures are given (l. 7-8).  This instance is stored internally and can be queried for.   
 
 Whenever a handler needs the services of another object, it has two possibilities.
 \begin{enumerate}
-    \item The handler knows the exact concrete type of the object it needs. For instance, handlers that filter files or data clumps can be given the names of filters and metrics that they should use. The handler can receive the respective object by querying the known type. 
+    \item The handler knows the exact concrete type of the object it needs. For instance, handlers that filter files or data clumps can be given the names of filters and metrics that they should use. The handler can receive the respective object by querying the known name. 
 
     \item The handler does not know the concrete type but request access to a service. In this example, a handler does not need to know that ChatGPT is used as the \ac{LLM}. It can request the object by querying for the abstract class name \enquote{AbstractLanguageModel}. This represents the classical dependency injection approach as the handler does not need to care about the specific model, but only that the \ac{API} contract is respected. The disadvantage of this design strategy is that only one  concrete type for each abstract type can be defined. If someone wants to use an \ac{LLM} for detection, and another model for refactoring, the current design would not allow this. 
 \end{enumerate}
@@ -35,21 +35,12 @@ Whenever a handler needs the services of another object, it has two possibilitie
 
 
 
-Then, the pipeline is defined (ll. 11-15). It consists of a single handler in this example. The keys of the pipeline are the names of the individual steps two which a handler object is assigned. In this case, the step is the data clump detection (l 12) step and the  handler uses an \ac{LLM} for detection (l. 13). The concrete \ac{LLM} does not need to be provided as the handler can query the object. 
+Then, the pipeline is defined (ll. 11-15). It consists of a single handler in this example. The keys of the pipeline are the names of the individual steps to which a handler object is assigned. In this case, the step is the data clump detection (l.~12) step and the  handler uses an \ac{LLM} for detection (l.~13). The concrete \ac{LLM} does not need to be provided as the handler can query the object. 
 
 
 It should be noted that the order of the handlers in the configuration  does not matter because the execution order is constant and in most cases, each step requires the context of a previous step so that parallel execution or vice-versa execution of steps is not possible. Only in the case of usage finding and name finding would a parallel execution make sense because none of these steps is dependent on the other.  However, this exception is not implemented.
 
-Not all relevant objects are part of the pipeline. Some are outside of the pipeline and can be referenced by all handlers. Here, the large language model \ac{API} is initialized with ChatGPT(l.~ 28).
 
-Each object that appears in the \ac{JSON} is instantiated using dependency injection. This means that the objects initially are registered at a central location but not fully instantiated until they are really needed. The general approach is as follows:
-\begin{enumerate}
-    \item The main program loads the \ac{JSON} and iterates over all objects
-    \item Each object has a category (e.~g. \textit{LanguageModelInterface} (see l.~ 28)) and a name (e.~g. ChatGPTInterface). The name and its category might be identical if only one instance of the respective class is needed. 
-    \item The name of the object and it parameters are registered at the central dependency manager under the category given
-    \item If a handler or other object needs another object of a specific category, it can ask the central manager. If the respective object has  yet not been created, it will be created. Otherwise, the already instantiated object will be returned. 
-\end{enumerate}
-With this approach, a looser coupling can be achieved. Each handler has access to the configuration it needs and does not have to deal with the creation of objects. 
 \subsubsection{Running the main program}
 
 
@@ -58,15 +49,17 @@ If a valid configuration file has been created, the main program can be started 
 With these arguments given, the following steps are executed
 
 \begin{enumerate}
-    \item the main program parses the configuration file and initializes the object with the given arguments. It also assigns the handlers to the respective steps.
-    \item  the validity of the pipeline is checked. For instance, it is tested whether all required programs are installed.
+    \item The main program parses the configuration file and initializes the object with the given arguments. It also assigns the handlers to the respective steps.
+    \item  The validity of the pipeline is checked. For instance, it is tested whether all required programs are installed.
     \item An initial code obtaining context is generated
     \item The pipeline is executed. For each executed pipeline step
     \begin{enumerate}
-        \item Checks whether there is a serialized context for this step and whether the handler accepts that this context is sufficient. In this case, the handler is not executed
+        \item Checks whether there is a serialized context for this step and whether the handler accepts that this context is sufficient. If these criteria are met, the handler can be skipped
         \item If none of these conditions are met, the handler is executed
-        \item the context returned by the context is used as the new context.
+        \item the context returned by the handler is used as the new context.
         \item If supported by the respective context, it is serialized
     \end{enumerate}
     \item The main program exits. The running time of each step is serialized for evaluation purposes. 
 \end{enumerate}
+
+It can be seen that due to the modular design, the algorithm for the main program is fairly small. However, it performs a critical part of the refactoring process as it uses the responses from each handler to decide how to continue with the execution of the program. 

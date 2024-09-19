@@ -1,22 +1,22 @@
 \section{Integration of large language services}
 
-Since \ac{LLM} like ChatGPT are a major part of this master thesis, the issue of integrating \ac{LLM} is another part of the concept. The following problems must be addressed
+Since \acp{LLM} like ChatGPT are a major part of this master thesis, the issue of integrating \ac{LLM} is another part of the concept. The following problems must be addressed:
 \begin{enumerate}
     \item How should an interface to a \ac{LLM} look like?
     \item How should the conversation with a \ac{LLM} be performed?
     \item How are messages from and to the model structured?
     \item Where should instructions be stored and processed so that they can be sent to a \ac{LLM}
 \end{enumerate}
-Issue 1 and 2 will be addressed in section \ref{sec:llm_interface}. The issue 2 3 will be discussed in section \ref{sec:llm_msg_structure}. Lastly, issue 4 will be dealt with in section \ref{llm_msg_storage}.
+Issues 1 and 2 will be addressed in section \ref{sec:llm_interface}. The issue 2--3 will be discussed in section \ref{sec:llm_msg_structure}. Lastly, issue 4 will be dealt with in section \ref{llm_msg_storage}.
 \subsection{An interface for large language models}\label{sec:llm_interface}
 
 Since the market for large language model is constantly expanding in just a few years, designing a interface for communication is challenging. As a result, only the core functionality can be modeled by an interface in order to keep compatibility and ease extendability. 
 
-An interface to a \ac{LLM} should support providing messages. These messages are provided by the user and can be a instruction (see  section \ref{llm_msg_storage}), data or any other relevant information. After a message is stored,  no modifications of the message content can occur so that that necessary text transformation must occur earlier. 
+An interface to a \ac{LLM} should support providing messages. These messages are provided by the user and can be an instruction (see  section \ref{llm_msg_storage}), data or any other relevant information. After a message is stored,  no modifications of the message content can occur so that that necessary text transformation must occur earlier. 
 
 Providing a message does not mean that the message is processed by the \ac{LLM} but is kept until further instruction. Thus, a user can prepare multiple messages before sending them to the model.
 
-If the user decides to send the messages to the mode, another operation can be used. This operation sends the accumulated message to the large language model and waits for the response, so that the operation is synchronous. While an asynchronous approach would also be feasible, in most cases the data clump detection and refactoring process cannot proceed without the relevant information from the model so that waiting is tolerable. 
+If the user decides to send the messages to the mode, another operation can be used. This operation sends the accumulated messages to the large language model and waits for the response, so that the operation is synchronous. While an asynchronous approach would also be feasible, in most cases the data clump detection and refactoring process cannot proceed without the relevant information from the model so that waiting is tolerable. 
 
 After sending and receiving the messages, the response from the model can be returned. Now the interface must deal with the messages it has accumulated. Since most models have no memory, the messages must be sent again if they are still relevant for future requests. However, storing and resending messages can cost more so that this should not be done always.
 
@@ -37,7 +37,7 @@ A static resource can be an instruction or additional context to be transmitted 
 
  Similarly to resources like textures, 3D models, sound data, images etc., they should be separated from the code \cite{separate_code_data}. As a result, separate text files for the instructions are better as they can be distributed and modified more efficiently, especially if other persons or entities create the instruction prompt.
 
-An instruction is often not a single resource but a composition of many resources or other data. For instance, if an instruction contains an code example, it is reasonable to split the code example into a different file to reduce the size of a single file. This  also allows easier modification of the example with an IDE because combining instruction text and source code would lead to compiler errors.
+An instruction is often not a single resource but a composition of many resources or other data. For instance, if an instruction contains an code example, it is reasonable to split the code example into a different file to reduce the size of a single file. This  also allows easier modification of the example with an \ac{IDE} because combining instruction text and source code would lead to compiler errors.
 
 As a result, an instruction resource may need to hold references to other files (e.~g. source code) or references to other data.
 For the \ac{LLM}, the instruction should be complete such that it contains the whole instruction with the content of all referenced files and other information.
@@ -73,6 +73,6 @@ Use the following JSON format for the output:
 \hfill
 \subsubsection{Dynamic resources}
 
-In contrast, dynamic resources represent information from the analyzed project. In the end, they are somewhat are representation of the context. However, directly transmitting the context is not useful, as it might contain unnecessary information, or some information must be gathered by combining information from multiple context layers. Therefore, it is the duty of the respective handler to use the existing context and generate messages that contain all relevant information. These messages is appended to the static resources at the end and then transmitted to the model. 
+In contrast, dynamic resources represent information from the analyzed project. In the end, they somewhat are representation of the context. However, directly transmitting the context is not useful, as it might contain unnecessary information, or some information must be gathered by combining information from multiple context layers. Therefore, it is the duty of the respective handler to use the existing context and generate messages that contain all relevant information. These messages are appended to the static resources at the end and then transmitted to the model. 
 
 One issue that should be taken care for is that the dynamic resources and the static resources must be compatible for optimal or even usable results. The concept does not guarantee that as it would be unfeasible to implement. For instance, the static resource (instruction) can state that complete files are transmitted to the model, while a handler only submits pieces of the source code or some other representation of the code which can lead to misunderstandings and can decrease the detection and refactoring quality. 
