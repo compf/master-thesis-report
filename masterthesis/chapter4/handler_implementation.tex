@@ -1,6 +1,6 @@
 \section{Implementation of handlers} \label{sec:step_impl}
 In this section, the implementation of the handlers is discussed. These handlers do not or only scarcely use the features by \ac{LLM}. 
-\subsection{Data Clump Doctor}
+\subsection{DataClumpDoctor}
 
 The main tool to detect  data clumps is the \textit{DataClumpDoctor}. As this program is written using the NodeJS platform it can be directly integrated into the main program blurring distinction between handler and service.
 
@@ -10,12 +10,12 @@ If a \ac{AST} context is already present, it re-used. Otherwise the \ac{AST} con
 
 After that, the \textit{DataClumpDoctor} loads the \ac{AST} files and detects the data clumps by comparing the identifiers and types of variables that might constitute a data clump, thereby requiring strict equality. These detected data clumps are saved in a separate file and can be re-used in the pipeline. 
 
-One issue with the \textit{DataClumpDoctor} is its handling of large projects. While a concrete \ac{LOC} number cannot be given, at some points analyzing large projects becomes infeasible leading to crashes or prolonged running times. This can be explained by considering that  the number of detected data clumps grows quadratically with the actual number of data clump holders. Due to the structure of the reporting format as discussed in appendix \ref{sec:data_clump_format}, there is a significant amount of repetition. For sufficiently large projects, this can be a problem it the data clump information needs to be serialized as NodeJS is not optimized for these tasks. While changing the format is one solution to this problem, it can be argued that using previous file filters is more suitable as the data clump detection results from large projects are difficult to evaluate. 
+One issue with the \textit{DataClumpDoctor} is its handling of large projects. While a concrete \ac{LOC} number cannot be given, at some points analyzing large projects becomes infeasible leading to crashes or prolonged running times. This can be explained by considering that  the number of detected data clumps grows quadratically with the actual number of data clump holders. Due to the structure of the reporting format as discussed in appendix \ref{app:data_clump_format}, there is a significant amount of repetition. For sufficiently large projects, this can be a problem it the data clump information needs to be serialized as NodeJS is not optimized for these tasks. While changing the format is one solution to this problem, it can be argued that using previous file filters is more suitable as the data clump detection results from large projects are difficult to evaluate. 
 
 \subsection{Name finding}
 Finding a suitable name for the soon-to-be-extracted class is the next step  that must be implemented. Two approaches are chosen.
 
-The first approach is the classic approach that has been used before the advent of \acs{LLM}. By concatenating all field names of the extracted class, a valid class name can be generated. For instance, a class with the fields \textit{x}, \textit{y}, m\textit{z} could be named \textit{XYZ}. In this example, the field names are capitalized and directly joined without any separator, however, other options might be better dependent on the project's style guidelines. 
+The first approach is the classic approach that has been used before the advent of \acs{LLM}. By concatenating all field names of the extracted class, a valid class name can be generated. For instance, a class with the fields \textit{x}, \textit{y}, and \textit{z} could be named \textit{XYZ}. In this example, the field names are capitalized and directly joined without any separator, however, other options might be better dependent on the project's style guidelines. 
 
 The advantage of this manual method is that the generated names are very unique and with a high probability will not conflict with other names because they are very artificial. Nevertheless, they lack creativity and in most cases, a developer will need to choose a better name in order to improve readability. 
 
@@ -44,9 +44,9 @@ Two approaches are implemented. In the manual method, the class is extracted usi
 
 Here also, the creativity of an \ac{LLM} can be useful. Given a suitable context, an \ac{LLM} can return the source code of the extracted class without being restricted to a template as the manual approach is. For instance, instead of generating a class, the model could create a Java record which is a simplified version of a class. 
 
-\subsection{Reference Finding}
+\subsection{Reference finding}
 
-Other relevant handlers deal with the finding of references. Only if all references are correctly resolved, the data clump refactoring can proceed smoothly. 
+Other relevant handlers deal with the finding of references. Only if all references are correctly resolved, can the data clump refactoring proceed smoothly. 
 
 \subsubsection{Via \ac{LSP}}
 In order to refactor data clumps, all relevant locations of interests (references) must be identified. If the IntelliJ plugin is used for refactoring, this step can sometimes be left out. However, since this plugin has some issues and the refactoring might be performed by an \ac{LLM}, it is beneficial to implement a service for reference finding. 
@@ -56,22 +56,22 @@ The \ac{LSP} is one method to find these references because it works reliable an
 Four kinds of references are relevant for data clump refactoring.
 
 \begin{enumerate}
-     \item A  variable (field or method parameter)  is declared
-    \item A variable is read from or assigned to
+     \item A  variable (field or method parameter)  is declared.
+    \item A variable is read from or assigned to.
    
-    \item A method is declared or overridden
-    \item A method is called
+    \item A method is declared or overridden.
+    \item A method is called.
 \end{enumerate}
 To facilitate the use of \ac{LSP}, the server is started and initialized. After that, a request to obtain references for each (filtered) data clump is sent to the server.
 Any reply by the \ac{LSP} is intertwined with the associated data clump thereby creating the reference context.
 
  
 \subsubsection{Primitive reference finding}
-This handler works with all programming language as it does not parse the source code at all. Instead, it searches for the identifiers that are part of a data clump (e.~g. method name, variable names). 
+This handler works with all programming languages as it does not parse the source code at all. Instead, it searches for the identifiers that are part of a data clump (e.~g. method name, variable names). 
 
 This simple approach has two issues. First of all, one must determine where to search. Searching the whole project will require a significant amount of time. Alternatively, only the files containing the data clump or the respective folder can be traversed.
 
-Moreover, this method will lead to more false positives because it disregards the scope of variables. For instance, searching for the variable name \textit{foo} will also match local variables named \textit{foo}. Therefore, a match might not be part of a data clump and refactoring this match can lead to more harm than good. 
+Moreover, this method will lead to more false positives because it disregards the scope of variables. For instance, searching for the variable name \textit{foo} will also match local variables named \textit{foo}. Therefore, a match might not be part of a data clump, and refactoring this match can lead to more harm than good. 
 
 This handler works best if combined with an \ac{LLM}. The model can decide for each reference whether it is truly relevant for data clump refactoring purposes. It might also propose a more sophisticated refactoring idea by using these non-data-clump references. 
 
@@ -80,20 +80,21 @@ This handler works best if combined with an \ac{LLM}. The model can decide for e
 For  manually refactoring data clumps, the  \ac{API} from IntelliJ mentioned in section \ref{sec:psi} can be used because it allows for easy modification of the source code that does not result in faulty code. 
 
 
-\begin{comment}The reasons for this are difficult to determine and the documentation is scarce, so the the PSI approach seems to be only suitable for projects created via IntelliJ or correctly initialized by IntelliJ with the required meta data. Gradle and maven projects are therefore not suitable for the full refactoring step. 
-\end{comment}
 
 
-The basic approach for refactoring is based on modifying references. A  reference is an information about the usage of an element. Element in this context could mean a class, a method, or a variable.
+
+The basic approach for refactoring is based on modifying references. A  reference is  information about the usage of an element. An element in this context could mean a class, a method, or a variable.
 In many cases , IntelliJ can find all references automatically and categorize them.
 
-However, this does not always happen. A project can be loaded wrongly so that  finding references of a method or field can lead to undefined behavior. Sometimes all references are correctly found, sometimes only a subset of the references are found, and sometimes no even no references are detected. This could be explained by invalid caches or unsupported projects although it is difficult to determine whether there are reference errors as no ground truth exists.
+However, this does not always happen. A project can be loaded wrongly so that  finding references of a method or field can lead to undefined behavior. Sometimes all references are correctly found, sometimes only a subset of the references are found, and sometimes no references are detected. This could be explained by invalid caches or unsupported projects.
 
-One solution for these issues is to open the project in IntelliJ at least once  on the same computer running the tool, so that all references can be loaded. Therefore, using IntelliJ as the main \ac{IDE} of the project to analyze will maximize the chance of finding all references
+The impact of this problem is especially significant because a consistent way to check  whether a project has successfully loaded is not available. This means that the reference finding via \ac{PSI} can be highly unreliable. 
+
+One solution for these issues is to open the project in IntelliJ at least once  on the same computer running the tool, so that all references can be loaded. Therefore, using IntelliJ as the main \ac{IDE} of the project to analyze will maximize the chance of finding all references.
 
 
 
-If this approach does not work, the context can be utilized. If a previous created a context that contains reference information, the IntelliJ plugin can use this context to perform the refactoring. This approach represents the pipeline idea that many tools need to work together to achieve a common goal.
+If this approach does not work, the context can be utilized. If a previous created a context that contains reference information (for instance using the \ac{LSP}), the IntelliJ plugin can use this context to perform the refactoring. This approach represents the pipeline idea that many tools need to work together to achieve a common goal.
 
 
 Whether such manual search is faster than the combined use of \ac{LSP} and IntelliJ is difficult to determine. On the one hand, can external services be faster because they are implemented better (i.~e. more sophisticated algorithms). On the other hand, starting two services leads to more overhead. 
@@ -102,13 +103,13 @@ Whether such manual search is faster than the combined use of \ac{LSP} and Intel
 
 Regardless of how the reference issue is solved, IntelliJ can now perform the refactoring. Depending of the category of a reference, IntelliJ needs to perform distinct step. 
 \begin{enumerate}
-    \item In case of a declared field, the field can be deleted because it is part of a field data clump. Now it can be determined whether the class contains already the new field that replaces the fields of the data clump.
-    \item If a method is declared, IntelliJ can modify the signature of the method. This can be the original method or an overridden one. IntelliJ needs to remove the parameters that are part of the data clump and add a new method parameter which replaces the method parameters of the data clump. 
-    \item If a variable is used it can be replaced by a getter or setter call. For instance if the variable \textit{var} is read, and the name of the extracted class is \textit{Object}, any reading of the variable can be replaced by  \textit{object.getVar()} where \textit{object} is a variable of type \textit{Object} and \textit{getVar} is the getter of \textit{var}. Similarly, an assignment can be replaces by the setter.
+    \item In the case of a declared field, the field can be deleted because it is part of a field data clump. Now it can be determined whether the class already contains the new field that replaces the fields of the data clump.
+    \item If a method is declared, IntelliJ can modify the signature of the method. This can be the original method or an overridden one. IntelliJ needs to remove the parameters that are part of the data clump and add a new method parameter that replaces the method parameters of the data clump. 
+    \item If a variable is used it can be replaced by a getter or setter call. For instance, if the variable \textit{var} is read, and the name of the extracted class is \textit{Object}, any reading of the variable can be replaced by  \textit{object.getVar()}, where \textit{object} is a variable of type \textit{Object} and \textit{getVar} is the getter of \textit{var}. Similarly, an assignment can be replaces by the setter.
     \item If a method is used, several substeps are needed.
     \begin{enumerate}
         \item First, for each argument provided in a method call it is determined whether the argument is connected to a data clump variable (i.~e. it provides a value to a parameter that is part of a data clump) 
-        \item The position of those arguments is stored and a reference to the argument is stored for further processing.
+        \item The position of those arguments is stored, and a reference to the argument is stored for further processing.
         \item Since the extracted class is known and existing, a matching constructor is determined to support all arguments to the data clump variables of the method call. 
         \item For each argument to a data clump variable, the argument is inserted into the matching position of the constructor, and the argument is deleted in the original method call. 
         \item the constructor call is added at the position of the method  where the parameter of the extracted class is expected. 
@@ -119,4 +120,4 @@ Regardless of how the reference issue is solved, IntelliJ can now perform the re
 
 This approach requires some coordination. For instance, the order of operation is important. Method and field declarations must be updated first because they are needed to perform the refactoring of variable usages and method calls successfully. 
 
-Another aspect, where the order of the operation matters, is the hierarchy in the abstract syntax tree. Consider the assignment \textit{x=x+1}. In an abstract syntax tree, the reading of the value \textit{x} and the addition of 1 is executed first. It is also at a deeper level of the tree than the assignment. If the assignment were to be replaced by a setter, the syntax tree of the reading expression can be out of sync because it is not linked to the original assignment anymore. Therefore, it is vital to refactor parts of a code with higher depth in the syntax tree before parts with lower depths. 
+Another aspect where the order of the operation matters is the hierarchy in the abstract syntax tree. Consider the assignment \textit{x=x+1}. In an abstract syntax tree, the reading of the value \textit{x} and the addition of 1 are executed first. It is also at a deeper level of the tree than the assignment. If the assignment were to be replaced by a setter, the syntax tree of the reading expression can be out of sync because it is not linked to the original assignment anymore. Therefore, it is vital to refactor parts of a code with higher depth in the syntax tree before parts with lower depths. 

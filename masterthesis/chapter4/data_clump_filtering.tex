@@ -7,7 +7,7 @@ In the first stage, no data clumps have been detected yet, and only file paths a
 
 In the second phase, data clumps have already  been detected given the (possibly shrunk) set of files. Now, information about the data clumps can be used  to decide which data clump will be refactored in later phases.
 
-In both phases, the same type of filtering objects are used because  a separate design for file filtering objects and data clump filtering objects would be over-engineering. A file filtering object could work with data clumps because a data clump has two associated file paths. Hence, these file paths must be dealth separately and the filter must combine the two (possiblly different) results.
+In both phases, the same type of filtering objects are used because  a separate design for file filtering objects and data clump filtering objects would be over-engineering. A filter targeted at files could also work with data clumps because a data clump has two associated file paths. Hence, these file paths must be dealt separately and the filter must combine the two (possibly different) results.
 
 Hence, each filtering objects must indicate whether it supports file paths, data clumps or both, so that the filtering objects can be correctly used. 
 

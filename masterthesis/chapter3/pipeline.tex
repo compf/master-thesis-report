@@ -7,7 +7,7 @@ In order to find and refactor data clumps automatically, a particular sequence o
 Each step of the pipeline is performed by a  \textbf{handler}. A handler might handle one or more steps.  Each handler has information about what steps of the pipeline it supports and  a handler can be registered to a pipeline step if it supports that particular step.  
 
 Since a service-based approach is used, a handler can be seen as a gateway to a different program or service that performs the specific functionality.  The handler and the respective service are tightly coupled. While a handler could deal with multiple services, it is not required by the design, and requires special care. Nevertheless, it recommendable to write the handler as abstract as possible.
-\begin{figure}
+\begin{figure}[ht!]
     \centering
     \includesvg[inkscapelatex=false,scale=0.9]{figures/chapter3/solver_gateway_service.svg}
     \caption{Visualization of communication to services for one pipeline step}

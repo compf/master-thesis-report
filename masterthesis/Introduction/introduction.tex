@@ -1,26 +1,25 @@
 \label{sec:introduction}
 
-A significant portion of the cost associated with software development incurs not before the release but afterwards. Most software needs to be improved in the future because of new requirements, improving the performance or adapting to external changes, which makes maintenance a major phase in the  software life cycle.
+A significant portion of the cost associated with software development incurs not before the release but afterwards. Most software needs to be improved in the future because of new requirements, improving the performance or adapting to external changes, which makes maintenance a major phase in the  software life cycle. \cite{465272}
 
 
 A prominent issue  complicating maintenance is the presence of code smells. Code smells are parts of the source code that tend to make the source code hard to read without directly causing any functional issues. Refactoring and removing code smells has a positive impact on the maintainability  of a software project and reduces cost associated with development in the long-term.\cite{mealyEvaluatingSoftwareRefactoring2006}
 
 
 
-Numerous approaches for detecting code smells exist (e~g., SonarCloud,  PMD, Checkstyle) that can be integrated into the development process but these tools do not automatically fix them  \cite{vidalApproachPrioritizeCode2016}. Since developers prioritize implementing new features or fixing bugs, the refactoring of code smells is deferred so that many code smells (even if detected) remain unfixed   \cite{10.1145/2393596.2393655}.
+Numerous approaches for detecting code smells exist (e~g., SonarCloud~\cite{sonarcloud},  PMD~\cite{pmd}, Checkstyle~\cite{checkstyle}) that can be integrated into the development process but these tools do not automatically fix them  \cite{vidalApproachPrioritizeCode2016}. Since developers prioritize implementing new features or fixing bugs, the refactoring of code smells is deferred so that many code smells (even if detected) remain unfixed   \cite{10.1145/2393596.2393655}.
 
-Moreover, there are code smells that remain often unnoticed and hence unfixed because they are are harder to detect and fix. One particular code smell named \textbf{data clumps} is the focus of this master thesis. Data clumps refer to duplicated fields or method parameters across the source code which increases the code size and makes the source code harder to read because these variables have a implicit connection that is not readily apparent.  \cite{BaumgartnerAP23}  \cite{data_clumps_refactoring_guru} \cite{join_data_items}.
+Moreover, there are code smells that remain often unnoticed and hence unfixed because they are are harder to detect and fix. One particular code smell named \textbf{data clumps} is the focus of this master thesis. Data clumps refer to duplicated fields or method parameters across the source code which increases the code size and makes the source code harder to read because these variables have a implicit connection that is not readily apparent.  This code smell can be difficult to detect as it can span multiple files and requires more extensive analysis of the source code \cite{BaumgartnerAP23}  \cite{data_clumps_refactoring_guru} \cite{join_data_items}.
  
+Several studies deal with data clumps. They are one of the top ten most-cited code smells \cite{lacerda} and are recommended for low-priority refactorization \cite{zhangPrioritisingRefactoringUsing2011}. The impact of data clumps on software quality is not conclusive, but research suggests that the \enquote{application domain and development context} influence whether data clumps are problematic or not \cite{hallCodeSmellsHave2014}. This highlights that not every data clump is a code smell per se, but identifying and refactoring some of them can have a positive impact on the software quality. 
 
-
-
-One potential solution to this issue is to automatically fix certain code smells that are easy to define so that human intervention is minimized. This automation can be regularly applied, allowing code smells to be gradually addressed. This helps developers to focus on their their primary tasks while profiting from cleaner code. 
+One potential solution to the issue of code smells is to automatically fix certain code smells that are easy to define so that human intervention is minimized. This automation can be regularly applied, allowing code smells to be gradually addressed. This helps developers to focus on their their primary tasks while profiting from cleaner code. 
 However,  automatic refactoring  is more difficult than a simple detection because it requires changes to the source code that could potentially induce bugs or break the build process \cite{9796303}. Hence, the tools used must be carefully assessed. 
 
 The data clump example mentioned above is one of those code smells that can be clearly defined by applying subjective thresholds \cite{zhangImprovingPrecisionFowler2008}. Hence it is amenable for automatic refactoring purposes. 
 
 
-However, a successful re-factorization of data clumps requires several steps which partly require domain knowledge and the ability to understand the context of the code \cite{martin2009clean}. Traditional refactoring tools are unable to minimize these human-like abilities so that they can only offer semi-automatic refactoring.   Instead, they can generate code that can be  perceived as artificial which limits their usefulness. 
+However, a successful re-factorization of data clumps requires several steps which partly require domain knowledge and the ability to understand the context of the code \cite{martin2009clean}. Traditional refactoring tools are unable to minimize these human-like abilities so that they can only offer semi-automatic refactoring.   Instead, they can generate code that can be  perceived as artificial which limits their usefulness \cite{pomian2024furtherllmsidestatic}. 
 
 Since a fully-automatic refactoring of data clumps is currently not supported, humans must still be involved to further improve the code so that it looks natural and is beneficial to improve readability. This reduces the suitability of semi-automatic refactoring tools as developers still need to review the proposed code changes, understand the refactoring, and come up with additional changes to enhance readability. 
 
@@ -33,7 +32,7 @@ The lack of fully-automatic refactoring for data clumps can be addressed by usin
   
   A popular \ac{LLM} is ChatGPT \cite{ChatGPT_url}. ChatGPT is an AI language model developed by OpenAI that uses a Generative Pre-trained Transformer (GPT) model to process textual input data (i.~e. natural language or source code). Users can provide queries, questions, or other textual material to ChatGPT and the model responds with a textual reply attempting to satisfy the user's request \cite{yetistirenEvaluatingCodeQuality2023}. It also employs a conversation feature so that previous requests and replies can be referred to by future requests and responses \cite{sobania2023analysis}.
 
-These services can be employed via a pipeline architecture that executes specific steps in a systematic order.  Given a software project, the pipeline is gradually filled with information from the tools and services that are used so that each tool and service can contribute to the goal of refactoring data clumps.  In each step, a specific service is used to perform a specific task that is necessary for refactoring data clumps. At the conclusion of this refactoring pipeline, some (or all) data clumps occurring in source code are removed.  
+These services can be employed via a pipeline architecture that executes specific steps in a systematic order.  Given a software project, the pipeline is gradually filled with information from the tools and services that are used so that each tool and service can contribute to the goal of refactoring data clumps.  In each step, a specific service is used to perform a specific task that is necessary for refactoring data clumps. At the conclusion of this refactoring pipeline, some (or all) data clumps occurring in the source code are removed.  
 
 
 
@@ -70,6 +69,6 @@ In chapter \ref{chapter:conception}, the design and structure of the tool is exp
 
 In chapter \ref{chapter:implementation}, the practical implementation is outlined.  Moreover, there is a discussion of how each tool and service can be used for the purpose of refactoring data clumps and what challenges exist. 
 
-A full-scale evaluation is performed in chapter \ref{chapter:eval}.
+A full-scale evaluation is performed in chapter \ref{chapter:eval}. For this end, the methodologies of the several experiments  are outlined, their results discussed, and the threats to validity explained. 
 
 In chapter \ref{chapter:conclusion}, a conclusion is given. Open questions, possible improvements of the tool and the chances and drawbacks of large language models are discussed.

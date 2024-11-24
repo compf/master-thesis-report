@@ -140,3 +140,26 @@ In order to find the variable in the source code, detailed location information 
 
 \subsubsection{Trivial reference finding}
 When using  an \ac{LLM} to refactor data clumps, it might be challenging to use \ac{LSP} for finding references. For instance, the \ac{LSP} approach only works if data clump have already been identified. If a model is tasked to find and refactor data clumps, it does not have the location of data clumps. Therefore, it might be useful
+
+
+
+
+
+\begin{table}[]
+    \centering
+    \begin{tabular}{p{7cm}|c|c}
+        Statement & Likert mean & Translated  \\\hline
+
+      Data clumps are a code smell that should be fixed.& 3.17 & Agree,\\\hline
+      Using LLMs in software development can be helpful to improve code quality.& 4 & Strongly Agree,\\\hline
+      The proposed refactoring maintains or improves the quality of the code.& 1.33 & Disagree,\\\hline
+      The proposed refactoring has  adequately identified and preserved the original
+      functionality and intent of the code.& 4 & Strongly Agree,\\\hline
+      The name of the new extracted class(es), fields and methods are well-chosen.&  3.67 &  Agree\\\hline
+      
+      The location of the extracted class(es) are well-chosen. & 4 & Strongly Agree \\\hline\hline
+    
+    \end{tabular}
+    \caption{Mean value of the likert results}
+    \label{tbl:likert}
+\end{table}

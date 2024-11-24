@@ -36,16 +36,11 @@ To conclude, the core definition of a data clump is clear. However, this definit
 
 
 
-In the following, the definition by \cite{zhangImprovingPrecisionFowler2008} will be used. However,  instead of requiring at least four parameters or fields for a data clump, at least three are required. The reasons for this change is that also Fowler believes that three variables can be sufficient for a data clump. Additionally due to the looser definition, a higher number of data clumps will be found in a software project which can help to better statistically analyze data clumps. In the end, these are subjective thresholds that are open for discussion. The thresholds for fields-to-fields, parameters-to-fields, and parameters-to-parameters data clumps should therefore be parameterized.
+In the following, the definition by \cite{zhangImprovingPrecisionFowler2008} will be used. However,  instead of requiring at least four parameters or fields for a data clump, at least three are required. The reasons for this change is that also Fowler believes that three variables can be sufficient for a data clump. Additionally due to the looser definition, a higher number of data clumps will be found in a software project which can help to better statistically analyze data clumps. In the end, these are subjective thresholds that are open for discussion. The thresholds for fields-to-fields, parameters-to-fields, and parameters-to-parameters data clumps should therefore be parameterized. 
 
 
 
-\begin{figure}
-    \centering
-    \includegraphics[width=0.8\columnwidth]{figures/chapter2/dataClump/refactor_simple_case.pdf}
-    \caption{A simple data clump and a proposed refactoring}
-    \label{fig:company_bill_tax}
-\end{figure}
+
 Figure \ref{fig:company_bill_tax} depicts as an UML-diagram a parameters-to-parameters data clump. The class \textit{Company} has two methods dealing with financial payments. Both methods  receives three parameters, namely an IBAN, a monetary amount, and a transaction date. While this example is comparably small, there could be more classes and methods in a real-world application that receives these three parameters to perform financial operations. As a result, changing the method signature can be time-consuming. For instance, adding a description to a transaction requires changing all affected method signatures and their associated calls. Also changing the datatype of the monetary value (e.~g. to a custom Money class) requires similar changes. Additionally, the readability of these methods might be not ideal as a reader might not know what a \textit{IBAN} is or what currency \textit{amount} represents. These facts must be outlined in the documentation which therefore needs to be duplicated for each method. 
  
 \subsection{Identifying data clumps}\label{sec:data_clump_detection}
@@ -108,7 +103,28 @@ Another approach for refactoring data clumps is applicable to parameters-to-para
 In the case of fields-to-fields data clump, introducing a common base class or interface could also help to solve the data clump issue. The new base class contains all data clump items a fields and is inherited by the two classes. Assuming only single inheritance hierarchies are supported, this does not work if at least one class already inherits from another class. In this case, using interfaces instead of classes can partially solve the data clump issue, but the data clump fields still need to be defined for each class.
 
 
+\begin{figure}
+    \begin{subfigure}[t]{0.8\columnwidth}
+    \includegraphics[width=1\columnwidth]{figures/chapter2/dataClump/refactor_simple_case.pdf}
+    \caption{A simple data clump and a proposed refactoring}
+    \label{fig:company_bill_tax}
+    \end{subfigure}
+    \vspace{6cm}
+        \begin{subfigure}[t]{0.6\columnwidth}
+\includegraphics[width=1\columnwidth]{figures/chapter2/alternative_refactorings_to_fields.drawio.pdf}
+\label{fig:fields_to_params}
+\caption{By replacing parameters by fields}
 
+    \end{subfigure}
+    \hspace{-1cm}
+    \begin{subfigure}[t]{0.4\columnwidth}
+        \includegraphics[width=1\columnwidth]{figures/chapter2/alternative_refactorings_move_up.drawio.pdf}
+        \label{fig:move_fields_up}
+        \caption{By moving the fields to the base class}
+    \end{subfigure}
+\label{fig:refactoring_options}
+\label{Overview of refactoring options of data clumps}
+\end{figure}
 
 
 \subsection{Reasons not to refactor data clumps}\label{sec:data_clump_not_refactor}
@@ -135,7 +151,7 @@ Another approach is proposed by Baumgartner et al. Here, only the classes that c
 
 
 One approach to represent and serialize data clumps for reporting purposes is the \textbf{Data clumps Type Context} \cite{dataclump_type_context} developed by Baumgartner et al. Each data clump is described by the affected files, classes and methods (if applicable). Additional, the precise location of each data clump is given. Hence,  it employs the first graph representation mentioned in this section, meaning that individual classes and methods are forming the data clump graph. However, the second variant can be re-constructed as well using this information. 
-A full description of the format can be found in appendix \ref{sec:data_clump_format}.
+A full description of the format can be found in appendix \ref{app:data_clump_format}.
 
 To discern one data clump from another, a \textbf{types-names-identifier} is used in this master thesis. This identifier is created by sorting the data clump items by identifier, then joining the data type and identifier of each data clump with a white space, and concatenating these strings with a semicolon. For instance given a data clump \textit{boolean sign}, \textit{int exponent}, and \textit{double mantissa}. The respective types-names-identifier is \textit{int exponent;double mantissa;boolean sign}. This key identifies a data clump based on its types and names thereby helping to find related data clumps. 
 

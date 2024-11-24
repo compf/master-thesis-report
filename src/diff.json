@@ -1,0 +1,42 @@
+{
+    "refactorings":{
+        "Library.java":[
+            {
+            "fromLine":3,
+            "toLine":5,
+            oldContent:"
+            System.out.println(sign);
+            System.out.println(mantissa);
+            System.out.println(exponent);
+            ",
+            newContent:"
+            System.out.println(numProp.getSign());
+            System.out.println(numProp.getMantissa());
+            System.out.println(numProp.getExponent());
+            ",
+            }
+            {
+                "fromLine":7,
+                "toLine":9,
+                "oldContent:"
+                private boolean sign;
+                private int mantissa;
+                private int exponent;
+                ",
+                "newContent:"
+                private NumProp numProp;
+                "
+
+            }
+        ]
+    },
+    "extractedClasses":{
+        "NumProp.java":"..."
+    }
+   
+}
+
+
+
+
+

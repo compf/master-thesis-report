@@ -6,6 +6,7 @@
   \documentclass[a4paper,12pt,oneside, bibliography=totoc]{scrbook}
 \fi
 \usepackage[dvipsnames]{xcolor}
+\renewcommand{\descriptionlabel}[1]{\hspace{\labelsep}\textit{#1}}
 
 
 \usepackage[utf8]{inputenc}
@@ -34,6 +35,7 @@
 %\usepackage{todonotes}
 \usepackage{svg}
 \usepackage[page, title, titletoc, header]{appendix} %prettier appendix
+\usepackage[export]{adjustbox}
 
 \svgpath{{../figures/}}
 \usepackage{xstring}
@@ -138,7 +140,6 @@
 	\input{Introduction/introduction}
 \begingroup
 \renewcommand{\cleardoublepage}{} % TODO maybe removing this and next
-\clearpage
 
 \chapter{Background}\label{chapter:background}
 

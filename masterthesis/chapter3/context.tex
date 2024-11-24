@@ -10,20 +10,43 @@ When a handler needs to access information from a specific context, it needs to 
 
 Each step in the data clump refactoring pipeline can access the context and obtain such information as it may deem necessary for its use. A step may or may not update the context. For instance, if a service performs multiple step consecutively, it does not need to share  some information, or this would be harder to implement. To give a more concrete example, if a service can find data clumps and refactor them automatically, it might not be able to store the locations of each data clump so that respective context cannot be created. Also, a handler can create multiple chained contexts if it is capable of executing multiple steps. 
 
-\begin{figure}[ht!]
-\centering
-   \includesvg[width=0.7\columnwidth]{figures/chapter3/context_pipeline.svg}
-\caption{Exemplary lifecycles of the context: a) All steps are performed by an \ac{LLM}, b) Detection and filtering by another tool, c) Only name suggestion by \ac{LLM}}
-\label{fig:context_lifecycle}
-\end{figure}
 
-Figure \ref{fig:context_lifecycle} illustrates how a different combination of handlers can affect the state of the context. The figure depicts a state diagram where rectangles visualize the most recent context and arrows indicate executed steps.  In the left part (a), the \ac{LLM} performs the detection of data clumps, and the refactoring (including all associated sub-tasks). Because all these task are performed by the same service, it would be unnecessary to save intermediate results. Therefore, the context is only updated once at the conclusion of the program. This final context does not have additional information but marks that the pipeline has been executed successfully.
+
+
+Figure \ref{fig:context_pipeline} illustrates how a different combination of handlers can affect the state of the context. The figure depicts three state diagrams where rectangles visualize the most recent context and arrows indicate executed steps.  In figure \ref{fig:context_pipeline1}, the \ac{LLM} performs the detection of data clumps, and the refactoring (including all associated sub-tasks). Because all these task are performed by the same service, it would be unnecessary to save intermediate results. Therefore, the context is only updated once at the conclusion of the program. This final context does not have additional information but marks that the pipeline has been executed successfully.
  
 
+\begin{figure}[H]
+\centering
+  \begin{adjustbox}{minipage=\linewidth,scale=0.7}
+     \centering
+     \begin{subfigure}[b]{0.3\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{figures/chapter3/context_pipeline_1.drawio.pdf}
+         \caption{All steps are performed by an \ac{LLM}}
+        \label{fig:context_pipeline1}
+     \end{subfigure}
+     \hfill
+     \begin{subfigure}[b]{0.30\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{figures/chapter3/context_pipeline_2.drawio.pdf}
+         \caption{Detection and filtering by another tool}
+         \label{fig:context_pipeline2}
+     \end{subfigure}
+     \hfill
+     \begin{subfigure}[b]{0.3\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{figures/chapter3/context_pipeline_3.drawio.pdf}
+ \caption{Only name suggestion by an \ac{LLM}}         \label{fig:context_pipeline3}
+     \end{subfigure}
+        \caption{Exemplary lifecycles of the context}
+        \label{fig:context_pipeline}
+        \end{adjustbox}
+\end{figure}
 
-In part b) in the center of the figure, some parts of the pipeline are performed by the \textit{DataClumpDoctor} and other programs. For instance, data clumps are detected by the \textit{DataClumpDoctor}. As a result, a data clump detector context is created containing all detected data clumps. Afterwards, a filter removes non-important data clump and creates a new context of the same type that is linked to the previous context. If a later handler requires information about the detected data clumps, it needs to find the first context that contains this information  beginning at the tail of the linked list. In this case it would be the filtered data clump context, not the original data clump context. Here, also the context is not updated after the filtering process as the rest of the work is performed by an \ac{LLM}. 
+In figure \ref{fig:context_pipeline2}, some parts of the pipeline are performed by the \textit{DataClumpDoctor} and other programs. For instance, data clumps are detected by the \textit{DataClumpDoctor}. As a result, a data clump detector context is created containing all detected data clumps. Afterwards, a filter removes non-important data clump and creates a new context of the same type that is linked to the previous context. If a later handler requires information about the detected data clumps, it needs to find the first context that contains this information  beginning at the tail of the linked list. In this case it would be the filtered data clump context, not the original data clump context. Here, also the context is not updated after the filtering process as the rest of the work is performed by an \ac{LLM}. 
 
-In part c) of the figure, the context is extended by a name finding context. This context includes information about a suitable identifier suggested by a \ac{LLM}. A manual refactoring tool (e.~g. IntelliJ), can use this context to perform the refactoring without further input by an \ac{LLM} so that the role of the model is limited here. 
+In figure \ref{fig:context_pipeline3}, the context is extended by a name finding context. This context includes information about a suitable identifier suggested by a \ac{LLM}. A manual refactoring tool (e.~g. IntelliJ), can use this context to perform the refactoring without further input by an \ac{LLM} so that the role of the model is limited here. 
 
 
 
@@ -104,7 +127,7 @@ In case of a failed validation, one might need more information. For instance, i
         File filtering & "" & Include, exclude expression, flag for inclusion prevailment & No \\\hline
 
         AST & "" & \ac{AST} for each analyzed file &  Yes \\\hline
-         Data clump detection & Data clump detection/filtering  & Format described in appendix \ref{sec:data_clump_format}, generation of types-names-keys & Yes \\\hline 
+         Data clump detection & Data clump detection/filtering  & Format described in appendix \ref{app:data_clump_format}, generation of types-names-keys & Yes \\\hline 
          Name finding & "" & Names for each types-names-key & Yes\\\hline
 
          Class path & Name finding & Class paths for each types-names-key & Yes\\\hline

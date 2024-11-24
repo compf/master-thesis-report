@@ -1,6 +1,11 @@
-\section{Platforms and tools for refactoring}
+\section{Related work}\label{sec:related_research}
+In this section works related to the topic of this master thesis is discussed. 
 
-In this section, several tools that performs important steps not related to \acp{LLM} are discussed.
+Firstly,  several tools that will be used throughout this master thesis are discussed. These tools perform various steps such as detecting data clumps or  refactoring source code and will be used to assists \acp{LLM} in their works.
+
+Afterwards, related research about the topics of this master thesis is presented. The research is divided into a section for data clumps and \ac{LLM} to discuss the challenges and advancements of each topic. 
+
+
 \subsubsection{Language Server Protocol} \label{sec:lsp}
 The \ac{LSP}  \cite{lsp_website} is a protocol developed by Microsoft to create a language-independent interface for code-related operations. 
 The \ac{LSP}  describes a server and a client who communicate to each other using the JSON-Remote-Process-Call protocol \cite{json_rpc}. 
@@ -15,9 +20,9 @@ The sequence diagram in figure \ref{fig:lsp_usage} illustrates how the \ac{LSP} 
 \begin{figure}
     \centering
     \includegraphics{figures/chapter2/language-server-sequence.png}
-    \caption{Example usage of the Language Server Protocol}
+    \caption{Example usage of the Language Server Protocol. Source: \cite{lsp_website} }
     \label{fig:lsp_usage}
-    \cite{lsp_website}
+    
 \end{figure}
 
 After the server has been successfully started by the client, a user can open a document (e.g. source code file). The request to open the document is submitted to the server. From now one, the server may not rely on the file system since that might be not the current version of the opened document. 
@@ -34,11 +39,11 @@ The \ac{LSP} can hence be used to simplify refactoring-related task. For instanc
 
 
 
-\subsubsection{Data clump doctor} \label{sec:data_clump_doctor}
+\subsubsection{DataClumpDoctor} \label{sec:data_clump_doctor}
 
-The  \textit{DataClumpDoctor} is NodeJS command line tool developed by Nils Baumgartner  to detect data clumps. It employs \textit{PMD} to find all classes, methods, and fields in a Java project to generate an \ac{AST}. Each Java file is converted to an \ac{AST} that does not contain the bodies of methods or documentation.
+The  \textit{DataClumpDoctor} is NodeJS command line tool  to detect data clumps. It employs \textit{PMD} to find all classes, methods, and fields in a Java project to generate an \ac{AST}. Each Java file is converted to an \ac{AST} that does not contain the bodies of methods or documentation.
 
-In a second step, the generated \ac{AST} can be loaded again to find data clumps. by using the algorithmic approach discussed in section \ref{sec:data_clump_detection}. With this two-step methodology, a greater programming language independence can be achieved as the data clump detection does not need access to the original source code. The \textit{DataClumpDoctor} reports its result in the format discussed in appendix \ref{sec:data_clump_format}
+In a second step, the generated \ac{AST} can be loaded again to find data clumps. by using the algorithmic approach discussed in section \ref{sec:data_clump_detection}. With this two-step methodology, a greater programming language independence can be achieved as the data clump detection does not need access to the original source code. The \textit{DataClumpDoctor} reports its result in the format discussed in appendix \ref{app:data_clump_format}
 
 For purposes of this master thesis, the results from the \textit{DataClumpDoctor} are treated as the ground truth with regard to data clump detection. 
 
@@ -48,15 +53,14 @@ The Program Structure Interface provided by IntelliJ is an \ac{API} to analyze a
 In order to use this API, an instance of IntelliJ must be started. IntelliJ can be started in a headless mode to reduce loading times and improve the performance so that no GUI is initialized. Nevertheless, IntelliJ requires many resources and much overhead, so that  the initialization needs some time.
 
 
-\section{Related work}\label{sec:related_research}
 
 
-The code smell \enquote{data clumps} has been the focus of multiple papers and several tools were developed for detecting and refactoring data clumps. However, none of them performs fully automatic refactoring and integrates \acp{LLM}.
-Since the surge of large language models is fairly recent, many novel papers attempt to analyze their usefulness for code generation and refactoring tasks.
+%The code smell \enquote{data clumps} has been the focus of multiple papers and several tools were developed for detecting and refactoring data clumps. However, none of them performs fully automatic refactoring and integrates \acp{LLM}.
+%Since the surge of large language models is fairly recent, many novel papers attempt to analyze their usefulness for code generation and refactoring tasks.
 
-\subsubsection{Related to data clumps}
+\subsubsection{Research related to data clumps}
 
-As outlined in section \ref{sec:data_clump_def}, the definition of data clump by Fowler \cite{fowler2019refactoring} is somewhat ambiguous because no clear criteria to determine data clumps is established. Zang et al. \cite{zhangImprovingPrecisionFowler2008} creates a more algorithmic approach to determine whether a data clump exists. This approach is also explained in section \ref{sec:data_clump_def}. The authors also provide more precise definitions of other code smells like \enquote{message chains} or \enquote{speculative generality}. By interviewing four software development experts about the code smell definitions the authors developed, they find that their new data clump definition receives relatively more disagreement than other definitions, which the authors explain are the results of not covering edge cases in the definitions. 
+As outlined in section \ref{sec:data_clump_def}, the definition of data clump by Fowler in \cite{fowler2019refactoring} is somewhat ambiguous because no clear criteria to determine data clumps is established. Zang et al. \cite{zhangImprovingPrecisionFowler2008} creates a more algorithmic approach to determine whether a data clump exists. This approach is also explained in section \ref{sec:data_clump_def}. The authors also provide more precise definitions of other code smells like \enquote{message chains} or \enquote{speculative generality}. By interviewing four software development experts about the code smell definitions the authors developed, they find that their new data clump definition receives relatively more disagreement than other definitions, which the authors explain are the results of not covering edge cases in the definitions. 
 
 
 Hall et al. analyzed the impact of code smells (including data clump) on the occurrence of faults in three open-source software projects. They find that data clumps have a mixed correlation to faults because, in two of the three projects analyzed, the correlation of data clumps per \ac{LOC} to detected faults is negative, but positive for another project. This rejects their hypothesis that data clumps do not affect faults, and the authors suggest that the application domain and the development context need to be considered before the time-consuming refactoring of data clumps since their impact is not predictable.  \cite{hallCodeSmellsHave2014}
@@ -64,12 +68,12 @@ Hall et al. analyzed the impact of code smells (including data clump) on the occ
 
 Baumgartner et al. developed a live code smell detection plugin for IntelliJ that can detect, report, and refactor data clumps without significantly impacting performance. However, the tool is semi-automatic, meaning the developer must still actively approve the data clump refactoring and suggest a suitable class name for the extracted class. \cite{BaumgartnerAP23}
 
-Murphy et al. \cite{stench_blossom} developed a visual tool to find code smells (including data clumps). the tool named \textit{Stench Blossom} is a plugin for Eclipse. If a plugin user views a file, the tool searches for code smells and displays them at the right side of the Eclipse editor. Each code smell is visually displayed as a a \textbf{petal}. The radius of such petal represents the strength of a smell (i.~e. how strongly violates the code smell the given coding guidelines). The petal has a color that indicates how obvious a code smell is. Orange code smells are not very obvious while blue code smells are easy to detect by human beings. Since orange has a closer connection to warnings, it is more easily to perceive so that undetected code smells can be fixed better. Experiments with \textit{Stench Blossom} shows that the median number of code smells detected by humans using the tool increased from 11 to 21. However, data particular for data clumps is not given.
+Murphy et al. \cite{stench_blossom} developed a visual tool to find code smells (including data clumps). the tool named \textit{Stench Blossom} is a plugin for Eclipse. If a plugin user views a file, the tool searches for code smells and displays them at the right side of the Eclipse editor. Each code smell is visually displayed as a a \textit{petal}. The radius of such petal represents the strength of a smell (i.~e. how strongly violates the code smell the given coding guidelines). The petal has a color that indicates how obvious a code smell is. Orange code smells are not very obvious while blue code smells are easy to detect by human beings. Since orange has a closer connection to warnings, it is more easily to perceive so that undetected code smells can be fixed better. Experiments with \textit{Stench Blossom} shows that the median number of code smells detected by humans using the tool increased from 11 to 21. However, data particular for data clumps is not given.
 
 
 
 
-\subsubsection{Related to large language models in software development}
+\subsubsection{Research related to Large Language Models}
 
 White et al. \cite{White2023ChatGPTPP} outline how ChatGPT can be used in software development to improve the workflow of developers. This includes  exploration of requirements, removing ambiguity in technical specification, or describing source code. The authors suggest specific prompts to elicit a suitable response from ChatGPT.
 
@@ -80,3 +84,6 @@ Cao et al. \cite{cao2023study} focus on using ChatGPT for fixing deep learning p
 
 Madaan et al. present a self-refinement process for \acp{LLM} with regard to code generation. Their idea is to submit the output of a model to the model again so the code can be evaluated by the model. The feedback returned by the \ac{LLM} is the used to improve the code again until a stop condition is reached. They find that this approach increases the quality of the generated code. For instance, the number of optimized programs using this strategy increases from 27.3~\% to 36~\%. \cite{Madaan2023SelfRefineIR}. 
 The general idea of this approach will also be used in this master thesis to correct building errors that can occur after using an \ac{LLM}. 
+
+A related approach is proposed by Alshahwan et al. They suggest to use \ac{LLM} to generate multiple program candidates (e.g. for refactoring). These programs are evaluated for their quality (e.~g. whether they compile or pass all tests). Programs failing these criteria are further evaluated on whether their faults can be easily fixed. They contrast this strategy with a method that will be used in this master thesis where the output of the model is directly integrated into the source code because the latter approach is more error-prone. However, they also acknowledge that cost issues are an obstacle for real-world deployment.
+Additionally, their suggestion is however only applicable if their is no demand for real-time code generation. \cite{alshahwan2024assuredllmbasedsoftwareengineering}
