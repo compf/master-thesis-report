@@ -1,9 +1,19 @@
 \chapter{Implementation}\label{chapter:implementation}
 
-In this chapter, the the design choices and considerations discussed in chapter \ref{chapter:conception} will be implemented. Firstly, In section \ref{sec:step_impl} an overview will be given over the implementation of handlers that do not  strongly rely on \acp{LLM}. After that, strategies to filter data clumps are presented in section \ref{sec:data_clump_filtering}.   Then, in section \ref{sec:config}, the configuration of the tool and how to use it is explained. 
+%In this chapter, the the design choices and considerations discussed in chapter \ref{chapter:conception} will be implemented. Firstly, In section \ref{sec:step_impl} an overview will be given over the implementation of handlers that do not  strongly rely on \acp{LLM}. After that, strategies to filter data clumps are presented in section \ref{sec:data_clump_filtering}.   Then, in section \ref{sec:config}, the configuration of the tool and how to use it is explained. 
+
+In this chapter the design choices and considerations discussed in chapter \ref{chapter:conception} are expanded to develop a fully functional automatic tool. 
+
+In the beginning, section  \ref{sec:step_impl} discusses how the traditional tools are integrated into the pipeline so that they can participate in refactoring data clumps. 
+
+Afterwards, section \ref{sec:implementation_tools} outlines how a \ac{LLM} can work with source code. To facilitate this, the model must somehow gain access to some representation of the source code. Then, the reverse direction is discussed as the output of the model must somehow be integrated into the context, or directly as refactoring into the source code. 
+
+Because of the limitations of \acp{LLM}, filtering is an important part of the pipeline. Hence, the architecture of the filtering process and examples of various filters are explained in section \ref{sec:data_clump_filtering}.
+
+Lastly, section \ref{sec:config} deals with the configuration of the tool. This includes how a step is linked to a handler via a configuration file and  how other objects like the \ac{LLM} to use are set up. Afterwards, there is  a brief overview of how the tool can be started and what steps happen in the background.
+
+
 \input{chapter4/handler_implementation}
 \input{chapter4/llm_integration}
-
-
 \input{chapter4/data_clump_filtering}
 \input{chapter4/configuration}

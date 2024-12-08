@@ -1,12 +1,12 @@
 \section{Implementation of handlers} \label{sec:step_impl}
-In this section, the implementation of the handlers is discussed. These handlers do not or only scarcely use the features by \ac{LLM}. 
+In this section, the implementation of the handlers is discussed. These handlers do not or scarcely use the features by \ac{LLM}. 
 \subsection{DataClumpDoctor}
 
 The main tool to detect  data clumps is the \textit{DataClumpDoctor}. As this program is written using the NodeJS platform it can be directly integrated into the main program blurring distinction between handler and service.
 
 The \textit{DataClumpDoctor} performs both the \ac{AST} generation step and the data clump detection step although these two steps are internally separated.
 
-If a \ac{AST} context is already present, it re-used. Otherwise the \ac{AST} context is generated. Here, the file filtering inclusion and exclusion rules must be applied as only the generated \ac{AST} files form the foundation for the \textit{DataClumpDoctor} to detect data clumps. Files  not represented by an \ac{AST} file are ignored. Since the detector internally uses \textit{PMD}, inclusion and exclusion rules can be set by creating a \enquote{custom-java-ruleset.xml} file. This file is located inside the Java-Archive file used by the detector, and must be updated whenever \ac{AST} files are generated to apply the current filtering rules. 
+If a \ac{AST} context is already present, it is re-used. Otherwise, the \ac{AST} context is generated. Here, the file filtering inclusion and exclusion rules must be applied as only the generated \ac{AST} files form the foundation for the \textit{DataClumpDoctor} to detect data clumps. Files  not represented by an \ac{AST} file are ignored. Since the detector internally uses \textit{PMD}, inclusion and exclusion rules can be set by creating a \enquote{custom-java-ruleset.xml} file. This file is located inside the Java-Archive file used by the detector and must be updated whenever \ac{AST} files are generated to apply the current filtering rules. 
 
 After that, the \textit{DataClumpDoctor} loads the \ac{AST} files and detects the data clumps by comparing the identifiers and types of variables that might constitute a data clump, thereby requiring strict equality. These detected data clumps are saved in a separate file and can be re-used in the pipeline. 
 
@@ -15,9 +15,9 @@ One issue with the \textit{DataClumpDoctor} is its handling of large projects. W
 \subsection{Name finding}
 Finding a suitable name for the soon-to-be-extracted class is the next step  that must be implemented. Two approaches are chosen.
 
-The first approach is the classic approach that has been used before the advent of \acs{LLM}. By concatenating all field names of the extracted class, a valid class name can be generated. For instance, a class with the fields \textit{x}, \textit{y}, and \textit{z} could be named \textit{XYZ}. In this example, the field names are capitalized and directly joined without any separator, however, other options might be better dependent on the project's style guidelines. 
+The first approach is the classic approach that was used before the advent of \acs{LLM}. By concatenating all field names of the extracted class, a valid class name can be generated. For instance, a class with the fields \textit{x}, \textit{y}, and \textit{z} could be named \textit{XYZ}. In this example, the field names are capitalized and directly joined without any separator, however, other options might be better dependent on the project's style guidelines. 
 
-The advantage of this manual method is that the generated names are very unique and with a high probability will not conflict with other names because they are very artificial. Nevertheless, they lack creativity and in most cases, a developer will need to choose a better name in order to improve readability. 
+The advantage of this manual method is that the generated names are very unique and with a high probability will not conflict with other names because they are very artificial. Nevertheless, they lack creativity and in most cases a developer will need to choose a better name in order to improve readability. 
 
 
 On the other hand, a suitable name for the extracted class of a data clump can be chosen by using the creativity of \acs{LLM}.  For this the model has to know the names of the variables of the data clump. It is also useful to include the qualified type of each data clump item because this type contains additional information to generate a more suitable name. For instance, the qualified name could contain the name of the project to analyze, the location of the type,     and the range of possible values that the variable can have.
@@ -26,21 +26,21 @@ While using \acs{LLM} for name finding, excessive name caching can be useful to 
 
 A related issue to name finding is the location of the extracted class. Here, one has to differentiate  between data clumps existing in a single file and data clumps connecting multiple files. In the former case, the location of the extracted class can be an already existing file, namely the file of the data clump  while in the latter case, a new class should be created.
 
-Using an existing class can be problematic because the succeeding step (class extraction) must be mindful that an existing class is used as it could override the file. Additionally, integrating the new class into the existing class can be challenging. Should the new class be an inner class of some class? In Java, should the inner class be static?  Creating an inner class require strategic syntactical modification of the source code which would require specialized handlers. As a result, they are not implemented in this master thesis, but could be. 
+Using an existing class can be problematic because the succeeding step (class extraction) must be mindful that an existing class is used as it could override the file. Additionally, integrating the new class into the existing class can be challenging. Should the new class be an inner class of some class? In Java, should the inner class be static?  Creating an inner class requires strategic syntactical modification of the source code which would require specialized handlers. As a result, they are not implemented in this master thesis, but could be. 
 
 On the other hand, using a completely new file is easier to implement. However, one has to choose the path of the extracted class. For instance, a data clump might be spread over \textit{n} files each of which is in a separate directory, thereby creating a theoretical possibility of \textit{n} candidates as the output directory. 
-One has also be mindful about any name conflicts that might occur. If the suggested name already exists, it will lead to conflicts.
+One also has to be mindful about any name conflicts that might occur. If the suggested name already exists, it will lead to conflicts.
 
 
 \subsection{Class extraction}
 
-Generating the actual class is a task that can be done manually if the names and types of the fields are known and the name of the class is known. However, the specific syntax depends on the programming language so that each programming language must have its own class extractor.
+Generating the actual class is a task that can be done manually if the names and types of the fields are known, and the name of the class is known. However, the specific syntax depends on the programming language so that each programming language must have its own class extractor.
 
 Other issues should also be taken into consideration. For instance, whether the class body at first contains the declaration of fields, then the getters, setters, and then the constructor, or another order is better depends on the project's style. For instance, the constructor could be declared directly after the fields.
 
 Additionally, not every part of the extracted class might be mandatory. For instance, some fields will never be modified so that a setter would be unnecessary. Furthermore, the extracted class should conform to code styles guidelines. 
 
-Two approaches are implemented. In the manual method, the class is extracted using simple text manipulation. The order of the members of the class can be configured.  However it would be challenging to determine whether a setter for a field is needed. Hence, in the manual approach all getters and setters are generated.
+Two approaches are implemented. In the manual method, the class is extracted using simple text manipulation. The order of the members of the class can be configured.  However, it would be challenging to determine whether a setter for a field is needed. Hence, in the manual approach all getters and setters are generated.
 
 Here also, the creativity of an \ac{LLM} can be useful. Given a suitable context, an \ac{LLM} can return the source code of the extracted class without being restricted to a template as the manual approach is. For instance, instead of generating a class, the model could create a Java record which is a simplified version of a class. 
 
@@ -84,7 +84,7 @@ For  manually refactoring data clumps, the  \ac{API} from IntelliJ mentioned in 
 
 
 The basic approach for refactoring is based on modifying references. A  reference is  information about the usage of an element. An element in this context could mean a class, a method, or a variable.
-In many cases , IntelliJ can find all references automatically and categorize them.
+In many cases, IntelliJ can find all references automatically and categorize them.
 
 However, this does not always happen. A project can be loaded wrongly so that  finding references of a method or field can lead to undefined behavior. Sometimes all references are correctly found, sometimes only a subset of the references are found, and sometimes no references are detected. This could be explained by invalid caches or unsupported projects.
 
@@ -94,24 +94,24 @@ One solution for these issues is to open the project in IntelliJ at least once  
 
 
 
-If this approach does not work, the context can be utilized. If a previous created a context that contains reference information (for instance using the \ac{LSP}), the IntelliJ plugin can use this context to perform the refactoring. This approach represents the pipeline idea that many tools need to work together to achieve a common goal.
+If this approach does not work, the context can be utilized. If a previous handler created a context that contains reference information (for instance using the \ac{LSP}), the IntelliJ plugin can use this context to perform the refactoring. This approach represents the pipeline idea that many tools need to work together to achieve a common goal.
 
 
-Whether such manual search is faster than the combined use of \ac{LSP} and IntelliJ is difficult to determine. On the one hand, can external services be faster because they are implemented better (i.~e. more sophisticated algorithms). On the other hand, starting two services leads to more overhead. 
+Whether such manual search is faster than the combined use of \ac{LSP} and IntelliJ is difficult to determine. On the one hand,  external services can be faster because they are implemented better (i.~e. more sophisticated algorithms). On the other hand, starting two services leads to more overhead. 
 
 
 
-Regardless of how the reference issue is solved, IntelliJ can now perform the refactoring. Depending of the category of a reference, IntelliJ needs to perform distinct step. 
+Regardless of how the reference issue is solved, IntelliJ can now perform the refactoring. Depending of the category of a reference, IntelliJ needs to perform distinct steps. 
 \begin{enumerate}
     \item In the case of a declared field, the field can be deleted because it is part of a field data clump. Now it can be determined whether the class already contains the new field that replaces the fields of the data clump.
-    \item If a method is declared, IntelliJ can modify the signature of the method. This can be the original method or an overridden one. IntelliJ needs to remove the parameters that are part of the data clump and add a new method parameter that replaces the method parameters of the data clump. 
-    \item If a variable is used it can be replaced by a getter or setter call. For instance, if the variable \textit{var} is read, and the name of the extracted class is \textit{Object}, any reading of the variable can be replaced by  \textit{object.getVar()}, where \textit{object} is a variable of type \textit{Object} and \textit{getVar} is the getter of \textit{var}. Similarly, an assignment can be replaces by the setter.
-    \item If a method is used, several substeps are needed.
+    \item If the reference is a method declaration, IntelliJ can modify the signature of the method. This can be the original method or an overridden one. IntelliJ needs to remove the parameters that are part of the data clump and add a new method parameter that replaces the method parameters of the data clump. 
+    \item If a variable is used it can be replaced by a getter or setter call. For instance, if the variable \textit{var} is read, and the name of the extracted class is \textit{Object}, any reading of the variable can be replaced by  \textit{object.getVar()}, where \textit{object} is a variable of type \textit{Object} and \textit{getVar} is the getter of \textit{var}. Similarly, an assignment can be replaced by the setter.
+    \item If a method is used, several sub steps are needed.
     \begin{enumerate}
         \item First, for each argument provided in a method call it is determined whether the argument is connected to a data clump variable (i.~e. it provides a value to a parameter that is part of a data clump) 
         \item The position of those arguments is stored, and a reference to the argument is stored for further processing.
         \item Since the extracted class is known and existing, a matching constructor is determined to support all arguments to the data clump variables of the method call. 
-        \item For each argument to a data clump variable, the argument is inserted into the matching position of the constructor, and the argument is deleted in the original method call. 
+        \item For each argument to a data clump variable, the argument is inserted into the matching position of the constructor, and the argument is removed in the original method call. 
         \item the constructor call is added at the position of the method  where the parameter of the extracted class is expected. 
         
     \end{enumerate}

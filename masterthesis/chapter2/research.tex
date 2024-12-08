@@ -12,7 +12,7 @@ The \ac{LSP}  describes a server and a client who communicate to each other usin
 
 The client can generally be anything that works with source code but has no detailed knowledge of a specific programming language. For instance, an \ac{IDE}, an editor or a refactoring tool can be described as a client.
 
-The client starts a server based on a programming language. The server has a inherent knowledge of one ore more programming languages and can provide source-code-related functionality. For instance, the server can rename a variable, find the usages of a method, or inform the client about compiler errors. 
+The client starts a server based on a programming language. The server has an inherent knowledge of one or more programming languages and can provide source-code-related functionality. For instance, the server can rename a variable, find the usages of a method, or inform the client about compiler errors. 
 
 Initially, client and server share some information to set up. This includes the path to the project that the server should load and information about what functionality each of them supports. These functionalities are named \textit{Capabilities}. For example, the server can announce that it supports renaming variables while the client is capable of showing error messages. Hence, server and client can interact in a manner such that no unsupported messages are transferred.
 
@@ -25,9 +25,9 @@ The sequence diagram in figure \ref{fig:lsp_usage} illustrates how the \ac{LSP} 
     
 \end{figure}
 
-After the server has been successfully started by the client, a user can open a document (e.g. source code file). The request to open the document is submitted to the server. From now one, the server may not rely on the file system since that might be not the current version of the opened document. 
+After the server has been successfully started by the client, a user can open a document (e.~g. source code file). The request to open the document is submitted to the server. From now one, the server may not rely on the file system since that might be not the current version of the opened document. 
 
-The client can now inform the server about some changes (e.g. adding a new method). The server can, in the meantime, inform the client about syntactical errors which the client might show to the user of the client.
+The client can now inform the server about some changes (e.~g. adding a new method). The server can, in the meantime, inform the client about syntactical errors which the client might show to the user of the client.
 
 Afterward, the client requests the definition of a method or variable, and the server returns a response with the requested data.
 
@@ -60,7 +60,7 @@ In order to use this API, an instance of IntelliJ must be started. IntelliJ can 
 
 \subsubsection{Research related to data clumps}
 
-As outlined in section \ref{sec:data_clump_def}, the definition of data clump by Fowler in \cite{fowler2019refactoring} is somewhat ambiguous because no clear criteria to determine data clumps is established. Zang et al. \cite{zhangImprovingPrecisionFowler2008} creates a more algorithmic approach to determine whether a data clump exists. This approach is also explained in section \ref{sec:data_clump_def}. The authors also provide more precise definitions of other code smells like \enquote{message chains} or \enquote{speculative generality}. By interviewing four software development experts about the code smell definitions the authors developed, they find that their new data clump definition receives relatively more disagreement than other definitions, which the authors explain are the results of not covering edge cases in the definitions. 
+As outlined in section \ref{sec:data_clump_def}, the definition of data clump by Fowler in \cite{fowler2019refactoring} is somewhat ambiguous because no clear criteria to determine data clumps is established. Zang et al. \cite{zhangImprovingPrecisionFowler2008} creates a more algorithmic approach to determine whether a data clump exists. This approach is also explained in section \ref{sec:data_clump_def}. The authors also provide more precise definitions of other code smells like \enquote{message chains} or \enquote{speculative generality}. By interviewing four software development experts about the code smell definitions the authors developed, they find that their new data clump definition receives relatively more disagreement than other definitions. The authors believe  that not covering edge cases is a major reason for this negative feedback. 
 
 
 Hall et al. analyzed the impact of code smells (including data clump) on the occurrence of faults in three open-source software projects. They find that data clumps have a mixed correlation to faults because, in two of the three projects analyzed, the correlation of data clumps per \ac{LOC} to detected faults is negative, but positive for another project. This rejects their hypothesis that data clumps do not affect faults, and the authors suggest that the application domain and the development context need to be considered before the time-consuming refactoring of data clumps since their impact is not predictable.  \cite{hallCodeSmellsHave2014}
@@ -75,9 +75,9 @@ Murphy et al. \cite{stench_blossom} developed a visual tool to find code smells 
 
 \subsubsection{Research related to Large Language Models}
 
-White et al. \cite{White2023ChatGPTPP} outline how ChatGPT can be used in software development to improve the workflow of developers. This includes  exploration of requirements, removing ambiguity in technical specification, or describing source code. The authors suggest specific prompts to elicit a suitable response from ChatGPT.
+White et al. \cite{White2024} outline how ChatGPT can be used in software development to improve the workflow of developers. This includes  exploration of requirements, removing ambiguity in technical specification, or describing source code. The authors suggest specific prompts to elicit a suitable response from ChatGPT.
 
-In case of refactoring, the author suggest that ChatGPT is able to refactor code with multiple prompts. For instance, ChatGPT can refactor based on a well known design pattern name, multiple examples on how to refactor the code, or a more lengthy requirements description. The exact success of each prompt is however dependent on how ChatGPT is trained and should be scrutinized manually. 
+In case of refactoring, the authors suggest that ChatGPT is able to refactor code with multiple prompts. For instance, ChatGPT can refactor based on a well-known design pattern name, multiple examples on how to refactor the code, or a more lengthy requirements description. The exact success of each prompt is however dependent on how ChatGPT is trained and should be scrutinized manually. 
 
 Cao et al. \cite{cao2023study} focus on using ChatGPT for fixing deep learning programs. Those are programs that cannot be understood only by their source code alone, but are are largely influenced by underlying data like  neural networks etc. This makes finding faults more difficult. The study finds out that ChatGPT can find code smells and detect faults. Without giving instructions however, ChatGPT will tend to return code smells and outdated API calls while not finding other bugs. 
 
@@ -85,5 +85,8 @@ Cao et al. \cite{cao2023study} focus on using ChatGPT for fixing deep learning p
 Madaan et al. present a self-refinement process for \acp{LLM} with regard to code generation. Their idea is to submit the output of a model to the model again so the code can be evaluated by the model. The feedback returned by the \ac{LLM} is the used to improve the code again until a stop condition is reached. They find that this approach increases the quality of the generated code. For instance, the number of optimized programs using this strategy increases from 27.3~\% to 36~\%. \cite{Madaan2023SelfRefineIR}. 
 The general idea of this approach will also be used in this master thesis to correct building errors that can occur after using an \ac{LLM}. 
 
-A related approach is proposed by Alshahwan et al. They suggest to use \ac{LLM} to generate multiple program candidates (e.g. for refactoring). These programs are evaluated for their quality (e.~g. whether they compile or pass all tests). Programs failing these criteria are further evaluated on whether their faults can be easily fixed. They contrast this strategy with a method that will be used in this master thesis where the output of the model is directly integrated into the source code because the latter approach is more error-prone. However, they also acknowledge that cost issues are an obstacle for real-world deployment.
-Additionally, their suggestion is however only applicable if their is no demand for real-time code generation. \cite{alshahwan2024assuredllmbasedsoftwareengineering}
+A related approach is proposed by Alshahwan et al. They suggest to use \ac{LLM} to generate multiple program candidates (e.~g. for refactoring). These programs are evaluated for their quality (e.~g. whether they compile or pass all tests). Programs failing these criteria are further evaluated on whether their faults can be easily fixed. They contrast this strategy with a method that will be used in this master thesis where the output of the model is directly integrated into the source code because the latter approach is more error-prone. However, they also acknowledge that cost issues are an obstacle for real-world deployment.
+Additionally, their suggestion is however only applicable if there is no demand for real-time code generation. \cite{alshahwan2024assuredllmbasedsoftwareengineering}
+
+
+The first attempt to test the suitability of data clump detection via \ac{LLM} is performed by Baumgartner et al. \cite{electronics13091644}. Here, the pipeline, which is also used in this master thesis, is formulated for the first time. Small experiments are performed showing that \ac{LLM} are capable of detecting data clumps. However, the refactoring abilities of ChatGPT could not be tested fully. Additionally, the effect of several model parameters like temperature is inconclusive and requires further testing. 

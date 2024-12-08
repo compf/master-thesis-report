@@ -6,7 +6,9 @@ An important aspect for the usability of the tool is the possibility to configur
 
 Since the goal of the tool is to allow the combination of multiple services and other tools in order to find and refactor data clumps, the user must be able to define which handler deals with which step  as outlined in section \ref{sec:pipeline}.
 
-The configuration is provided by a \ac{JSON} file whose location needs to be provided to the tool via a command line argument. It might be argued that providing the configuration directly via the command line is better suited than a separate configuration file because they do not require the creations of files and are easier for users who start the tool just once. Nevertheless, configuration files are persistent and especially \ac{JSON} can be more easily structured so that they are easier to understand. As a result, only \ac{JSON} files will be used  for the configuration. 
+The configuration is provided by a \ac{JSON} file whose location needs to be provided to the tool via a command line argument. It might be argued that providing the configuration directly via the command line is better suited than a separate configuration file because they do not require the creations of files and are easier for users who start the tool just once.
+
+However, configuration files are persistent and especially \ac{JSON} can be more easily structured so that they are easier to understand. As a result, only \ac{JSON} files will be used  for the configuration. 
 
 
 Listing \ref{lst:config} shows an example configuration file:
@@ -23,22 +25,22 @@ In the beginning, the programming language is defined (l.~1).
 
 Then, the user can define objects. An object can be used by a handler to perform sub-steps, but declaring an object in \ac{JSON} does not necessarily mean that it is used. 
 
-Here, one object is declared (l.4). The \textit{AbstractLanguageModel} represents the interface to the \ac{LLM}.  An instance of the type \enquote{ChatGPTInterface} (l.5). The object is given arguments via the \enquote{args} attribute (l. 6). In this case, model name and temperatures are given (l. 7-8).  This instance is stored internally and can be queried for.   
+Here, one object is declared (l.4). The \textit{AbstractLanguageModel} represents the interface to the \ac{LLM}. In this case, it is an instance of the type \enquote{ChatGPTInterface} (l.5). The object is given arguments via the \enquote{args} attribute (l. 6). In this case, model name and temperatures are given (l. 7-8).  This instance is stored internally and can be queried for.   
 
 Whenever a handler needs the services of another object, it has two possibilities.
 \begin{enumerate}
     \item The handler knows the exact concrete type of the object it needs. For instance, handlers that filter files or data clumps can be given the names of filters and metrics that they should use. The handler can receive the respective object by querying the known name. 
 
-    \item The handler does not know the concrete type but request access to a service. In this example, a handler does not need to know that ChatGPT is used as the \ac{LLM}. It can request the object by querying for the abstract class name \enquote{AbstractLanguageModel}. This represents the classical dependency injection approach as the handler does not need to care about the specific model, but only that the \ac{API} contract is respected. The disadvantage of this design strategy is that only one  concrete type for each abstract type can be defined. If someone wants to use an \ac{LLM} for detection, and another model for refactoring, the current design would not allow this. 
+    \item The handler does not know the concrete type but requests access to a service. In this example, a handler does not need to know that ChatGPT is used as the \ac{LLM}. It can request the object by querying for the abstract class name \enquote{AbstractLanguageModel}. This represents the classical dependency injection approach as the handler does not need to care about the specific model, but only that the \ac{API} contract is respected. The disadvantage of this design strategy is that only one  concrete type for each abstract type can be defined. If someone wants to use an \ac{LLM} for detection, and another model for refactoring, the current design would not allow this. 
 \end{enumerate}
 
 
 
 
-Then, the pipeline is defined (ll. 11-15). It consists of a single handler in this example. The keys of the pipeline are the names of the individual steps to which a handler object is assigned. In this case, the step is the data clump detection (l.~12) step and the  handler uses an \ac{LLM} for detection (l.~13). The concrete \ac{LLM} does not need to be provided as the handler can query the object. 
+Then, the pipeline is defined (ll. 11-15). It consists of a single handler in this example. The keys of the pipeline are the names of the individual steps to which a handler object is assigned. In this case, the step is the data clump detection step (l.~12) and the  handler uses an \ac{LLM} for detection (l.~13). The concrete \ac{LLM} does not need to be provided as the handler can query the object. 
 
 
-It should be noted that the order of the handlers in the configuration  does not matter because the execution order is constant and in most cases, each step requires the context of a previous step so that parallel execution or vice-versa execution of steps is not possible. Only in the case of usage finding and name finding would a parallel execution make sense because none of these steps is dependent on the other.  However, this exception is not implemented.
+It should be noted that the order of the handlers in the configuration  does not matter because the execution order is constant and, in most cases, each step requires the context of a previous step so that parallel execution or vice-versa execution of steps is not possible. Only in the case of usage finding and name finding would a parallel execution make sense because none of these steps is dependent on the other.  However, this exception is not implemented.
 
 
 \subsubsection{Running the main program}
@@ -46,18 +48,18 @@ It should be noted that the order of the handlers in the configuration  does not
 
 If a valid configuration file has been created, the main program can be started via \textit{npm run run <config> <project-location>} where \textit{config} is the location of the configuration file and \textit{project-location} is the path to the project to be analyzed. The order of these arguments can be swapped. 
 
-With these arguments given, the following steps are executed
+With these arguments given, the following steps are executed:
 
 \begin{enumerate}
     \item The main program parses the configuration file and initializes the object with the given arguments. It also assigns the handlers to the respective steps.
     \item  The validity of the pipeline is checked. For instance, it is tested whether all required programs are installed.
-    \item An initial code obtaining context is generated
-    \item The pipeline is executed. For each executed pipeline step
+    \item An initial code obtaining context is generated.
+    \item The pipeline is executed. For each executed pipeline step:
     \begin{enumerate}
-        \item Checks whether there is a serialized context for this step and whether the handler accepts that this context is sufficient. If these criteria are met, the handler can be skipped
-        \item If none of these conditions are met, the handler is executed
+        \item Checks whether there is a serialized context for this step and whether the handler accepts that this context is sufficient. If these criteria are met, the handler can be skipped.
+        \item If none of these conditions are met, the handler is executed.
         \item the context returned by the handler is used as the new context.
-        \item If supported by the respective context, it is serialized
+        \item If supported by the respective context, it is serialized.
     \end{enumerate}
     \item The main program exits. The running time of each step is serialized for evaluation purposes. 
 \end{enumerate}

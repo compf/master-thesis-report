@@ -1,8 +1,47 @@
-This chapter covers the evaluation of the master thesis. The goal of the evaluation is to assess the suitability of ChatGPT in performing  different steps of the refactoring pipeline, and whether such refactoring is accepted. The evaluation is split into two distinct experiments that use different methodologies. 
-In section \ref{sec:pull_request_eval} the  first experiment is discussed. Here, pull requests to several GitHub projects were submitted. In each PR  a specific data clump was selected and refactored, and feedback regarding that pull request was collected.
+This chapter covers the evaluation of the master thesis. The goal of the evaluation is to assess the suitability of ChatGPT in performing  different steps of the refactoring pipeline, and whether such refactoring is accepted.
 
-Afterwards, section \ref{sec:metric_based_eval} outlines  the second experiment, a smaller set of GitHub projects was selected and analyzed by the tool to determine the detection, filtering, and refactoring capabilities of ChatGPT using metrics.
-This two-sided evaluation approach integrates both human feedback and systematic analysis to provide a comprehensive understanding of the tool's efficacy and applicability.  As both experiments have their limitations and challenges, it can be useful to perform these distinct experiments to evaluate the potential of ChatGPT in the data clump refactoring pipeline.
+
+
+The evaluation is split into two distinct experiments that use two different methodologies. Figure \ref{fig:exp_comparison} shows the general methodologies of both experiments. 
+
+\begin{figure}[ht!]
+    \centering
+   \begin{subfigure}[t]{0.49\columnwidth}
+   \centering
+    \includegraphics[]{figures/chapter5/evalPartASequence.drawio.pdf}
+    \caption{Experiment 1:\\
+    feedback-based evaluation}
+    \label{fig:exp1_sequence}
+    \end{subfigure}
+     \begin{subfigure}[t]{0.49\columnwidth}
+     \centering
+        \includegraphics[]{figures/chapter5/evalPartBSequence.drawio.pdf}
+        \caption{Experiment 2:\\ metric-based evaluation}
+        \label{fig:exp2_sequence}
+    \end{subfigure}
+    \caption{Flowcharts comparing both experiments}
+    \label{fig:exp_comparison}
+\end{figure}
+
+In section \ref{sec:pull_request_eval} the  first experiment is discussed.  This experiments attempts to answer RQ 1 about the acceptance of \ac{LLM}-assisted refactoring. 
+
+As figure \ref{fig:exp1_sequence} outlines, several GitHub projects are selected.  In each of these projects, one data clump is selected manually. This data clump is refactored via the tool. The experiment is parameterized via two different refactoring methods. In one experimental setting, the \ac{LLM} only proposes a suitable name for the extracted class but the refactoring is performed via the \ac{PSI}  while in the other setting the refactoring is performed by the \ac{LLM} alone. The experiment is evaluated by submitting \acp{PR} via GitHub and asking for feedback from contributors of the selected projects. 
+
+
+
+The two remaining research questions about the potential of \acp{LLM} in the refactoring pipeline are handled in section \ref{sec:metric_based_eval}
+
+ As the flowchart in figure \ref{fig:exp2_sequence} shows, there are key differences. Only three projects are selected. However, more data clumps are chosen. This time, data clumps are selected automatically (e.~g. randomly or via metrics). Additionally, a larger set of parameters is varied. Moreover, the focus on this experiment is not to test whether the tool can successfully execute the complete refactoring pipeline but subsets of it. For instance, it is tested whether the \ac{LLM} can filter data clumps given that data clumps have already been detected. In contrast, to the first experiment, no human feedback is sought but different metrics are used that attempt to evaluate the performance of \acp{LLM}. 
+
+
+These two experiments complement each other and help to assess the potential of \acp{LLM} in the refactoring pipeline. 
+Studies have shown that traditional metrics like cohesion or coupling are insufficient to provide information about software quality \cite{search_based_refactoring}.  However,  a feedback-based based approach (e.~g. via interviews or surveys) is more time- and resource-consuming so that it is often  not used to validate refactoring tools. Additional,feedback-based evaluation  requires experience  in the respective development area. \cite{automatic_software_refactoring_literature_review}
+
+Hence,  two-sided evaluation approach integrates both human feedback and systematic analysis to provide a comprehensive understanding of the tool's efficacy and applicability.
+As both experiments have their limitations and challenges, it can be useful to perform these distinct experiments to evaluate the potential of ChatGPT in the data clump refactoring pipeline.
+
+
+
 
 
 

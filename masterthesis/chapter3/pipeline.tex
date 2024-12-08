@@ -1,9 +1,16 @@
 
 
 \section{Pipeline}\label{sec:pipeline}
-In order to find and refactor data clumps automatically, a particular sequence of steps \textbf{(pipeline)} has to be respected. Most steps of this sequence must be in a specific order because they rely on information extracted in a previous step.
+In order to find and refactor data clumps automatically, a particular sequence of steps \textbf{(pipeline)} has to be respected. Most steps of this sequence must be in a specific order because they rely on information extracted in a previous step. 
 
-\subsection{Structure of the pipeline}
+This section outlines the structure of the pipeline. Section \ref{sec:pipeline_structure} gives an overview of how the pipeline is implemented. 
+
+Section \ref{sec:pipeline_exec_order} discusses an alternative but similar approach for the pipeline which is relevant if multiple data clumps are considered in the pipeline. 
+
+Finally, section \ref{sec:pipeline_steps} describes each important pipeline steps and what considerations should be taken into account when developing tools for the respective pipeline step. 
+
+
+\subsection{Structure of the pipeline}\label{sec:pipeline_structure}
 Each step of the pipeline is performed by a  \textbf{handler}. A handler might handle one or more steps.  Each handler has information about what steps of the pipeline it supports and  a handler can be registered to a pipeline step if it supports that particular step.  
 
 Since a service-based approach is used, a handler can be seen as a gateway to a different program or service that performs the specific functionality.  The handler and the respective service are tightly coupled. While a handler could deal with multiple services, it is not required by the design, and requires special care. Nevertheless, it recommendable to write the handler as abstract as possible.
@@ -17,9 +24,9 @@ Since a service-based approach is used, a handler can be seen as a gateway to a 
 Figure \ref{fig:solver_gateway_service_overview} illustrates how the service-based approach works for one step:
 
 \begin{enumerate}
-    \item The program developed in this master thesis \textbf{(main program)} executes one step (e.g. finding a suitable class name)
+    \item The program developed in this master thesis \textbf{(main program)} executes one step (e.~g. finding a suitable class name)
     \item The handler registered to that step is used. It is provided with the current context containing the results from previous steps.
-    \item The handler starts or employs a specific service. This service might be dependent on the current step or might be constant. The handler knows how to start or use the service and sends all relevant information to the service (e.g. via files, network streams etc.). 
+    \item The handler starts or employs a specific service. This service might be dependent on the current step or might be constant. The handler knows how to start or use the service and sends all relevant information to the service (e.~g. via files, network streams etc.). 
     \item The service processes the requests submitted by the handler. For instance, ChatGPT can suggest a suitable class name. The service might be outside of the control of the developer. For example, it might be programmed in a different programming language or the source code might not be available. At some point it will create a response and send it back to the handler. 
     \item The handler reads the response and processes it. It then creates a new context based on the previous context and the response from the service. 
     \item The new context is returned to the program and can be used for successive steps (e.~g. the suggested name can be used for creating a respective class) 
@@ -44,9 +51,9 @@ Another issue to analyze is the pipeline execution order. This should not be con
 
 The former order deals with how the steps are executed with respect to each detected data clump. Two approaches are considered here:
 
-In the first approach, each data clump is  further processed immediately after detection. This means after a data clump has been detected, it is immediately given a suggested name, a class is extracted if necessary, and the refactoring is executed. In the following, this approach will be referred to as \textit{one-data-clump approach}
+In the first approach, each data clump is  further processed immediately after detection. This means after a data clump has been detected, it is immediately given a suggested name, a class is extracted if necessary, and the refactoring is executed. In the following, this approach will be referred to as \textit{one-data-clump approach}.
 
-In the second approach, all data clumps are detected first. Then all, those data clumps are assigned a suitable name, and classes are extracted if necessary. At the end, each data clump is refactored. In the following, this approach will be referred to as \textit{one-step approach}
+In the second approach, all data clumps are detected first. Then all, those data clumps are assigned a suitable name, and classes are extracted if necessary. At the end, each data clump is refactored. In the following, this approach will be referred to as \textit{one-step approach}.
 
 As a result, in the \textit{one-data-clump approach}, a data clump is processed by one step of the pipeline and then by the next while in the \textit{one-step approach} the first step has to process all data clumps first before the data clumps can be processed by the succeeding steps.
 
