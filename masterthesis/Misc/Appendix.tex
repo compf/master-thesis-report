@@ -23,7 +23,7 @@ A similar principle is applied to the classes in which a data clump is located. 
 
 The information about the methods of the data clump (l. 11, 12, 16, 17) is optional. If one part of the data clump is a field-to-field data clump, no method is involved, so the respective part would be \textit{null}.
 
-The field \enquote{probability} can be used by probabilistic data clump detection tools to indicate the probability that the detected data clump is indeed a data clump. For purposes of this master thesis, it will be ignored. 
+The field \enquote{probability} can be used by probabilistic data clump detection tools to indicate the probability that the detected data clump is indeed a data clump. For purposes of this master's thesis, it will be ignored. 
 
 In lines 19-42, each variable that is part of the data clump is described. In this example, only one variable is listed, although for a data clump there must be at least three variables. As for the data clump itself, the individual variables are separated into a \enquote{from-part} and a \enquote{to-part}. The former is implicitly defined (l.~20-25, 38-42), while the latter has a specifically named sub object \enquote{to\_variable} (l. 27-37). For each variable, the name (l. 22 and l. 28)) and the data type (l.~23 and l. 29) are provided. As for the general data clump, a probability is given whether the variable is indeed part of a data clump (l. 24). As mentioned above, this information will be ignored.  Additionally, modifiers like \enquote{private}, \enquote{final} etc. are also stored. 
 
@@ -38,7 +38,7 @@ Title: \textbf{ Refactored data clumps with the help of LLMs (research project)}
 
 Hello maintainers,
 
-I am conducting a master thesis project focused on enhancing code quality through automated refactoring of data clumps, assisted by Large Language Models (LLMs).\newline
+I am conducting a master's thesis project focused on enhancing code quality through automated refactoring of data clumps, assisted by Large Language Models (LLMs).\newline
 
 
 \textbf{Data Clump Definition}
@@ -81,7 +81,7 @@ University of Osnabrück \newline
 
 \chapter{Survey for experiment 1}\label{app:pr_survey}
 
-For this master thesis, the survey platform \textit{LamaPoll} \cite{lamapoll} was used.  The respondents should address the following statements:
+For this master's thesis, the survey platform \textit{LamaPoll} \cite{lamapoll} was used.  The respondents should address the following statements:
 \begin{enumerate}
 \item Data clumps are a code smell that should be fixed.
 \item Using LLMs in software development can be helpful to improve code quality.
@@ -122,12 +122,12 @@ Table \ref{tab:likert_options} shows the options for each question and the assoc
 
 
 
-\chapter{UML diagram of the tool}
+\chapter{UML diagram of the tool} \label{app:uml_diagram}
 Figure \ref{fig:uml_classes} depicts the most important classes of the tool in the scenario that data clumps are detected manually and the \ac{LLM} performs the refactoring. 
 
 The following list describes the functionality of each class in this scenario:
 \begin{description}
-    \item [AbstractStepHandler] This abstract class is the foundation of each step handler. It provides the \textit{handle} method which executes a given step. It returns a new \textit{DataClumpRefactoringContext} based on the the information obtained in this step and the previous context.
+    \item [AbstractStepHandler] This abstract class is the foundation of each step handler. It provides the \textit{handle} method which executes a given step. It returns a new \textit{DataClumpRefactoringContext} based on the information obtained in this step and the previous context.
     \item [DataClumpRefactoringContext] This class represents the context. It is implemented as a linked list. 
     \item[SimpleCodeObtainingHandler] This step handler creates the first context which contains the project's location.
 

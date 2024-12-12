@@ -13,7 +13,7 @@ Finally, section \ref{sec:pipeline_steps} describes each important pipeline step
 \subsection{Structure of the pipeline}\label{sec:pipeline_structure}
 Each step of the pipeline is performed by a  \textbf{handler}. A handler might handle one or more steps.  Each handler has information about what steps of the pipeline it supports and  a handler can be registered to a pipeline step if it supports that particular step.  
 
-Since a service-based approach is used, a handler can be seen as a gateway to a different program or service that performs the specific functionality.  The handler and the respective service are tightly coupled. While a handler could deal with multiple services, it is not required by the design, and requires special care. Nevertheless, it recommendable to write the handler as abstract as possible.
+Since a service-based approach is used, a handler can be seen as a gateway to a different program or service that performs the specific functionality.  The handler and the respective service are tightly coupled. Although a handler could manage multiple services, this is not a design requirement and must be handled with care. Nevertheless, it is recommended to write the handler as abstract as possible.
 \begin{figure}[ht!]
     \centering
     \includesvg[inkscapelatex=false,scale=0.9]{figures/chapter3/solver_gateway_service.svg}
@@ -24,7 +24,7 @@ Since a service-based approach is used, a handler can be seen as a gateway to a 
 Figure \ref{fig:solver_gateway_service_overview} illustrates how the service-based approach works for one step:
 
 \begin{enumerate}
-    \item The program developed in this master thesis \textbf{(main program)} executes one step (e.~g. finding a suitable class name)
+    \item The program developed in this master's thesis \textbf{(main program)} executes one step (e.~g. finding a suitable class name)
     \item The handler registered to that step is used. It is provided with the current context containing the results from previous steps.
     \item The handler starts or employs a specific service. This service might be dependent on the current step or might be constant. The handler knows how to start or use the service and sends all relevant information to the service (e.~g. via files, network streams etc.). 
     \item The service processes the requests submitted by the handler. For instance, ChatGPT can suggest a suitable class name. The service might be outside of the control of the developer. For example, it might be programmed in a different programming language or the source code might not be available. At some point it will create a response and send it back to the handler. 
@@ -42,7 +42,7 @@ An alternative approach is called choreography. Here each step would call the ne
 
 Both approaches have their advantages. In the choreography architecture, there is less coupling since a main program does not need to know which handler is associated with which step. Instead, each handler need to know the next (and only the next) step. This can become challenging if steps are optional because the gateway does not know what service to call next. Additionally, debugging the process is more challenging as there is no central point that coordinates the pipeline.
 
-On the other hand, the orchestrator architecture is easier to control and debug. It easier to configure and to implement. Nevertheless, the coupling to each handler is stronger because each gateway must be known by by the main program. Additionally, the main program is a single point of failure. If there is a problem with the main program, the data clump refactoring cannot proceed as every step requires coordination with the orchestrator. Also the overhead should be considered because the orchestrator will need to act multiple time to process responses and generate new requests for the next gateway. This becomes more important if services are not local but are accessed using the internet or the local network, which causes more overhead. \cite{orchestration_choreography}
+On the other hand, the orchestrator architecture is easier to control and debug. It is easier to configure and to implement. Nevertheless, the coupling to each handler is stronger because each gateway must be known by the main program. Additionally, the main program is a single point of failure. If there is a problem with the main program, the data clump refactoring cannot proceed as every step requires coordination with the orchestrator. Also the overhead should be considered because the orchestrator will need to act multiple time to process responses and generate new requests for the next gateway. This issue gains importance if services are remote, accessed via the internet or a local network, thereby increasing overhead. \cite{orchestration_choreography}
 
 
 \subsection{Pipeline execution order}\label{sec:pipeline_exec_order}
@@ -57,7 +57,7 @@ In the second approach, all data clumps are detected first. Then all, those data
 
 As a result, in the \textit{one-data-clump approach}, a data clump is processed by one step of the pipeline and then by the next while in the \textit{one-step approach} the first step has to process all data clumps first before the data clumps can be processed by the succeeding steps.
 
-There are arguments for and against both approaches. However, designing a system that supports both approaches is challenging and out of scope for this master thesis, so only one approach is used. 
+There are arguments for and against both approaches. However, designing a system that supports both approaches is challenging and out of scope for this master's thesis, so only one approach is used. 
 
 The \textit{one-data-clump approach} leads to quicker intermediate results so that if the tool to be developed is stopped during execution, it is more likely that some data clumps are fixed so that some progress is being made.
 

@@ -17,7 +17,7 @@ Two concepts to  reduce the number of data clumps can be distinguished.
 \subsection{Ranking} \label{sec:metrics}
 In the ranking approach, each item is scored using a metric. A higher score is better than a lower score.  Then, the items are sorted based upon their score in a descending order. Finally, the first  \textit{n} items are retained while the remaining items are filtered out. The values of \textit{n} and the metric can be chosen via the configuration. 
 
-With this ranking approach only important item are kept. The importance of an item is determined by a metric, and the \enquote{survival} of an item depends on how many other items with better scores exist.
+With this ranking approach only important item are kept. The importance of an item is determined by a metric, and the likelihood that an item survives the filtering depends on how many other items with better scores exist.
 
 In the following, the implemented metrics are discussed:
 
@@ -33,7 +33,7 @@ On the other hand,  it can become more difficult to find a suitable name for the
 
 The occurrence metric describes how often a type-name-key of a data clump appears throughout the software project to be analyzed. A high value is a strong indicator that refactoring is necessary because it demonstrates how strongly the code size can be reduced. Additionally, this metric is hard to measure manually because no developer will have an overview on the whole project and can count this occurrence, making it more difficult to realize that a data clump has a high occurrence.  
 
-On the other hand, refactoring these data clumps requires that more lines of the project must be changes which needs to be verified and tested. 
+However, refactoring such data clumps means more lines need changing, which requires further verification and testing
 
 \subsubsection{Affected Files}
 

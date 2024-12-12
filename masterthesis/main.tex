@@ -1,12 +1,12 @@
 %\newcommand*{\DEBUG}{}
-\ifdefined\DEBUG
-\documentclass[a4paper,12pt,oneside, bibliography=totoc,dvipsnames]
-{scrbook}
-\else
+
   \documentclass[a4paper,12pt,oneside, bibliography=totoc]{scrbook}
-\fi
 \usepackage[dvipsnames]{xcolor}
 \renewcommand{\descriptionlabel}[1]{\hspace{\labelsep}\textit{#1}}
+
+
+\newcommand{\nocontentsline}[3]{}
+\newcommand{\tocless}[2]{\bgroup\let\addcontentsline=\nocontentsline#1{#2}\egroup}
 
 
 \usepackage[utf8]{inputenc}
@@ -78,6 +78,8 @@
    urldate=long,
    url=false
 ]{biblatex}
+\setcounter{biburllcpenalty}{7000}
+\setcounter{biburlucpenalty}{8000}
 \addbibresource{database.bib}
 %\addbibresource{literatur2.bib}
 
@@ -102,9 +104,9 @@
 	   	Institute of Computer Science, Software Engineering Group
 	\end{center}
 	}
-	\subject{Master Thesis: }
+	\subject{Master's Thesis: }
 	\title{Detecting and Refactoring Data Clumps supported by Large Language Models}
-	\author{Timo Schoemaker\\ Immatriculation number: 978621} %engl. Matriculation Number
+	\author{Timo Schoemaker\\ Matriculation number: 978621} %engl. Matriculation Number
 
 	\date{\today\\
 	Advisor: Prof. Dr.-Ing. Elke Pulvermüller \\ %Deutsch: Erstebetreuer
@@ -137,7 +139,7 @@
 \setcounter{page}{1} %Seitenzahlen hier mit 1 anfangen
 
 	%Include text from other files into the document --> great for structuring
-	\input{Introduction/introduction}
+	\input{chapter1/introduction}
 \begingroup
 \renewcommand{\cleardoublepage}{} % TODO maybe removing this and next
 
@@ -157,14 +159,14 @@
 
 \clearpage
 \chapter{Evaluation}\label{chapter:eval}
-	\input{Evaluation/eval}
+	\input{chapter5/eval}
 \begingroup
 \renewcommand{\cleardoublepage}{} % TODO maybe removing this and next
 \renewcommand{\clearpage}{}
 \chapter{Conclusion}\label{chapter:conclusion}
 \endgroup
 \label{sec:conclusion}
-\input{Conclusion/conclusion}
+\input{chapter6/conclusion}
 
 
 %Prints references

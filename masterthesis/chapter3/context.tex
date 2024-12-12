@@ -115,7 +115,7 @@ Alternatively, specific locations can be used to store all extracted classes. Th
 
 As an alternative, the complete class body could be stored instead of saving it directly to a file. This might be advantageous if the class content should be formatted, refactored or otherwise modified in order to be valid. This also would deflect the responsibility of the class location from the class extractor step. 
 
-For this master thesis, the first approach is used. The type-name--key is mapped to a specific path which is chosen at the name suggestion step although it could also be chosen at the class extraction step. 
+For this master's thesis, the first approach is used. The type-name--key is mapped to a specific path which is chosen at the name suggestion step although it could also be chosen at the class extraction step. 
 
  
 \subsubsection{Validation}
@@ -133,7 +133,7 @@ In case of a failed validation, one might need more information. For instance, i
         Name & Generated in step & Contained data/methods & Serializable?  \\\hline
         Code obtaining & "" & Path to project & No \\\hline
         Git repository & Code Obtaining & Timestamps of changes in files, recently changed files & No \\\hline
-        File filtering & "" & Include, exclude expression, flag for inclusion prevailment & No \\\hline
+        File filtering & "" & Include, exclude expressions, flag whether inclusion prevails over exclusion & No \\\hline
 
         AST & "" & \ac{AST} for each analyzed file &  Yes \\\hline
          Data clump detection & Data clump detection/filtering  & Format described in appendix \ref{app:data_clump_format}, generation of types-names-keys & Yes \\\hline 
@@ -156,4 +156,4 @@ One can observe that there is no one-to-one mapping between context and pipeline
 
 Also, the available operations differ between  the several context types. Most context types only contain the data that is initialized upon creating the respective type. In other cases, however, the context type only provides access to operations that query the sought data. For instance, the Git repository context does not load all relevant information immediately but only after it is requested. This saves performance because this information is not always used. 
 
-Regarding serializability, it can be seen that not all context types support serialization. Only if a context contains a significant amount of data (e.~g. data clumps, usage information etc), it useful to serialize these results to save these results for further launches. 
+Regarding serializability, it can be seen that not all context types support serialization. Only if a context contains a significant amount of data (e.~g. data clumps, usage information etc.), it useful to serialize these results to save these results for further launches. 

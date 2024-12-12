@@ -1,9 +1,9 @@
 \section{Related work}\label{sec:related_research}
-In this section works related to the topic of this master thesis is discussed. 
+In this section works related to the topic of this master's thesis is discussed. 
 
-Firstly,  several tools that will be used throughout this master thesis are discussed. These tools perform various steps such as detecting data clumps or  refactoring source code and will be used to assists \acp{LLM} in their works.
+Firstly,  several tools that will be used throughout this master's thesis are discussed. These tools perform various steps such as detecting data clumps or  refactoring source code and will be used to assist \acp{LLM} in their work.
 
-Afterwards, related research about the topics of this master thesis is presented. The research is divided into a section for data clumps and \ac{LLM} to discuss the challenges and advancements of each topic. 
+Afterwards, related research about the topics of this master's thesis is presented. The research is divided into a section for data clumps and \ac{LLM} to discuss the challenges and advancements of each topic. 
 
 
 \subsubsection{Language Server Protocol} \label{sec:lsp}
@@ -25,7 +25,7 @@ The sequence diagram in figure \ref{fig:lsp_usage} illustrates how the \ac{LSP} 
     
 \end{figure}
 
-After the server has been successfully started by the client, a user can open a document (e.~g. source code file). The request to open the document is submitted to the server. From now one, the server may not rely on the file system since that might be not the current version of the opened document. 
+After the server has been successfully started by the client, a user can open a document (e.~g. source code file). The request to open the document is submitted to the server. From now on, the server may not rely on the file system since that might be not the current version of the opened document. 
 
 The client can now inform the server about some changes (e.~g. adding a new method). The server can, in the meantime, inform the client about syntactical errors which the client might show to the user of the client.
 
@@ -33,7 +33,7 @@ Afterward, the client requests the definition of a method or variable, and the s
 
 In the end, the client can save the document and notify the server that the document was closed which means that the physical file of the document represents the current version of the document again. 
 
-The \ac{LSP} can hence be used to simplify refactoring-related task. For instance, a mandatory part of refactoring is to find all references of a symbol (e.~g. variable). The \ac{LSP} can perform this step so that the detected references can be processed further. It should however be noted that functionality of the protocol is limited to maximize the support for many programming languages. Thus, the an \ac{LSP} server is not a refactoring tool per-se. 
+The \ac{LSP} can hence be used to simplify refactoring-related tasks. For instance, a mandatory part of refactoring is to find all references of a symbol (e.~g. variable). The \ac{LSP} can perform this step so that the detected references can be processed further. It should however be noted that functionality of the protocol is limited to maximize the support for many programming languages. Thus, the an \ac{LSP} server is not a refactoring tool per-se. 
 
 
 
@@ -41,11 +41,11 @@ The \ac{LSP} can hence be used to simplify refactoring-related task. For instanc
 
 \subsubsection{DataClumpDoctor} \label{sec:data_clump_doctor}
 
-The  \textit{DataClumpDoctor} is NodeJS command line tool  to detect data clumps. It employs \textit{PMD} to find all classes, methods, and fields in a Java project to generate an \ac{AST}. Each Java file is converted to an \ac{AST} that does not contain the bodies of methods or documentation.
+The  \textit{DataClumpDoctor} is a NodeJS command line tool  to detect data clumps. It employs \textit{PMD} to find all classes, methods, and fields in a Java project to generate an \ac{AST}. Each Java file is converted to an \ac{AST} that does not contain the bodies of methods or documentation.
 
 In a second step, the generated \ac{AST} can be loaded again to find data clumps. by using the algorithmic approach discussed in section \ref{sec:data_clump_detection}. With this two-step methodology, a greater programming language independence can be achieved as the data clump detection does not need access to the original source code. The \textit{DataClumpDoctor} reports its result in the format discussed in appendix \ref{app:data_clump_format}
 
-For purposes of this master thesis, the results from the \textit{DataClumpDoctor} are treated as the ground truth with regard to data clump detection. 
+For purposes of this master's thesis, the results from the \textit{DataClumpDoctor} are treated as the ground truth with regard to data clump detection. 
 
 \subsubsection{ Program Structure Interface}\label{sec:psi}
 The Program Structure Interface provided by IntelliJ is an \ac{API} to analyze and modify  projects that the \ac{IDE} \textit{IntelliJ} can load. As a result, the various classes, methods etc. can be obtained which allows for the detection of data clumps. Also modifications are possible which makes it a suitable candidate for refactoring purposes.
@@ -68,7 +68,7 @@ Hall et al. analyzed the impact of code smells (including data clump) on the occ
 
 Baumgartner et al. developed a live code smell detection plugin for IntelliJ that can detect, report, and refactor data clumps without significantly impacting performance. However, the tool is semi-automatic, meaning the developer must still actively approve the data clump refactoring and suggest a suitable class name for the extracted class. \cite{BaumgartnerAP23}
 
-Murphy et al. \cite{stench_blossom} developed a visual tool to find code smells (including data clumps). the tool named \textit{Stench Blossom} is a plugin for Eclipse. If a plugin user views a file, the tool searches for code smells and displays them at the right side of the Eclipse editor. Each code smell is visually displayed as a a \textit{petal}. The radius of such petal represents the strength of a smell (i.~e. how strongly violates the code smell the given coding guidelines). The petal has a color that indicates how obvious a code smell is. Orange code smells are not very obvious while blue code smells are easy to detect by human beings. Since orange has a closer connection to warnings, it is more easily to perceive so that undetected code smells can be fixed better. Experiments with \textit{Stench Blossom} shows that the median number of code smells detected by humans using the tool increased from 11 to 21. However, data particular for data clumps is not given.
+Murphy et al. \cite{stench_blossom} developed a visual tool to find code smells (including data clumps). the tool named \textit{Stench Blossom} is a plugin for Eclipse. If a plugin user views a file, the tool searches for code smells and displays them at the right side of the Eclipse editor. Each code smell is visually displayed as a \textit{petal}. The radius of such petal represents the strength of a smell (i.~e. how strongly violates the code smell the given coding guidelines). The petal has a color that indicates how obvious a code smell is. Orange code smells are not very obvious while blue code smells are easy to detect by human beings. Since orange has a closer connection to warnings, it is more easily to perceive so that undetected code smells can be fixed better. Experiments with \textit{Stench Blossom} shows that the median number of code smells detected by humans using the tool increased from 11 to 21. However, data particular for data clumps is not given.
 
 
 
@@ -79,14 +79,14 @@ White et al. \cite{White2024} outline how ChatGPT can be used in software develo
 
 In case of refactoring, the authors suggest that ChatGPT is able to refactor code with multiple prompts. For instance, ChatGPT can refactor based on a well-known design pattern name, multiple examples on how to refactor the code, or a more lengthy requirements description. The exact success of each prompt is however dependent on how ChatGPT is trained and should be scrutinized manually. 
 
-Cao et al. \cite{cao2023study} focus on using ChatGPT for fixing deep learning programs. Those are programs that cannot be understood only by their source code alone, but are are largely influenced by underlying data like  neural networks etc. This makes finding faults more difficult. The study finds out that ChatGPT can find code smells and detect faults. Without giving instructions however, ChatGPT will tend to return code smells and outdated API calls while not finding other bugs. 
+Cao et al. \cite{cao2023study} focus on using ChatGPT for fixing deep learning programs. Those are programs that cannot be understood only by their source code alone, but are largely influenced by underlying data like  neural networks etc. This makes finding faults more difficult. The study finds out that ChatGPT can find code smells and detect faults. Without giving instructions however, ChatGPT will tend to return code smells and outdated API calls while not finding other bugs. 
 
 
 Madaan et al. present a self-refinement process for \acp{LLM} with regard to code generation. Their idea is to submit the output of a model to the model again so the code can be evaluated by the model. The feedback returned by the \ac{LLM} is the used to improve the code again until a stop condition is reached. They find that this approach increases the quality of the generated code. For instance, the number of optimized programs using this strategy increases from 27.3~\% to 36~\%. \cite{Madaan2023SelfRefineIR}. 
-The general idea of this approach will also be used in this master thesis to correct building errors that can occur after using an \ac{LLM}. 
+The general idea of this approach will also be used in this master's thesis to correct building errors that can occur after using an \ac{LLM}. 
 
-A related approach is proposed by Alshahwan et al. They suggest to use \ac{LLM} to generate multiple program candidates (e.~g. for refactoring). These programs are evaluated for their quality (e.~g. whether they compile or pass all tests). Programs failing these criteria are further evaluated on whether their faults can be easily fixed. They contrast this strategy with a method that will be used in this master thesis where the output of the model is directly integrated into the source code because the latter approach is more error-prone. However, they also acknowledge that cost issues are an obstacle for real-world deployment.
+A related approach is proposed by Alshahwan et al. They suggest to use \ac{LLM} to generate multiple program candidates (e.~g. for refactoring). These programs are evaluated for their quality (e.~g. whether they compile or pass all tests). Programs failing these criteria are further evaluated on whether their faults can be easily fixed. They contrast this strategy with a method that will be used in this master's thesis where the output of the model is directly integrated into the source code because the latter approach is more error-prone. However, they also acknowledge that cost issues are an obstacle for real-world deployment.
 Additionally, their suggestion is however only applicable if there is no demand for real-time code generation. \cite{alshahwan2024assuredllmbasedsoftwareengineering}
 
 
-The first attempt to test the suitability of data clump detection via \ac{LLM} is performed by Baumgartner et al. \cite{electronics13091644}. Here, the pipeline, which is also used in this master thesis, is formulated for the first time. Small experiments are performed showing that \ac{LLM} are capable of detecting data clumps. However, the refactoring abilities of ChatGPT could not be tested fully. Additionally, the effect of several model parameters like temperature is inconclusive and requires further testing. 
+The first attempt to test the suitability of data clump detection via \ac{LLM} is performed by Baumgartner et al. \cite{electronics13091644}. Here, the pipeline, which is also used in this master's thesis, is formulated for the first time. Small experiments are performed showing that \ac{LLM} are capable of detecting data clumps. However, the refactoring abilities of ChatGPT could not be tested fully. Additionally, the effect of several model parameters like temperature is inconclusive and requires further testing. 

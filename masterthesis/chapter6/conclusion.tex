@@ -1,0 +1,27 @@
+In this master's thesis, a modular pipeline for detecting and refactoring data clumps was developed. This pipeline was designed to allow the integration of \acp{LLM} so that the potential of this new technology can be used for some or all steps of the pipeline. While the principal design of the pipeline is working, challenges still remain.   
+
+
+This pipeline employs handlers that use specific services to perform steps that are necessary for detecting and refactoring data clumps. One step for instance is the detection of data clumps while another would be to find a suitable name for an extracted class. 
+
+Using an internal database named context, information from each handler can be collected and submitted to a subsequent handler that can use this information. For instance, the suggested names by an \ac{LLM} can be accessed by a refactoring handler to create appropriate classes. 
+
+Some tools were implemented to assist an \ac{LLM} in its task. For example, the \textit{DataClumpDoctor} can detect data clumps in Java projects. Due to the pipeline design, the use of \acp{LLM} is not mandatory though the quality of the result will be lower. For instance, not using an \ac{LLM} at all would mean that an extracted class  has a very artificial name that would need to be changed. 
+
+Not all steps were implemented in this master's thesis. For instance, while mentioned in section \ref{sec:pipeline_steps}, the committing and evaluation steps do not have an associated handler as the scope of the thesis lies on other steps like detection or filtering. Implementing such handlers should however not be challenging. 
+
+To integrate \acp{LLM} in the pipeline, approaches to process the input and the output regard to the context are developed. These methods allow the model to access only such information as it needs while leaving out information that is irrelevant or would not be helpful. For instance, only files affected by a data clump can be transmitted. As an alternative, only small code snippets containing such data  clump are chosen. Both approaches have their advantages as the evaluation shows. 
+
+The evaluation shows that this approach is not accepted by developers but there are signs that \acp{LLM} can be useful for data clump detection and refactoring. However, the current implementation of the pipeline is only reliable if the scope of the model is limited. Allowing the \ac{LLM} to change the source code is associated with  multiple challenges that need to be addressed.  For instance, the source code is non-compilable and refactoring suggested by the model are not precise enough. Nevertheless, \ac{LLM} like ChatGPT can be a great help for developers to find and refactor code smells and their appropriate usage will be an important research topic. 
+
+%A modular approach for detecting and refactoring data clumps can have many advantages.  For instance, an extension to other programming languages, operating systems or build platforms is easier so that the usability of such a tool is increased. Nevertheless, performance issues and configuration issues are some arguments against the modular method. 
+
+In this master's thesis, only data clumps are considered and refactored. However, some developers might regard data clumps not as a serious code smell. Hence, extending the general design of the tool to other code smells would be an interesting research task as more code smells can be found and refactored without losing the modular design. This requires for instance, that the \enquote{data clump detection} step needs to be more general (e.~g. \enquote{code smell detection step}. Also, the \enquote{name finding} step might be removed or replaced with another suitable step. 
+
+ 
+
+In general, the topic \ac{LLM} is a very popular target of research with new updates and improvements being published frequently. This means that many problems considered in this master's thesis might have already been addressed or are not as relevant as they were a short time ago. Research in Large Language Models is hence constantly evolving and promises many more innovations. Nevertheless, the main concerns cannot be ignored and will still be relevant.
+
+While \acp{LLM}  have existed for some time, only the fairly recent release of ChatGPT have enabled developers around the world to use the advantages of such models in their daily developments. As a result, the impact of tools like ChatGPT on software development are part of current scientific research. This includes the need to deal with the challenges and limitations of ChatGPT while employing the undeniable potentials and powers of ChatGPT in the software development of the future. 
+
+
+

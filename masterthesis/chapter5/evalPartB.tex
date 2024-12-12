@@ -9,9 +9,9 @@ As the first experiment shows the limitations of ChatGPT while detecting and ref
 
 To further evaluate the usefulness of ChatGPT in the pipeline, a second experiment was conducted.
 
-In this second experiment, tests were conducted to assess the suitability of ChatGPT performing steps of the pipeline. In contrast of the first experiment, this experiment is centered on a limited set of projects and uses more metrics while leaving out human feedback. These experiments centers on RQ 2 which deal with suitability of ChatGPT in the refactoring pipeline and RQ 3 which is about the effect of \ac{LLM} parameters. Both of these research questions are answered in this experiment. 
+In this second experiment, tests were conducted to assess the suitability of ChatGPT performing steps of the pipeline. In contrast of the first experiment, this experiment is centered on a limited set of projects and uses more metrics while leaving out human feedback. These experiments center on RQ 2 which deal with suitability of ChatGPT in the refactoring pipeline and RQ 3 which is about the effect of \ac{LLM} parameters. Both of these research questions are answered in this experiment. 
 
-Since the pipeline consists of several steps where the model can be used, the experiment was split into  four sub-experiments (numbered from 2A to 2D) where each sub-experiment is independent from the other. Each of these sub-experiments answers a sub-question of RQ 2, but also the associated third research question.
+Since the pipeline consists of several steps where the model can be used, the experiment was split into  four sub-experiments (numbered from 2A to 2D) where each sub-experiment is independent from the other. Each experiment deals with a distinct part of RQ 2 and 3. 
 
 The following steps from the pipeline were considered:
 
@@ -21,7 +21,7 @@ The following steps from the pipeline were considered:
     \item Refactor data clumps
 \end{itemize}
 
-Table \ref{tbl:expB} shows the derived research question of each experiment and the section where the experiment is described. 
+Table \ref{tbl:expB} shows the derived research question of each experiment and the identifier of the experiment. 
 \begin{table}[ht!]
     \centering
     \begin{tabular}{m{2cm}|m{10cm}| m{2cm}}
@@ -35,9 +35,11 @@ Table \ref{tbl:expB} shows the derived research question of each experiment and 
     \label{tbl:expB}
 \end{table}
 
+Each of these experiments answers a derivation of RQ 2 as well as a derived third RQ. For instance, In experiment 2A, the RQ answered deals with the detection capability of ChatGPT. At the same time, the influence of different \ac{LLM} parameters on the detection capability is tested. 
+
 \subsection{General methodology}
 
-In contrast to the feedback-driven experiment, multiple data clumps are selected that will be used in the succeeding steps. These data clumps are not chosen manually as in the first experiment but selected via an algorithm. This algorithm is as follows:
+In contrast to the feedback-based experiment, multiple data clumps are selected that will be used in the succeeding steps. These data clumps are not chosen manually as in the first experiment but selected via an algorithm. This algorithm is as follows:
 \begin{enumerate}
     \item Select 
 \textit{n}
@@ -51,17 +53,17 @@ In contrast to the feedback-driven experiment, multiple data clumps are selected
 
 With this local optimum search strategy, a set of data clumps is retrieved that can be used as the basis for the detection, filtering and refactoring step while also minimizing the total file size transmitted to the \ac{LLM}. 
 
-The exact criteria and amount of data clumps used for the data clump selection depend on the concrete experiment. For instance, if the best data clump should be chosen by the model, very large data clumps and data clumps affecting many classes and methods should be transmitted. This creates a stark contrast between the proposed data clumps and forces the model to make a genuine selection for a suitable data clump. In the refactoring step only two random data clumps are considered  because it can be expected that subsequent validation steps would increase the amount of transmitted data even more, so that submitting more files would increase the likelihood of context window overflow. This issue does not occur under the detection and filtering step. 
+The exact criteria and amount of data clumps used for the data clump selection depend on the concrete experiment. For instance, if the best data clump should be chosen by the model, very large data clumps and data clumps affecting many classes and methods should be transmitted. This creates a stark contrast between the proposed data clumps and forces the model to make a genuine selection for a suitable data clump. In the refactoring step only two random data clumps were considered  because it could be expected that subsequent validation steps would increase the amount of transmitted data even more. Hence, submitting more files would increase the likelihood of context window overflow. This issue does not occur under the detection and filtering step. 
 
 \subsubsection{Selection of projects}
 
-Selecting projects for this experiment is easier because no human feedback is required so that the active maintaining criterion in section \ref{sec:github_projects} is not relevant. However, the other criteria are still relevant. 
+Selecting projects for this experiment was easier because no human feedback was required so that the active maintaining criterion in section \ref{sec:github_projects} is not relevant. However, the other criteria were still relevant. 
 
-As a result, projects were selected that have already been used for experiment regarding code smells or refactoring in the literature. The following list shows the selected projects together with their description:
+As a result, projects were selected that have already been used for experiment regarding code smells or refactoring in the literature. The following list shows the selected projects together with a description:
 \begin{description}
-    \item[ArgoUML] The leading open source UML modeling tool
-    \item[RocketMQ] A cloud-native messaging, eventing, streaming real-time data processing platform
-    \item[DolphinScheduler] A distributed and extensible open-source workflow orchestration platform
+    \item[ArgoUML:] Open source UML modeling tool. \cite{argouml}
+    \item[RocketMQ:] A cloud-native messaging, eventing, streaming real-time data processing platform. \cite{rocketmq}
+    \item[DolphinScheduler:] A distributed and extensible open-source workflow orchestration platform. \cite{dolphinscheduler}
 \end{description}
 
 
@@ -70,13 +72,13 @@ As a result, projects were selected that have already been used for experiment r
 In order to answer RQ 3, multiple \ac{LLM} parameters must be considered.  These parameters determine how the model can interpret the instruction and how it should respond. Using different hyper-parameters can show whether special care should be given to these parameters or whether they are irrelevant. The following parameters are considered: 
 
 \begin{description}
-	\item [Temperature] This parameter describes the randomness of the output of the model. The less temperature, the more the output is predictable. However, this reduces the model's potential for creating creative output.
+	\item [Temperature:] This parameter describes the randomness of the output of the model. The less temperature, the more the output is predictable. However, this reduces the model's potential for creating creative output.
 	
 	%\item[Instruction type] This parameter describes how the concept of data clump is taught to the model. Three types are tested: In the definition-based approach a formal definition resembling the definition given in section \ref{sec:data_clump_def} is provided. In contrast using the no-definition method, the term \enquote{data clump} is not explained at all so that the model must use its inherent knowledge. A third option is to provide examples of data clumps In Java which requires the model to learn this concept by analyzing similairities in source code.  
 	
-	\item [Input type] This parameter is discussed in section \ref{sec:input_format}. The available values for this parameter depends in what steps of the pipeline the model is used. For instance, in the detection step, the data clump type context is not available and cannot be submitted to the model. In the refactoring step, only source code can be submitted as that source code must be changed by the model.
+	\item [Input format:] This parameter is discussed in section \ref{sec:input_format}. The available values for this parameter depends in what steps of the pipeline the model is used. For instance, in the detection step, the data clump type context is not available and cannot be submitted to the model. In the refactoring step, only source code can be submitted as that source code must be changed by the model.
 	
-	\item [Margin] This parameter is only relevant if code snippets are transmitted. In other cases, it would have no effect since it only affect the size of the code snippets. Values considered here are 0, 1, 2, 5 and 10, 
+	\item [Margin:] This parameter is only relevant if code snippets are transmitted. In other cases, it would have no effect since it only affect the size of the code snippets. Values considered here are 0, 1, 2, 5 and 10, 
 	
 	
 \end{description}
@@ -91,18 +93,19 @@ For each parameterization, the experiment was repeated ten times.
 
 To evaluate the quality of \ac{LLM} in the pipeline, several metrics are employed that give an hindsight about the potential of such models. These metrics return a numerical value. These metrics are not scaled to a uniform range. The metrics can be further categorized into common metrics and experiment-specific metrics. 
 
+
 Common metrics are used by each experiment as they are not specific to a specific experiments and can be evaluated by all experiments. These metrics include
 \begin{description}
-    \item [Price] The total price in US-Dollars of a query which includes the price for processing the input and the price for the output
-    \item [Time] The time needed from sending the query to the \ac{LLM} server until it responds. 
-    \item[ Data-clump-specific] Attributes of the data clump considered by the model. This includes the size, occurrence, affected files of the respective data clump. 
-    \item[Validity of the JSON] This metrics determines whether the output of the \ac{LLM} is valid \ac{JSON}. Invalid output can occur if the model hallucinates or the output is too large.
+    \item [Price:] The total price in US-Dollars of a query which includes the price for processing the input and the price for the output
+    \item [Time:] The time needed from sending the query to the \ac{LLM} server until it responds. 
+    \item[ Data-clump-specific:] Attributes of the data clump considered by the model. This includes the size, occurrence, affected files of the respective data clump. 
+    \item[Validity of the JSON:] This metrics determines whether the output of the \ac{LLM} is valid \ac{JSON}. Invalid output can occur if the model hallucinates or the output is too large.
 \end{description}
 
 
 On the other hand, experiment-specific metrics do only apply to a specific experiment and would not make sense for all experiments. These metrics are discussed in the subsections for each individual test. 
 
-For brevity reasons, the results of every metric are not discussed in this master thesis. All data such as figures or raw data is available in the directory \enquote{experimentA} of the digital appendix. 
+For brevity reasons, the results of every metric are not discussed in this master's thesis. All data such as figures or raw data is available in the directory \enquote{experiment1} of the digital appendix. 
 
 
 \subsection{Experiment 2A: Data clump detection}
@@ -124,12 +127,12 @@ The following metrics are used for evaluating this test:
 
 \begin{description}
 
-    \item[Correctness of output format]
+    \item[Correctness of output format:]
     As already noted, the correctness of the output format representing the data clump is essential. If the model reports in wrong format, the data must be interpreted again which increases the risk of faults complicates integrating the \ac{LLM}. This metric counts the number of deviations from the required output format.
 
-     \item [Surety of the results] In contrast to the preceding metric, not the exact output format is analyzed but the correctness of the entailed data. For instance, the model might return a wrong line number or method name which would have a significant impact on succeeding steps. This metric is calculated by subtracting the number of wrong information from the number of correct information. 
+     \item [Surety of the results:] In contrast to the preceding metric, not the exact output format is analyzed but the correctness of the entailed data. For instance, the model might return a wrong line number or method name which would have a significant impact on succeeding steps. This metric is calculated by subtracting the number of wrong information from the number of correct information. 
 
-     \item [Number of data clumps] This metrics describes how many data clumps are returned by the model. It does not differentiate whether these data clumps are virtually identical or whether they are data clumps at all. 
+     \item [Number of data clumps:] This metrics describes how many data clumps are returned by the model. It does not differentiate whether these data clumps are virtually identical or whether they are data clumps at all. 
      
 
    
@@ -150,8 +153,6 @@ Considering the effect of the temperature, the number of detected data clumps de
 The effect of the input type is also visible. Providing full files instead of code snippets decreases the surety.  Figure \ref{fig:detect_input_surety} compares the surety of both input formats via a box plot. The left box plot visualizes the surety if code snippets are provided. The surety has a median of 2.5. Additionally, the upper whisker has a value of 7.5, while the lower whisker has a value of -4.25. There is only one outlier.
 
 On the other hand providing full source files results in a smaller median of 1.0 as the right box plot shows. This box plot is more compact showing less variance within its interquartile range.  Additionally, there are more outliers which even reaches a surety of -15.  Since the surety is defined as the number of information that is correct minus the number of incorrect information, it can be seen that providing full source files is less reliable and results in more mistakes by the model. 
-
-%Changing the margin leads to very inconclusive results per project. \textit{ArgoUML} and \textit{Dolphinscheduler} have a higher surety if the margin is larger, which is not the case for \textit{RocketMQ}. However, there is a steady increase in the cost for higher margins for all projects.
 
 
 
@@ -183,17 +184,17 @@ Additionally for the output accuracy metric, the relevance of each parameter in 
 
 This experiment is a derivation from the preceding one. Similarly to the detection experiment, the goal is to detect data clumps in a software project.
 
-However, now the source code is modified to test whether the model can detect data clumps that the \textit{DataClumpDoctor} would not be able to detect because the name or the types of at least one data clump item is different. Three types of modification should be distinguished:
+However, now the source code is modified to test whether the model can detect data clumps that the \textit{DataClumpDoctor} would miss due to difference in the names or data types of the clump items. Three types of modification should be distinguished:
 
 \begin{description}
-    \item[Synonym] A synonym of variable name is used. For instance, the words \textit{change} and \textit{modification} have a very similar  meaning. 
+    \item[Synonym:] A synonym of variable name is used. For instance, the words \textit{change} and \textit{modification} have a very similar  meaning. 
 
-    \item[ Typographical error] A spelling error resulting in a slightly modified name. This could be caused by a developer not knowing the exact spelling of a word. However, it could also happen by accident if the developer mistypes while writing the source code.
+    \item[Typographical error:] A spelling error resulting in a slightly modified name. This could be caused by a developer not knowing the exact spelling of a word. However, it could also happen by accident if the developer mistypes while writing the source code.
 
-    \item [Type mismatch] Two variables that share the exact names but have a similar type .
+    \item [Type mismatch:] Two variables that share the exact names but have a similar type .
 \end{description}
 
-In each of these cases, it can be argued that a data clump can still exist even with these modifications. For synonyms and type mismatches however, allowing such changes might decrease the specificity of the detection because they might be purpose and cannot be easily refactored. 
+In each of these cases, it can be argued that a data clump can still exist even with these modifications. For synonyms and type mismatches however, allowing such changes might increase the chance of false positives. 
 
 \subsubsection{Methodology}
 
@@ -239,7 +240,9 @@ In summary, ChatGPT was able to detect data clumps with synonyms and typos while
     
     \label{fig:detect_syn_mod_type}
 \end{figure}
- The pie diagrams  \ref{fig:detect_syn_mod_type_argouml}, \ref{fig:detect_syn_mod_type_rocketmq}, and \ref{fig:detect_syn_mod_type_dolphinscheduler} depict the percentage of data clump detected by modification type. In the case of \textit{ArgoUML} and \textit{Dolphinscheduler},81~\% of the  data clumps detected were not modified. 18~\% of the detected data clumps have a synonym as a modification while the remaining 1~\% of the case belong the category data clumps with typos. No data clumps were detected that have a modified data type. 
+
+
+ The pie diagrams  \ref{fig:detect_syn_mod_type_argouml}, \ref{fig:detect_syn_mod_type_rocketmq}, and \ref{fig:detect_syn_mod_type_dolphinscheduler} depict the percentages of data clump detected by modification type. In the case of \textit{ArgoUML} and \textit{Dolphinscheduler}, 81~\% of the  data clumps detected were not modified. 18~\% of the detected data clumps have a synonym as a modification while the remaining 1~\% of the case belong the category data clumps with typos. No data clumps were detected that have a modified data type. 
 
  A stark contrast exists for \textit{RocketMQ}. 88~\% of the detected data clumps were modified by using a synonym. In 3~\% of the cases, the data clumps have a typo. A data type was modified in 4~\% of the identified data clumps. In the remaining 5~\%, the data clumps had no modifications. 
 
@@ -247,19 +250,19 @@ For \dolphinscheduler, the ratio of data clump with typos is 51~\% while in 47~\
 
 
 
-The input format also has some influence on the category of data clumps detected. Figures \ref{fig:detectSyn_full_files} and \ref{fig:detectSyn_snippets} shows the impact of the input format as a pie chart. 
+The input format also has some influence on the category of data clumps detected. Figures \ref{fig:detectSyn_full_files} and \ref{fig:detectSyn_snippets} show the impact of the input format as a pie chart. 
 
  26~\% of the detected data clumps have a synonym as a modification if full code files are submitted. This value increases to 39~\% if code snippets are provided. On the hand, the percentage of detected data clumps with typos decreases from 21~\% to 17~\%. Also, the number of detected data clumps with data type modifications decreases from 4~\% to 1~\%. Consequently, 49~\% of the detected data clumps have no modifications if complete files are submitted while this value is 43~\% in the case of code snippets.  
 
 \begin{figure}[ht!]
     \centering
-    \begin{subfigure}[t]{0.44\columnwidth}
+    \begin{subfigure}[t]{0.5\columnwidth}
         \includegraphics[width=0.8\columnwidth]{figures/chapter5/detectSyn_input_fullFile.pdf}
         \caption{Full code files}
         \label{fig:detectSyn_full_files}
     \end{subfigure}
-            \begin{subfigure}[t]{0.44\columnwidth}
-        \includegraphics[width=0.8\columnwidth]{figures/chapter5/detectSyn_input_snippet.pdf}
+            \begin{subfigure}[t]{0.5\columnwidth}
+        \includegraphics[width=1.3\columnwidth]{figures/chapter5/detectSyn_input_snippet.pdf}
         \caption{Code snippets}
        \label{fig:detectSyn_snippets}
     \end{subfigure}
@@ -270,8 +273,8 @@ The input format also has some influence on the category of data clumps detected
     \label{fig:detect_syn_input_type}
 \end{figure}
 
-\subsubsection{Threats of validity}
-In general, the threats of validity from the detection experiment apply here too. 
+\subsubsection{Threats to validity}
+In general, the Threats to validity from the detection experiment apply here too. 
 
 Additionally, the concrete modification applied to a data clump item can strongly affect the result. For instance, the Birbeck dataset contains mostly spelling mistakes made by children or illiterate adults so that developers could possibly make other mistakes which would be easier to spot for a model. 
 
@@ -292,9 +295,9 @@ The following metrics are used to evaluate this experiment:
 \begin{description}
     
 
-    \item [Surety] This metric is identical to the surety metric in the detection experiment. 
-    \item [Reason] A reason given by the model that explains why the model chose a particular data clump. 
-    \item [Position on ground truth] The minimal index of the data clump with respect to the occurrence, size, and affected files metrics.
+    \item [Surety:] This metric is identical to the surety metric in the detection experiment. 
+    \item [Reason:] A reason given by the model that explains why the model chose a particular data clump. 
+    \item [Position on ground truth:] The minimal index of the data clump with respect to the occurrence, size, and affected files metrics.
 \end{description}
 
 
@@ -306,21 +309,21 @@ For \argouml, in 42~\% of the cases, the model named the number of affected file
 
 Considering the project \rocketmq, it can be seen that the percentage of the reason \enquote{Affected files} is also relatively large with 33~\%. Additionally, the occurrence was mentioned in 38~\% of the cases. In 19~\% of the filtering proposals, the size of the data clump was named as the reason for refactoring. Lastly, the domain of the data clump variables was specified as the model's choice in 10~\% of the cases.
 
-In the case of \dolphinscheduler, the importance of the domain is greater since 36~\% of the suggestions named this reason. Additionally, the affected files played a less role as the percentage is 14~\%. The same applies to the reason \enquote{size} which is 4~\%. On the other hand, the occurrenceof the data clump remained an important reason for the model as it was named in 46~\% of the cases. 
+In the case of \dolphinscheduler, the importance of the domain is greater since 36~\% of the suggestions named this reason. Additionally, the affected files played a less role as the percentage is 14~\%. The same applies to the reason \enquote{size} which is 4~\%. On the other hand, the occurrence of the data clump remained an important reason for the model as it was named in 46~\% of the cases. 
 \begin{figure}[ht!]
     \centering
-    \begin{subfigure}[t]{0.44\columnwidth}
+    \begin{subfigure}[t]{0.48\columnwidth}
         \includegraphics[width=1\columnwidth]{figures/chapter5/filter_reason_argouml.pdf}
         \caption{ArgoUML}
         \label{fig:filter_reason_argouml}
     \end{subfigure}
-            \begin{subfigure}[t]{0.44\columnwidth}
+            \begin{subfigure}[t]{0.48\columnwidth}
         \includegraphics[width=1\columnwidth]{figures/chapter5/filter_reason_type_rocketmq.pdf}
         \caption{RocketMQ}
        \label{fig:filter_reason_rocketmq}
     \end{subfigure}
-        \begin{subfigure}[t]{0.5\columnwidth}
-        \includegraphics[width=1.5\columnwidth]{figures/chapter5/filter_reason_type_dolphin.pdf}
+        \begin{subfigure}[t]{0.6\columnwidth}
+        \includegraphics[width=1.3\columnwidth]{figures/chapter5/filter_reason_type_dolphin.pdf}
         \caption{DolphinScheduler}
         \label{fig:filter_reason_dolphinscheduler}
     \end{subfigure}
@@ -334,7 +337,7 @@ The position on the ground truth varied per project. The box plot in figure \ref
 
 For \argouml, the median is zero and no whiskers  are visible. However, a multitude of outliers up to 12 are present. This means that in most cases, the model chose the same data clump as a traditional metric. 
 
-On the other hand, \rocketmq shows that the model could choose other data clumps. Here, the lower whisker is 0 while the upper whisker is  3, The median is 2 meaning that the model more often returned a data clump that a traditional algorithm would would not suggest.
+On the other hand, \rocketmq shows that the model could choose other data clumps. Here, the lower whisker is 0 while the upper whisker is  3, The median is 2 meaning that the model more often returned a data clump that a traditional algorithm would not suggest.
 
 For \dolphinscheduler, the median is also 2 though in this case no whiskers are visible. This indicates that here also the model would return data clumps more difficult to detect via a classical algorithm. 
 \begin{figure}
@@ -345,7 +348,7 @@ For \dolphinscheduler, the median is also 2 though in this case no whiskers are 
 \end{figure}
 
 
-\subsubsection{Threats of validity}
+\subsubsection{Threats to validity}
 
 One threat of validity is   that only one data clumps is returned although it might make sense to return more (e.~g. three). Additionally, as a result of the similarity to the detection experiment, the flaws of the former can be flaws of the latter experiment. 
 
@@ -365,19 +368,19 @@ If, however, the \ac{LLM} extracts more functionality by creating new methods or
 In contrast, to the detection and filtering experiment, this experiment included actual modification to the source code. 
 
 The model is instructed to find and refactor all data clumps. 
-The model outputs by providing diff instruction as discussed in section \ref{sec:output_processing} and the modifications are applied.  The modified program is tested with the respective build system (gradle or maven). If the build fails, the model is provided with error messages and the content of the affected lines, and the model is instructed to fix these issues. If after five attempts, the project still does not compiles, no further attempts are made. 
+The model outputs by providing diff instruction as discussed in section \ref{sec:output_processing} and the modifications are applied.  The modified program is tested with the respective build system (Gradle or Maven). If the build fails, the model is provided with error messages and the content of the affected lines, and the model is instructed to fix these issues. If after five attempts, the project still does not compiles, no further attempts are made. 
 
 The following metrics are used for evaluating this test:
 
 \begin{description}
-    \item [Compilation attempts] The number of attempts remaining. For instance, if the model takes four iterations to fix all compilation issues, one iteration is remaining. 
-    \item[Final program validity] Whether a refactored program is compilable at the end. 
-   \item [Reference error ratio] This metric shows the ratio of reference errors over all compiler errors. Reference errors are errors about unknown methods, variables etc.  A reference error can be described as  a \enquote{good} error because it could be fixed more easily. On the other hand, a syntactical error like missing parentheses or non-closed comments are more difficult to handle. 
-    \item [Rich class] Whether the extracted class are more than mere data classes
+    \item [Compilation attempts:] The number of attempts remaining. For instance, if the model takes four iterations to fix all compilation issues, one iteration is remaining. 
+    \item[Final program validity:] Whether a refactored program is compilable at the end. 
+   \item [Reference error ratio:] This metric shows the ratio of reference errors over all compiler errors. Reference errors are errors about unknown methods, variables etc.  A reference error can be described as  a \enquote{good} error because it could be fixed more easily. On the other hand, a syntactical error like missing parentheses or non-closed comments are more difficult to handle. 
+    \item [Rich class:] Whether the extracted class are more than mere data classes
    
-    \item [Removed data clumps] This metric assesses how many data clumps were removed during the refactoring process
+    \item [Removed data clumps:] This metric assesses how many data clumps were removed during the refactoring process
 
-    \item [Removed variables] In contrast to the removed data clump metric, this metric counts the total number of fields and parameters removed during the refactoring process even if these removals do not lead to less data clumps, 
+    \item [Removed variables:] In contrast to the removed data clump metric, this metric counts the total number of fields and parameters removed during the refactoring process even if these removals do not lead to less data clumps, 
 \end{description}
 
 
@@ -412,7 +415,7 @@ Higher margins also led to a decrease in the number of removed data clumps as th
 For a margin of 0, there is a greater variance. The median is 1 while the upper whisker is nearly 6. The lower whisker is 0. A margin of 1 decreases the median number of removed data clumps and also the value of the upper whisker to about 3. A similar decrease happens if the margin is increased to 2. If the margin is 5 or 10, median becomes 0 while the upper whisker is close to 1. For all margins larger than 0 a significant amount of outliers are present indicating that while data clumps were removed seldom, there were instances where the removal was successful. 
 \begin{figure}
     \centering
-    \includegraphics{figures/chapter5/refactor_margin_removed_data_clumps.pdf}
+    \includegraphics[width=\columnwidth]{figures/chapter5/refactor_margin_removed_data_clumps.pdf}
     \caption{Box plot: Influence of margin on removed data clumps}
     \label{fig:refactor_margin_removedDataClumps}
 \end{figure}
@@ -421,7 +424,7 @@ For a margin of 0, there is a greater variance. The median is 1 while the upper 
 
 For the refactoring experiments, several limitation should be considered. Noteworthy, the number of data clumps transmitted is severely limited as the model should also correct errors which requires retransmitting files multiple times. In many cases, this repeated transmission can exceed the context window so that the number of data clumps (and hence in most cases the number of transmitted files)  needs to be reduced. 
 
-Additionally, in the validation phase, the instruction to fix errors is constant, namely \enquote{Fix all errors in the respective files}. In contrast to a human in the loop who might be able to help the model to solve the compiler errors, the model can only rely on the compiler errors and the content of the files affected by these compiler errors. This can be problematic if the model returns a specific correction output but this output cannot be parsed correctly (e.~g. wrong line numbers). In that case, no compiler errors are fixed and the model might be tempted to use the same output again until the five attempts are exhausted. This problem could only be prevented if concrete feedback is given which is outside of the scope of this master thesis. 
+Additionally, in the validation phase, the instruction to fix errors is constant, namely \enquote{Fix all errors in the respective files}. In contrast to a human in the loop who might be able to help the model to solve the compiler errors, the model can only rely on the compiler errors and the content of the files affected by these compiler errors. This can be problematic if the model returns a specific correction output but this output cannot be parsed correctly (e.~g. wrong line numbers). In that case, no compiler errors are fixed and the model might be tempted to use the same output again until the five attempts are exhausted. This problem could only be prevented if concrete feedback is given which is outside of the scope of this master's thesis. 
 
 \subsection{Discussion}
 
@@ -431,7 +434,7 @@ The results from all four experiments show that ChatGPT has potential to be used
 
 As outlined in experiment 2A, The model is capable of detecting some data clumps but due to output size limitation, the number of data clumps is limited. However, the limited number of data clumps might also be a sign of filtering so that non-important data clumps are ignored.
 
-Experiment 2B shows that the model can also detect data clumps that a tool like the \textit{DataClumpDoctor} would not be able to detect. This is useful as a single typo can invalidate a data clump relationship that would be undetected by a traditional tool. This also applies to synonym although one must be cautious as the risk of false positive is higher.
+Experiment 2B shows that the model can also detect data clumps that a tool like the \textit{DataClumpDoctor} would not be able to detect. This is useful as a single typo can invalidate a data clump relationship so that a traditional tool would not be able to detect this data clump. This also applies to synonym although one must be cautious as the risk of false positive is higher.
 
 The filtering experiment 2C illustrates that ChatGPT can also find a suitable data clump for refactoring given they have been already detected. This data clump is not always the one proposed by a traditional metric so that other reasons than size or occurrence are used to make a decision on what data clump to refactor. However, as the first experiment shows, the data clump proposed might not be a data clump that a developer wants to refactor. As a result, further investigations about the reasons developer would like to remove data clumps for are warranted.
 

@@ -10,6 +10,12 @@ The challenges vary depending on the specific uses of the \ac{LLM}. The followin
 
 Each usage can be performed independently from each other, but internally all previous steps must be conducted. For instance, a model instructed to refactor data clumps must find them first, then decide which data clumps are worthy to refactor (these could be all data clumps), and then refactor them. Similarly, a model instructed to filter data clumps must find them first, but does not need to refactor them.
 
+Section \ref{sec:input_format} outlines the strategy on how the existing context obtained by previous steps (e.~g. detected data clumps) can be conveyed to the model.
+
+Afterwards, section \ref{sec:output_processing} describes the reverse direction on how the output of the model can be interpreted so that they can be applied to the context or directly to the source code. 
+
+Lastly, section \ref{sec:proposal_handling} explains how multiple proposals by the model can be handled so that the inherent randomness of such models can be utilized. 
+
 \subsection{Input processing}\label{sec:input_format}
 
 \begin{table}[ht!]
@@ -37,7 +43,7 @@ The input provided to a model is strongly dependent on the purpose of the model.
 
 \subsubsection{AST}
 
-The \ac{AST} is an effective method to give the model all relevant information about the source code.  The \ac{AST} only contains a reduced structure of the source code and will therefore help to reduce processing cost. However, the \ac{AST} is usually not directly available but must be produced by other tools or ChatGPT (which means the source code has to be sent to the \ac{LLM} nevertheless). Additionally, there is no fixed format for the \ac{AST} which might complicate parsing and processing the \ac{AST} or the results by ChatGPT.
+The \ac{AST} is an effective method to give the model all relevant information about the source code.  The \ac{AST} only contains a reduced structure of the source code and will therefore help to reduce processing cost. However, the \ac{AST} is usually not directly available but must be produced by other tools or ChatGPT, necessitating that source code still be sent to the \ac{LLM}. 
 
 If ChatGPT is also tasked with refactoring, using \ac{AST} may not be as beneficial. Refactoring often involves updating method calls or variable usages, which may not be fully represented in the \ac{AST}. One could hypothetically submit both the \ac{AST} and the source code, enabling ChatGPT to use the \ac{AST} for detection and the source code for refactoring. However, this approach increases costs, and it is unclear whether it could degrade the quality since ChatGPT would need to process more data and establish a correlation between the source code and the \ac{AST}.
 
@@ -56,7 +62,7 @@ Consequently, the idea of the context as discussed in section \ref{sec:context} 
 
 
 
-Artificially enlarging the number of locations of interest is also a method worth discussing. Instead of transmitting only the line of the data clump items,  a small neighborhood or margin around these lines is transmitted, too. This helps the model to gain a better overview about the source code. For instance, these additional lines could include documentation or the usage of variables, thereby helping the \ac{LLM} in its task.
+To further improve the quality of \acp{LLM}, the number of lines can be increased. Instead of transmitting only the line of the data clump items,  a small neighborhood or margin around these lines is transmitted, too. This helps the model to gain a better overview about the source code. For instance, these additional lines could include documentation or the usage of variables, thereby helping the \ac{LLM} in its task.
 
 \begin{figure}
     \centering
@@ -65,12 +71,12 @@ Artificially enlarging the number of locations of interest is also a method wort
     \label{fig:margin_effect}
 \end{figure}
 
-Figure \ref{fig:margin_effect} illustrates the advantage of a larger margin size. The source code shows counters used for testing purposes and a possible way to reset them \footnote{This example is somewhat inspired by a JUnit5 data clump that was refactored as part of the evaluation in section \ref{sec:pull_request_eval}}. The first four fields are part of a data clump (the second class is not shown for brevity). Assume for the sake of this example that only the data clump item \enquote*{afterAll} is transmitted. If the margin is zero, only line 4 would be transmitted to the model (black rectangle). This means that the \ac{LLM} has only a scarce overview over the purpose of the variable.
-The green rectangle covers the area if a margin of one is used. Now, line 3 and 5 are also included. Since line 5 mentions something about tests, the model can infer where the data clump items are used and might improve its refactoring. The red rectangle represents a margin size of three. In this case, the full code block is transmitted, and the model can observe that it might be useful to include a reset method in the extracted class. 
+Figure \ref{fig:margin_effect} illustrates the advantage of a larger margin size. The source code shows counters used for testing purposes and a possible way to reset them. The first four fields are part of a data clump (the second class is not shown for brevity). Assume for the sake of this example that only the data clump item \enquote*{afterAll} is transmitted. If the margin is zero, only line 4 would be transmitted to the model (black rectangle). This means that the \ac{LLM} has only a scarce overview over the purpose of the variable.
+The green rectangle covers the area if a margin of one is used. Now, line 3 and 5 are also included. Since line 5 mentions something about tests, the model can infer where the data clump items are used and might improve its refactoring. The red rectangle represents a margin size of three. In this case, the full code block is transmitted. Now, the model can observe that it might be useful to include a reset method in the extracted class. 
 
 However, not only data clumps items could be used as the starting point of the additional lines. Many source code files contain a header and import statements in the beginning. This information can be beneficial especially in case of refactoring as the model can better understand the types of the variables or the context of the source code.
 
-In this master thesis a constant margin is considered. However, variable margins that depends on the programming language or statistics of the source code (average length of a method or documentation) could be considered too.
+In this master's thesis a constant margin is considered. However, variable margins that depends on the programming language or statistics of the source code (average length of a method or documentation) could be considered too.
 
 
 \subsubsection{Full source code}
@@ -83,7 +89,7 @@ Here also, the selection of the files is crucial to ensure sufficient quality. T
 
 
 \subsection{Output processing}\label{sec:output_processing}
-An \ac{LLM} on its own cannot change code or control a system since, for the purpose of this master thesis, it  can only output textual information. Therefore, each output from the model must be received and interpreted  in order to serialize them permanently. Two approaches are discussed. 
+An \ac{LLM} on its own cannot change code or control a system since, for the purpose of this master's thesis, it  can only output textual information. Therefore, each output from the model must be received and interpreted  in order to serialize them permanently. Two approaches are discussed. 
 
 Commonly, a human in the loop between the \ac{LLM} and the source code who reviews the output, interprets it and uses the gained knowledge to simplify the workflow. In the case of refactoring, the model can propose changes to the source code but cannot change the source code directly. Instead, a human in the loop has to read the refactoring suggestion, determine whether they are reasonable, and perform the suggested refactoring. In the last step, this also involves finding the affected files, change them, and test the changes. Hence, while an \ac{LLM} can help to make decisions, manual work must still be performed. The benefit of this manual work is that the human in the loop bears the responsibility by using the output from the model which can be one part to ensure the reliability of the refactoring. 
 
@@ -126,7 +132,7 @@ Therefore, the \ac{JSON} approach should be modified so that not full file conte
 
 Figure \ref{fig:json_based_changes} displays a \ac{UML} sequence diagram that shows how the diff-based approach works on a simple example. Here, the fields \textit{x}, \textit{y}, and \textit{z} are part of a data clump and need to be refactored. 
 
-The handler sends the file or a code snippets to an \ac{LLM}. The model processes the source code based on the instruction and generates a diff instruction. This diff instruction contains a line number, an old content, and a new content. The \ac{UML} note in the bottom right of the diagram shows a simplified diff instruction. Here, it instructs the handler to replace the content \enquote{int x} (which is abbreviated for brevity) in line 1 by \enquote{Point pt}. 
+The handler sends the file or a code snippets to an \ac{LLM}. The model processes the source code based on the instruction and generates a diff instruction. This diff instruction contains a line number, an old content, and a new content. The \ac{UML} note in the bottom right of the diagram shows a simplified diff instruction. Here, it instructs the handler to replace the content \enquote{int x; int y; int z} (which is abbreviated for brevity) in line 1 by \enquote{Point pt}. 
 
 This diff instruction is processed by the handler which changes the source code  and writes the modifications to the file system. 
 \begin{figure}[ht!]
@@ -145,20 +151,24 @@ One major issue is how to correctly apply the suggested changes if the model mak
 Two approaches are possible.
 In the first approach, the content at lines \textit{}{fromLine} to \textit{toLine} is replaced by \enquote{newContent}. This can be challenging if \enquote{newContent} has more lines than \enquote{oldContent}. Additionally, even if these  changes are correctly applied, later changes in the same file can become more problematic as the line number information might be outdated. 
 
-Alternatively, a replace method can be used. This means that the string \textit{oldContent} is replaced by \textit{newContent} without considering the line number information. This method prevents the issues of the first approach. Additionally, it might refactor more lines that the \ac{LLM} did not refactor for some reasons. This can have advantages but also challenges. For instance, an instruction to replace the curly bracket (\enquote*{\{}) by an empty string can have fatal implication in a java source code file as it will contain many of such braces and removing them all will lead to non-compilable programs. Additionally, this does not work if \textit{oldContent} for some reason does not exist in the file. For instance, the model might have added extra whitespaces to the old content so that a simple search-and-replace-strategy does not work. Furthermore, if oldContent is an empty string, replacing can lead to file corruption as the replacement operations are not developed for such an scenario. 
+Alternatively, a replacement method can be used. This means that the string \textit{oldContent} is replaced by \textit{newContent} without considering the line number information. This method prevents the issues of the first approach. Additionally, it might refactor more lines that the \ac{LLM} did not refactor for some reasons. This can have advantages but also challenges. For instance, an instruction to replace all curly brackets (\enquote*{\{}) by an empty string in a Java file can lead to non-compilable programs.  
+Additionally, this does not work if \textit{oldContent} for some reason does not exist in the file. For instance, the model might have added extra whitespaces to the old content so that a simple search-and-replace-strategy does not work. Furthermore, if \textit{oldContent} is an empty string, replacing can lead to file corruption as the replacement operations are not developed for such an scenario. 
 
-On the other hand, if multiple methods share the same parameters, the replace approach can change them all at once even if the output of the model does not suggest such changes. While adhering to the output of the \ac{LLM} is useful, it is restricted due to its output size limitations so that this method can forestall incomplete refactoring. 
+On the other hand, if multiple methods share the same parameters, the replace approach can change them all at once even if the output of the model does not suggest such changes. While adhering to the output of the \ac{LLM} is useful, it is restricted due to its output size limitations. Consequently,  this method can forestall incomplete refactoring. 
 
 As a result, the decision which strategy to use is complex and can strongly impact the number of changes until the source code can build again. In general, the shorter the old content is, the more likely should the first approach be used, but exact criteria cannot be given. 
 
 
-In this master thesis both approaches are employed. The second approach is always tested first if the changes exceed a threshold of ten characters. If this approach does not work (e.~g. \enquote{oldContent} does not exist in the file, the line-by-line replacement method is used.  
+In this master's thesis both approaches are employed. The second approach is always tested first if the changes exceed a threshold of ten characters. If this approach does not work (e.~g. \enquote{oldContent} does not exist in the file, the line-by-line replacement method is used.  
 
 \subsubsection{Handling invalid \ac{JSON} objects}
 
 When using the \ac{JSON} output format, it is essential to deal with edge cases where the output is not valid \ac{JSON}. This problem can happen in two scenarios.
 
-Firstly, not all \acp{LLM} support \ac{JSON}-only modes. This means that that the content of the model cannot be forced to contain only \ac{JSON} but might contain additional text that cannot be parsed. While the model used in this thesis supports this output mode, it is useful to keep these edge cases in mind. This edge case can be circumvented by finding the first opening curly brace \enquote{\{} in the response and the last closing curly brace \enquote{\}} because the string between should be valid \ac{JSON}. As a result, any text before or after the \ac{JSON} is ignored and cut off. 
+Firstly, not all \acp{LLM} support \ac{JSON}-only modes. This means that that the content of the model cannot be forced to contain only \ac{JSON} but might contain additional unparsable text that cannot be parsed. 
+
+The model used in this thesis supports the \ac{JSON}-only mode. Nevertheless, it is still useful to keep these edge cases in mind. This edge case can be circumvented by finding the first opening curly brace \enquote{\{} in the response and the last closing curly brace \enquote{\}} because the string between should be valid \ac{JSON}. 
+As a result, any text before or after the \ac{JSON} is ignored and cut off. 
 
 Secondly, one problem for \acp{LLM} is that they generate token by token and therefore cannot pre-plan their output. Usually, this does not cause problems. 
 
@@ -170,7 +180,7 @@ The easiest solution to this problem is to simply ignore the output as the respo
 However,  one can still try to parse the output as the incomplete \ac{JSON} might still contain relevant data (e.~g. refactoring instructions). While the refactoring is probably incomplete, it might be a good start and possible errors can be fixed in the validation step.
 
 
-\subsection{Proposal handling}
+\subsection{Proposal handling}\label{sec:proposal_handling}
 
 One issue that might occur while working with \ac{LLM} is that their output quality can vary. The same prompt can generate various outputs of which some might be useful and some are not useful. This, however, is also an advantage of \acs{LLM}. Refactoring data clumps can be performed in many different ways and therefore, the first output might not be the best output. 
 
@@ -186,7 +196,7 @@ As an alternative, one could count the number of changed lines in a proposal and
 
 Another possible idea is to let the user decide. For instance, for each proposal, a new branch in the \ac{VCS} could be created so that a user can choose manually which version would be best one. After choosing a particular branch, the changes could be merged back to the original branch. Alternatively, an interactive dialog  could allow the user to zap through all proposals without changing branches. When selecting a proposal, the changes from the previous proposal are deleted and the new proposal is applied to the source code. However, this strategy requires active human intervention. 
 
-This master thesis does not attempt to explore which proposal selection strategy is suitable or whether other strategies would be better. 
+This master's thesis does not attempt to explore which proposal selection strategy is suitable or whether other strategies would be better. 
 
 \subsubsection{Sequential proposals}
 

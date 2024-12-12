@@ -27,20 +27,22 @@ However, there might be more complex cases. For instance, the source code could 
 
 
 \subsubsection{File filtering}\label{subsub:filtering_files}
-After retrieving the project files, a file filtering process is important. A software project consists of many artifacts like actual source code, images, libraries, or other resources. For this master thesis, only source code files are pertinent for data clump detection. 
+After retrieving the project files, a file filtering process is important. A software project consists of many artifacts like actual source code, images, libraries, or other resources. For this master's thesis, only source code files are pertinent for data clump detection. 
 
 
-However, not every source code file might be analyzed for data clumps. For instance, parts of the projects must not be refactored, or a re-factorization would be too time-consuming. As outlined in chapter \ref{sec:introduction}, the cost of detecting data clumps might need to be minimized. Therefore, filtering rules might be necessary to reduce the scope of the files that are considered in the the subsequent steps.  
+However, not every source code file might be analyzed for data clumps. For instance, parts of the projects must not be refactored, or a re-factorization would be too time-consuming. As outlined in chapter \ref{sec:introduction}, the cost of detecting data clumps might need to be minimized. Therefore, filtering rules might be necessary to reduce the scope of the files that are considered in the subsequent steps.  
 
 File filtering can be achieved through several methods:
 
 With pattern-based filtering, inclusion rules and exclusion rules can be used to filter out irrelevant files.  To facilitate these rules, regex patterns can be used.  Each inclusion pattern specifies which file must be included, and each exclusion pattern specifies files that must be excluded. For instance, consider \textit{includeGlobs=[\enquote{.*\.java}]} and \textit{excludeGlobs=\enquote{.*Main.java}}. In this case, all Java files are included, if however a file ends with \enquote{Main.java} it is excluded.
 
-The precedence between include and exclude rules can have a major impact on defining the correct rules. In the example above, exclusion rules override inclusion rules.  This means that few files can be excluded with few exclusion rules. If however only a small set of files should be considered while excluding a larger set of files, this prevalence should be reversed so that inclusion rules dominates over exclusion rules. In this master thesis, the latter approach will be chosen due to its  compatibility with programs like PMD and its ability to simplify partial analysis of software projects. 
+The precedence between include and exclude rules can have a major impact on defining the correct rules. In the example above, exclusion rules override inclusion rules.  This means that many files can be included at large but certain files can be excluded. If however only a small set of files should be considered while excluding a larger set of files, this prevalence should be reversed so that inclusion rules dominates over exclusion rules. In this master's thesis, the latter approach will be chosen due to its  compatibility with programs like \textit{PMD} and its ability to simplify partial analysis of software projects. 
 
 More complex filters can also be used. For instance, only considering files changed by the latest commit or rank the files given a specific metric and keep the best files. Details of these more complex filtering methods can be found in section \ref{sec:data_clump_filtering}
+
+
 \subsubsection{Extraction of AST}
-Then,  the source code needs to be simplified as comments, the method bodies, and other language parts are irrelevant for detecting data clumps. This could be achieved by extracting a subset of the \ac{AST} from the source code, which includes all the relevant information to identify data clumps.
+This step is required for some tools like the \textit{DataClumpDoctor} as comments, the method bodies, and other language parts are irrelevant for detecting data clumps. Generating an \ac{AST} that does not contain this information can speed up the detection process. This could be achieved by extracting a subset of the \ac{AST} from the source code, which includes all the relevant information to identify data clumps.
 
 
 \subsubsection{Data clump detection}
@@ -51,7 +53,9 @@ The handler should take care that it only finds data clumps, and not related par
 
 Moreover, each data clump must receive an unique ID. While the structure of this ID is not relevant and does not need to be parsed, concatenating the available information of the data clump (e.~g. class name, data clump items) is a suitable way to generate such an ID
 
-\subsubsection{Data clump filtering or prioritization} \label{subsub:filtering_data_clumps}
+\subsubsection{Data clump filtering or prioritization} 
+\label{subsub:filtering_data_clumps}
+
 In section \ref{subsub:filtering_files}, a filtering by files is performed. However, even if many data clumps were detected, they do not always need to be refactored. One can decide to ignore certain data clumps and refactor them later or even never. 
 
 There can be many reasons for this approach. For instance, parts of the source code that are infrequently updated might be too risky for refactoring since any automatic tool might cause bugs or invalid code that is hard to fix because the developers are unfamiliar with this part of the source code. On the contrary, a part of the source code that is updated more frequently might be in an intermittent state, so that refactoring is currently not recommendable. Also, as noted in section  \ref{subsub:filtering_files}, if a service like ChatGPT is used, the cost of transferring many source code files with data clumps might be too high. 
@@ -62,6 +66,7 @@ Therefore, filtering out certain data clumps considered not worthy of refactorin
 There are several methods to filter out data clumps which will be discussed in section \ref{sec:data_clump_filtering}
 
 \subsubsection{Name finding}\label{subsec:chap3_data_clump_name_finding}
+
 The next step of the pipeline is to find a suitable identifier of the extracted class.
 
 There are some criteria for this identifier. It should be a valid name in the respective programming language so that, in general, only alphanumerical characters may be chosen. It should not conflict with other identifiers as it may lead to bugs or compiler errors, and it should be readable and, as best as feasible, represent the fields of the class.
@@ -80,7 +85,7 @@ After a class name has been found, a respective class can be added to the source
 
 In contrast to the name finding step of the pipeline, this process can be automated more straightforwardly because it does not require creativity and a general template can be used, that is:
 \begin{itemize}
-    \item Create a private field for each variable of the data clump
+    \item Create a private field for each variable of the data clump.
     \item Create a public getter for each variable of the data clump. This getter may be named \textit{getVar} where \textit{Var} is replaced by the capitalized name of the variable. The method returns the value of the respective field
     \item Similarly, a setter \textit{setVar} may be created that has no return type, accepts a new value as a parameter, and sets the respective field. 
     \item A constructor that initializes the fields with provided or default values may be created. 
@@ -95,10 +100,10 @@ After extracting a class, the next step is to refactor the source code to remove
 In case of a field data clump, the following transformations need to be applied.
 
 \begin{enumerate}
-    \item For each class in which the same field data clump is detected, the data clump variables are replaced by an object of the extracted class
-    \item A getter of that object is created that has the same access level as the highest access level of the data clump items
-    \item If a data clump item is read, it must be replaced by a call of the respective getter of the extracted class
-    \item Similarly, if a data clump item is written to, the assignment must be replaced by a setter
+    \item For each class in which the same field data clump is detected, the data clump variables are replaced by an object of the extracted class.
+    \item A getter of that object is created that has the same access level as the highest access level of the data clump items.
+    \item If a data clump item is read, it must be replaced by a call of the respective getter of the extracted class.
+    \item Similarly, if a data clump item is written to, the assignment must be replaced by a setter.
 \end{enumerate}
 
 
@@ -123,6 +128,6 @@ Another metric for the evaluation could be the running time. A substantial runni
 
 \subsubsection{Committing}
 
-After all changes are made,they  are still local and not part of the \ac{VCS}. As a result, they must be committed and pushed so that every developer of the software project has access to the changes by the refactoring. Hence, it can be viewed as the reverse of the code obtaining step. 
+After all changes are made, they  are still local and not part of the \ac{VCS}. As a result, they must be committed and pushed so that every developer of the software project has access to the changes by the refactoring. Hence, it can be viewed as the reverse of the code obtaining step. 
 
 In this step, a suitable commit message should be chosen. This could also be done via ChatGPT.    Also a manual message based on the changed files might be sufficient. Further issues that might arise is whether a new branch should be created for the refactoring and how humans or other automatic tools (Continuous integration continuous development) should be used to validate the refactoring.  

@@ -6,27 +6,27 @@ The main tool to detect  data clumps is the \textit{DataClumpDoctor}. As this pr
 
 The \textit{DataClumpDoctor} performs both the \ac{AST} generation step and the data clump detection step although these two steps are internally separated.
 
-If a \ac{AST} context is already present, it is re-used. Otherwise, the \ac{AST} context is generated. Here, the file filtering inclusion and exclusion rules must be applied as only the generated \ac{AST} files form the foundation for the \textit{DataClumpDoctor} to detect data clumps. Files  not represented by an \ac{AST} file are ignored. Since the detector internally uses \textit{PMD}, inclusion and exclusion rules can be set by creating a \enquote{custom-java-ruleset.xml} file. This file is located inside the Java-Archive file used by the detector and must be updated whenever \ac{AST} files are generated to apply the current filtering rules. 
+If a \ac{AST} context is already present, it is re-used. Otherwise, the \ac{AST} context is generated. Here, the file filtering inclusion and exclusion rules must be applied as only the generated \ac{AST} files form the foundation for the \textit{DataClumpDoctor} to detect data clumps. Files  not represented by an \ac{AST} file are ignored. \textit{PMD} is used internally by the detector. As a result, inclusion and exclusion rules can be set by creating a \enquote{custom-java-ruleset.xml} file. This file is located inside the Java-Archive file used by the detector and must be updated whenever \ac{AST} files are generated to apply the current filtering rules. 
 
 After that, the \textit{DataClumpDoctor} loads the \ac{AST} files and detects the data clumps by comparing the identifiers and types of variables that might constitute a data clump, thereby requiring strict equality. These detected data clumps are saved in a separate file and can be re-used in the pipeline. 
 
-One issue with the \textit{DataClumpDoctor} is its handling of large projects. While a concrete \ac{LOC} number cannot be given, at some points analyzing large projects becomes infeasible leading to crashes or prolonged running times. This can be explained by considering that  the number of detected data clumps grows quadratically with the actual number of data clump holders. Due to the structure of the reporting format as discussed in appendix \ref{app:data_clump_format}, there is a significant amount of repetition. For sufficiently large projects, this can be a problem it the data clump information needs to be serialized as NodeJS is not optimized for these tasks. While changing the format is one solution to this problem, it can be argued that using previous file filters is more suitable as the data clump detection results from large projects are difficult to evaluate. 
+One issue with the \textit{DataClumpDoctor} is its handling of large projects. While a concrete \ac{LOC} number cannot be given, at some points analyzing large projects becomes infeasible leading to crashes or prolonged running times. This can be explained by considering that  the number of detected data clumps grows quadratically with the actual number of data clump holders. Due to the structure of the reporting format as discussed in appendix \ref{app:data_clump_format}, there is a significant amount of repetition. For sufficiently large projects, this serialization can be problematic as NodeJS is not optimized for these tasks. Changing the format is one solution to this problem. However, using previous file filters might be more suitable as the data clump detection results from large projects are difficult to evaluate. 
 
 \subsection{Name finding}
-Finding a suitable name for the soon-to-be-extracted class is the next step  that must be implemented. Two approaches are chosen.
+The next step involves finding a suitable name for the class soon to be extracted. Two approaches are chosen.
 
 The first approach is the classic approach that was used before the advent of \acs{LLM}. By concatenating all field names of the extracted class, a valid class name can be generated. For instance, a class with the fields \textit{x}, \textit{y}, and \textit{z} could be named \textit{XYZ}. In this example, the field names are capitalized and directly joined without any separator, however, other options might be better dependent on the project's style guidelines. 
 
 The advantage of this manual method is that the generated names are very unique and with a high probability will not conflict with other names because they are very artificial. Nevertheless, they lack creativity and in most cases a developer will need to choose a better name in order to improve readability. 
 
 
-On the other hand, a suitable name for the extracted class of a data clump can be chosen by using the creativity of \acs{LLM}.  For this the model has to know the names of the variables of the data clump. It is also useful to include the qualified type of each data clump item because this type contains additional information to generate a more suitable name. For instance, the qualified name could contain the name of the project to analyze, the location of the type,     and the range of possible values that the variable can have.
+On the other hand, a suitable name for the extracted class of a data clump can be chosen by using the creativity of \acs{LLM}.  For this end, the model has to know the names of the variables of the data clump. It is also useful to include the qualified type of each data clump item because this type contains additional information to generate a more suitable name. For instance, the qualified name could contain the name of the project to analyze, the location of the type,     and the range of possible values that the variable can have.
 
-While using \acs{LLM} for name finding, excessive name caching can be useful to save costs and resources. The same combination of data clump items will probably result in the same class name. In order to prevent the extraction of classes with similar purposes, it is therefore useful to only ask the model if the types-names identifier has not occurred before. 
+Using \acs{LLM} for name finding can benefit from  name caching to save costs and resources. The same combination of data clump items will probably result in the same class name. In order to prevent the extraction of classes with similar purposes, it is therefore useful to only ask the model if the types-names identifier has not occurred before. 
 
 A related issue to name finding is the location of the extracted class. Here, one has to differentiate  between data clumps existing in a single file and data clumps connecting multiple files. In the former case, the location of the extracted class can be an already existing file, namely the file of the data clump  while in the latter case, a new class should be created.
 
-Using an existing class can be problematic because the succeeding step (class extraction) must be mindful that an existing class is used as it could override the file. Additionally, integrating the new class into the existing class can be challenging. Should the new class be an inner class of some class? In Java, should the inner class be static?  Creating an inner class requires strategic syntactical modification of the source code which would require specialized handlers. As a result, they are not implemented in this master thesis, but could be. 
+Using an existing class can be problematic because the succeeding step (class extraction) must take care that the existing class does not accidentally override the file. Additionally, integrating the new class into the existing class can be challenging. Should the new class be an inner class of some class? In Java, should the inner class be static?  Creating an inner class requires strategic syntactical modification of the source code which would require specialized handlers. As a result, they are not implemented in this master's thesis, but could be. 
 
 On the other hand, using a completely new file is easier to implement. However, one has to choose the path of the extracted class. For instance, a data clump might be spread over \textit{n} files each of which is in a separate directory, thereby creating a theoretical possibility of \textit{n} candidates as the output directory. 
 One also has to be mindful about any name conflicts that might occur. If the suggested name already exists, it will lead to conflicts.
@@ -71,7 +71,7 @@ This handler works with all programming languages as it does not parse the sourc
 
 This simple approach has two issues. First of all, one must determine where to search. Searching the whole project will require a significant amount of time. Alternatively, only the files containing the data clump or the respective folder can be traversed.
 
-Moreover, this method will lead to more false positives because it disregards the scope of variables. For instance, searching for the variable name \textit{foo} will also match local variables named \textit{foo}. Therefore, a match might not be part of a data clump, and refactoring this match can lead to more harm than good. 
+Moreover, this method will tend to result in more false positives because it disregards the scope of variables. For instance, searching for the variable name \textit{foo} will also match local variables named \textit{foo}. Therefore, a match might not be part of a data clump, and refactoring this match can lead to more harm than good. 
 
 This handler works best if combined with an \ac{LLM}. The model can decide for each reference whether it is truly relevant for data clump refactoring purposes. It might also propose a more sophisticated refactoring idea by using these non-data-clump references. 
 
@@ -88,7 +88,7 @@ In many cases, IntelliJ can find all references automatically and categorize the
 
 However, this does not always happen. A project can be loaded wrongly so that  finding references of a method or field can lead to undefined behavior. Sometimes all references are correctly found, sometimes only a subset of the references are found, and sometimes no references are detected. This could be explained by invalid caches or unsupported projects.
 
-The impact of this problem is especially significant because a consistent way to check  whether a project has successfully loaded is not available. This means that the reference finding via \ac{PSI} can be highly unreliable. 
+The impact of this issue is especially significant because a reliable way to check  whether a project has successfully loaded is not available. This means that the reference finding via \ac{PSI} can be highly unreliable. 
 
 One solution for these issues is to open the project in IntelliJ at least once  on the same computer running the tool, so that all references can be loaded. Therefore, using IntelliJ as the main \ac{IDE} of the project to analyze will maximize the chance of finding all references.
 
@@ -111,7 +111,7 @@ Regardless of how the reference issue is solved, IntelliJ can now perform the re
         \item First, for each argument provided in a method call it is determined whether the argument is connected to a data clump variable (i.~e. it provides a value to a parameter that is part of a data clump) 
         \item The position of those arguments is stored, and a reference to the argument is stored for further processing.
         \item Since the extracted class is known and existing, a matching constructor is determined to support all arguments to the data clump variables of the method call. 
-        \item For each argument to a data clump variable, the argument is inserted into the matching position of the constructor, and the argument is removed in the original method call. 
+        \item For each argument to a data clump variable, the argument is inserted into the matching position of the constructor. Afterwards,  the argument is removed in the original method call. 
         \item the constructor call is added at the position of the method  where the parameter of the extracted class is expected. 
         
     \end{enumerate}

@@ -9,18 +9,18 @@ The term \ac{LLM} refers to a machine learning model that can generate and under
 An \ac{LLM} is trained on a large data set of texts. These texts can come from books, internet pages or other textual sources. The input data is then prepared and sanitized to avoid biases and factual errors.
 
 
-Then, the training process is performed. By word embedding, the relationship between words is trained such that the model learns the semantic relationship between words. For instance it can learn that cats are animals  or that there is a relationship between men and women. This relationship is represented as vectors; for example, applying the relationship \enquote{men to women} to \enquote{king} results in \enquote{queen}.
+Then, the training process is performed. By word embedding, the relationship between words is trained such that the model learns the semantic relationship between words. For instance, it can learn that cats are animals  or that there is a relationship between men and women. This relationship is represented as vectors; for example, applying the relationship \enquote{men to women} to \enquote{king} results in \enquote{queen}.
 
 Which this training, the model can generate coherent texts based on an input that attempts to satisfy any query.
 
 
-For instance, given the text \enquote{How are}, the model  has a access to a corpus of texts where this sentence ends with \enquote{you}. Hence, it is likely to finish the sentence with this word. 
+For instance, given the text \enquote{How are}, the model  has access to a corpus of texts where this sentence ends with \enquote{you}. Hence, it is likely to finish the sentence with this word. 
 
 To improve these results, fine tuning is performed.  For example, humans evaluate the \ac{LLM} outputs to correct errors and enhance performance for specific tasks.
 
 
 
-Since source code can be viewed as a language, the methods can be applied too. However, specific fine-tuning is needed as source code  has a stricter syntax and a different data set(e.~g. public source code repositories).
+Since source code can be viewed as a language, the methods can be applied too. However, specific fine-tuning is needed as source code  has a stricter syntax and a different data set (e.~g. public source code repositories).
 
 It should be noted that an \ac{LLM} still has no sentience. Even if it seems to produce clear and meaningful output, it is still not aware of the inherent meaning. This can result in logical and confident output that is nevertheless wrong.~\cite{Amaratunga2023}
 
@@ -29,7 +29,7 @@ It should be noted that an \ac{LLM} still has no sentience. Even if it seems to 
 \label{sec:chatgpt}
 
 
-ChatGPT~\cite{ChatGPT_url} is a \ac{LLM} developed by OpenAI and released in November 2022. As a \ac{LLM}, ChatGPT can interpret user queries and return an appropriate response. 
+ChatGPT~\cite{ChatGPT_url} is an \ac{LLM} developed by OpenAI and released in November 2022. As a \ac{LLM}, ChatGPT can interpret user queries and return an appropriate response. 
 
 A query can be a question or a prompt directing ChatGPT to answer a question or provide some output. The range of topics ChatGPT can help with is basically unlimited. For instance, ChatGPT can help with math, history, politics, or coding topics. ChatGPT can also understand programming language and therefore, help developers to code.  
 
@@ -46,7 +46,7 @@ Figure \ref{fig:chatgpt_browser} illustrates how ChatGPT can be used in the brow
     \caption{ChatGPT in the browser}
     \label{fig:chatgpt_browser}
 \end{figure}
-In the main panel that encompasses the most area of the figure, a chat is visualized. This is the chat with the ChatGPT model. The queries are headlined with \textit{You} and the responses with \textit{ChatGPT}. In this example, ChatGPT is asked to create a \textit{hello world} program with gradle. As a response, the model returned code blocks that the user can simply copy and use. Also descriptions are provided to explain the context and usage of the code.
+In the main panel that encompasses most of the area of the figure, a chat is visualized. This is the chat with the ChatGPT model. The queries are headlined with \textit{You} and the responses with \textit{ChatGPT}. In this example, ChatGPT is asked to create a \textit{hello world} program with Gradle. As a response, the model returned code blocks that the user can simply copy and use. Also descriptions are provided to explain the context and usage of the code.
 
 On the right side, all conversations with ChatGPT are listed. For instance, there is a conversation about \enquote{IntelliJ PSI Modification Fix}. A user can have multiple independent conversations where each has its own context. 
 
@@ -55,7 +55,7 @@ In order to utilize the ChatGPT \ac{API}, a user has to create an OpenAI account
 
 A token is the smallest unit used by ChatGPT to process a query. For instance, a token could be one English word, a syntactical part of a programming language, a number, or a similar discrete segment of a query. According to OpenAI, a token roughly equates 3/4 of a word, so 100 tokens are about 75 words. However, this is just an estimate for natural language texts in the English language. 
 
-The \ac{API} itself used JSON combined with \ac{HTTP}. For the purpose of this master thesis, only a subset of the available means to use the \ac{API} will be explained because the whole \ac{API} would be too complex and outside the scope this master thesis. 
+The \ac{API} itself used JSON combined with \ac{HTTP}. For the purpose of this master's thesis, only a subset of the available means to use the \ac{API} will be explained because the whole \ac{API} would be too complex and outside the scope this master's thesis. 
 
 Listing \ref{lst:chatgpt_api} shows how an \ac{API} query may look like if it used via \textit{curl} which is a tool to  perform \ac{HTTP} requests:
 
@@ -105,7 +105,7 @@ Some recent commercial \acp{LLM} services are Claude~\cite{claude} or Gemini~\ci
 A different method  is to use self-hosted \acp{LLM}.
 Self-hosting means that the user of a \ac{LLM} has to provide for the infrastructure and resources to run and employ the model. For instance, a separate server could be configured that runs a large language model and listens to requests. This server could be directly set up by the user or rented from another organization (e.~g. virtual private server). 
 
-With this approach, costs can be saved. Instead of being dependent on the price model of OpenAI which can be subject to changes, the user has to pay for the actual costs (e.~g. the monthly rent for a server, the power bills, hardware etc). These might amortize after some years but this is not certain.
+With this approach, costs can be saved. Instead of being dependent on the price model of OpenAI which can be subject to changes, the user has to pay for the actual costs (e.~g. the monthly rent for a server, the power bills, hardware etc.). These might amortize after some years but this is not certain.
 
 Moreover, privacy is more preserved since data does not flow to OpenAI but remains in the control of the user. This is especially important in regions with stricter privacy laws (e.~g. European Union).
 
@@ -129,21 +129,22 @@ While using  \ac{LLM} for refactoring brings many advantages  and possibilities,
 
 \subsubsection{Advantages}
 
-First of all, large language models are very flexible. A normal refactoring algorithm needs to consider many situations. For instance, a traditional approach that modifies the method signature in a class might not work on an interface. A large language model does not need to be adapted to all edge cases but often finds a suitable solution to a problem because it is not restricted to a specific refactoring process.~\cite{shirafuji2023refactoring}
+First of all, large language models are very flexible. A normal refactoring algorithm needs to consider many situations. For instance, a traditional approach that modifies the method signature in a class might not work on an interface. In contrast, a large language model does not need to be adapted to all edge cases but often finds a suitable solution to a problem because it is not restricted to a specific refactoring process.~\cite{shirafuji2023refactoring}
 
-Additionally, an \ac{LLM} is more similar to a human as it is more  \enquote{creative}. While it is still a computer model and does not win the Turing-Test~\cite{turing_test}, a \ac{LLM} can refactor code in a manner more closely as a human being would do. For instance, it can suggest class names that are related to the topic of the class, which a human being would also consider, while traditional approaches would use placeholder names, concatenation of field names or other simple name construction algorithms.~\cite{shirafuji2023refactoring}
+Additionally, an \ac{LLM} is capable of producing outputs that appear to be human-like. While it is still a computer model and does not win the Turing-Test~\cite{turing_test}, a \ac{LLM} can refactor code in ways that mimic human approaches. For instance, it can suggest class names that are related to the topic of the class, which a human being would also consider, while traditional approaches would use placeholder names, concatenation of field names or other simple name construction algorithms.~\cite{shirafuji2023refactoring}
 
 Large language models are also extensible. For instance, if another programming language is used, an \ac{LLM} can be easily adapted, while a traditional refactoring approach would require more effort to be language-agnostic.
 
-Moreover, an \ac{LLM} can refactor the code in more ways than instructed. While a model can be specifically instructed to refactor data clumps, it might also correct formatting errors, spelling mistakes, or other code smells. While the focus of this master thesis will be on data clumps, other code smells are important too and might be more serious. Using a  \ac{LLM} allows developers to fix more code smells without developing and testing more tools to refactor multiple code smells. As they are better to understand the context of the code than a traditional approach, the quality of the code can therefore be improved.~\cite{shirafuji2023refactoring}
+Moreover, an \ac{LLM} can refactor the code in more ways than instructed. While a model can be specifically instructed to refactor data clumps, it might also correct formatting errors, spelling mistakes, or other code smells. While the focus of this master's thesis will be on data clumps, other code smells are important too and might be more serious. Using a  \ac{LLM} allows developers to fix more code smells without developing and testing more tools to refactor multiple code smells. As they are better to understand the context of the code than a traditional approach, the quality of the code can therefore be improved.~\cite{shirafuji2023refactoring}
 
-Additionally, \acp{LLM} employ a interaction-based learning model which significantly facilitates the integration of developer feedback in real-time. This dynamic learning process allows \acp{LLM} to progressively refine and optimize their suggestions based on continuous interactions with developers.~\cite{10.1145/3581641.3584037} 
-%Furthermore, \ac{LLM} can adapt to the coding style of the source code. If for instance, the source code used the \enquote{snake\_case} or the \enquote{pascalCase} naming convention, the model can detect this convention and use it for its own refactoring (e.~g. creating new methods, variables or classes). A traditional approach would need to be configured for each project to use the right convention so that the generated code might look more artificial as it does not not fit to the rest of the code.
+Additionally, \acp{LLM} employ conversational history. During a conservation, a model can  improve its output by reacting to further input from a developer or other sources (e.~g- compiler errors). Therefore, they can correct themselves which improves their usability.~\cite{10.1145/3581641.3584037} 
+
+
 
 
 \subsubsection{Disadvantages}
 
-First of all, \acp{LLM} are not trustworthy. They are often confident in their answers which nevertheless are wrong. This confidence can often be broken by asking subsequent questions which lead the \ac{LLM} to rethink the answer. however, doing this in an automatic way is challenging.~\cite{azaria2023internal}
+First of all, \acp{LLM} cannot always be trustworthy. They are often confident in their answers which nevertheless are wrong. This confidence can often be broken by asking subsequent questions which lead the \ac{LLM} to rethink the answer. however, doing this in an automatic way is challenging.~\cite{azaria2023internal}
 
 Additionally, \acp{LLM} use randomness in their answers which means that the same query can result in different replies. The factors influencing the reply are generally not known and should not be assumed. As a result, requirements regarding a specific output format may be ignored by the model so that developers using a \ac{LLM} must always consider how to parse non-adhering output. ~\cite{hu2023large}
 
@@ -225,7 +226,7 @@ Also the output size of an \ac{LLM} is often limited. This means that generating
 \subsubsection{Choosing the right parameters}
 When dealing with an \ac{LLM}, a user must configure the model. The most major settings to be configured are the model itself and the temperature.
 
-In this master thesis, the ChatGPT \ac{API} with the model \textit{gpt-4-1106-preview} is used as it provides a larger context  and output size and supports outputting in \ac{JSON} only. However, the cost associated with this model can be a disadvantage. Alternatively, the model \textit{gpt-3.5-turbo-1106} is cheaper but is not as thoroughly trained. For other providers of \acp{LLM}, other models are available that have their strengths and weaknesses.  
+In this master's thesis, the ChatGPT \ac{API} with the model \textit{gpt-4-1106-preview} is used as it provides a larger context  and output size and supports outputting in \ac{JSON} only. However, the cost associated with this model can be a disadvantage. Alternatively, the model \textit{gpt-3.5-turbo-1106} is cheaper but is not as thoroughly trained. For other providers of \acp{LLM}, other models are available that have their strengths and weaknesses.  
 
 The temperature is another important configurable item. Using a higher temperature can be beneficial for creative tasks. On the other hand, the quality can be worse as the outputs can get more unpredictable. 
 
